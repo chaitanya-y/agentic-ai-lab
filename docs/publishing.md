@@ -1,0 +1,55 @@
+# Publishing Plan
+
+## Repository Name
+
+Use:
+
+```text
+agentic-ai-lab
+```
+
+Why:
+
+- It is broader than LangChain.
+- It reads like an AI engineering portfolio, not a framework tutorial.
+- It can grow into RAG systems, vector databases, local models, graph workflows,
+  multi-agent systems, and deployment examples.
+
+## Push These Files
+
+```text
+.env.example
+.gitignore
+README.md
+pyproject.toml
+uv.lock
+data/README.md
+docs/langgraph_orchestration_notes.md
+docs/publishing.md
+src/retrieval/semantic_search.py
+src/orchestration/langgraph_state_machine.py
+src/agents/arithmetic_tool_agent.py
+src/agents/weather_tool_graph.py
+```
+
+## Do Not Push These Files
+
+```text
+.env
+.venv/
+__pycache__/
+data/nke-10k-2023.pdf
+sandbox/
+```
+
+## Why Sandbox Is Excluded
+
+`sandbox/` is useful for local experiments, but it is not polished enough for a
+public engineering portfolio yet. Individual files can be cleaned up and moved
+into `src/` later when they become production-quality modules.
+
+## First GitHub Commit Message
+
+```text
+Initial agentic AI systems portfolio
+```

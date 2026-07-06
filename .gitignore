@@ -1,0 +1,33 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.pycache-check/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Local model/data caches
+.hf_cache/
+.cache/
+
+# Large local data artifacts
+data/*.pdf
+data/*.parquet
+data/*.sqlite
+data/*.db
+
+# Local scratch experiments that are not part of the published learning path
+sandbox/
+
+# OS/editor files
+.DS_Store
+.idea/
+.vscode/
