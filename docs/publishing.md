@@ -20,6 +20,7 @@ Why:
 ```text
 .env.example
 .gitignore
+LICENSE
 README.md
 pyproject.toml
 uv.lock
@@ -28,6 +29,8 @@ docs/langgraph_orchestration_notes.md
 docs/publishing.md
 src/retrieval/semantic_search.py
 src/orchestration/langgraph_state_machine.py
+src/agents/rag_agent.py
+src/agents/rag_chain.py
 src/agents/arithmetic_tool_agent.py
 src/agents/weather_tool_graph.py
 ```
@@ -48,8 +51,8 @@ sandbox/
 public engineering portfolio yet. Individual files can be cleaned up and moved
 into `src/` later when they become production-quality modules.
 
-## First GitHub Commit Message
+## Suggested Commit Message
 
 ```text
-Initial agentic AI systems portfolio
+Add RAG agent and chain modules
 ```

@@ -17,4 +17,6 @@ dependencies = [
   "langchain-huggingface>=1.2.2",
   "sentence-transformers>=5.6.0",
   "torch>=2.12.1",
+  "beautifulsoup4>=4.14.2",
+  "requests>=2.32.5",
 ]

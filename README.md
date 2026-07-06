@@ -10,6 +10,7 @@ not a single framework.
 ## What This Demonstrates
 
 - Retrieval pipelines: documents, chunking, embeddings, vector search, retrievers
+- RAG agents: retrieval tools, grounded generation, and context safety prompts
 - Agent tool use: tool schemas, tool execution loops, final-response routing
 - Graph orchestration: state, reducers, conditional edges, checkpoints, interrupts
 - Local model operations: Hugging Face embedding models, cache behavior, CPU tradeoffs
@@ -26,6 +27,8 @@ src/
     langgraph_state_machine.py      # State, reducers, routing, checkpoints, interrupts
 
   agents/
+    rag_agent.py                    # RAG agent over Lilian Weng's agents blog post
+    rag_chain.py                    # RAG chain with retrieval middleware
     arithmetic_tool_agent.py        # Explicit tool-calling agent loop
     weather_tool_graph.py           # Tool-backed graph workflow
 
@@ -38,6 +41,8 @@ data/
 ```
 
 Local scratch work lives in `sandbox/` and is ignored by Git.
+Large local data files, model caches, virtual environments, and secrets are not
+committed.
 
 ## Setup
 
@@ -87,14 +92,6 @@ Qwen/Qwen3-Embedding-0.6B
 This model is downloaded from Hugging Face and runs locally in the Python
 process. There is no OpenAI API cost for that path.
 
-The file also includes a commented OpenAI embedding option for comparison:
-
-```python
-# embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
-```
-
-Uncommenting that line and using OpenAI embeddings will call a paid API.
-
 ## Orchestration: LangGraph State Machine
 
 ```bash
@@ -109,9 +106,24 @@ uv run python src/orchestration/langgraph_state_machine.py --demo streaming
 ## Agents: Tool-Calling Workflows
 
 ```bash
+uv run python src/agents/rag_agent.py
+uv run python src/agents/rag_chain.py
 uv run python src/agents/arithmetic_tool_agent.py
 uv run python src/agents/weather_tool_graph.py
 ```
+
+`rag_agent.py` and `rag_chain.py` fetch a public blog post, create local
+embeddings, and may call a chat model. Use `MODEL_PROVIDER=ollama` for local
+chat inference. To run hosted OpenAI calls, set `MODEL_PROVIDER=openai` and
+`ALLOW_PAID_API_CALLS=true` explicitly.
+
+`rag_agent.py` follows the LangChain RAG tutorial structure: load a blog post,
+split it into chunks, index it in a vector store, expose retrieval as a tool,
+and let the agent decide when to search.
+
+`rag_chain.py` shows the deterministic alternative from the same tutorial:
+retrieve first in middleware, inject context into the model input, and call the
+model once.
 
 ## Safety Notes
 
@@ -121,6 +133,7 @@ uv run python src/agents/weather_tool_graph.py
 - `InMemoryVectorStore` stores vectors only in RAM; vectors disappear when the
   script exits.
 - `sandbox/` is ignored because it contains rough local experiments.
+- OpenAI calls are guarded by `ALLOW_PAID_API_CALLS=true` in the RAG modules.
 
 ## Positioning
 

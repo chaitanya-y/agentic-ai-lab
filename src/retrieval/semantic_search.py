@@ -79,7 +79,7 @@ def main() -> None:
     print(f"Created chunks: {len(all_splits)}")
     all_splits = limit_chunks_for_local_demo(all_splits)
 
-    # Paid API option from the LangChain docs:
+    # Hosted API option:
     # embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 
     # Local model option: downloads once, then runs inside this Python process.
