@@ -1,20 +1,31 @@
 # Agentic AI Lab
 
-A portfolio-style collection of small, working AI engineering systems covering
-retrieval, agent tool use, graph orchestration, memory, and local model tradeoffs.
+A focused AI engineering portfolio demonstrating retrieval systems, agentic tool
+use, graph orchestration, local embeddings, and safe model execution patterns.
 
-The current implementations use LangChain and LangGraph where they provide useful
-abstractions, but the repository is organized around engineering capabilities,
-not a single framework.
+The implementations use LangChain and LangGraph where they are useful, but the
+repo is organized around engineering capabilities: retrieval, orchestration,
+tooling, state, and operational safety.
 
-## What This Demonstrates
+## Highlights
 
-- Retrieval pipelines: documents, chunking, embeddings, vector search, retrievers
-- RAG agents: retrieval tools, grounded generation, and context safety prompts
-- Agent tool use: tool schemas, tool execution loops, final-response routing
-- Graph orchestration: state, reducers, conditional edges, checkpoints, interrupts
-- Local model operations: Hugging Face embedding models, cache behavior, CPU tradeoffs
-- Production instincts: secrets management, ignored data artifacts, reproducible setup
+- End-to-end semantic search over documents with chunking, embeddings, and vector search
+- RAG agent that exposes retrieval as a tool and lets the model decide when to search
+- RAG chain that retrieves deterministically before generation for lower latency and easier debugging
+- Tool-calling agents with explicit control flow and model/tool message inspection
+- LangGraph state-machine examples covering reducers, routing, checkpoints, interrupts, subgraphs, and streaming
+- Local Hugging Face embeddings with commented hosted OpenAI embedding alternatives for comparison
+- Guardrails for secrets, local data, model caches, and paid API calls
+
+## Architecture Coverage
+
+| Area | What It Demonstrates | Module |
+| --- | --- | --- |
+| Retrieval | PDF loading, chunking, local embeddings, vector search | `src/retrieval/semantic_search.py` |
+| Agentic RAG | Retrieval as a tool, multi-step tool use, grounded answers | `src/agents/rag_agent.py` |
+| RAG Chain | Middleware-driven retrieval before a single model call | `src/agents/rag_chain.py` |
+| Tool Agents | Tool schemas, tool execution loops, final response routing | `src/agents/arithmetic_tool_agent.py` |
+| Graph Workflows | State, reducers, conditional routing, checkpoints, interrupts | `src/orchestration/langgraph_state_machine.py` |
 
 ## Repository Structure
 
@@ -24,25 +35,24 @@ src/
     semantic_search.py              # PDF retrieval pipeline with local embeddings
 
   orchestration/
-    langgraph_state_machine.py      # State, reducers, routing, checkpoints, interrupts
+    langgraph_state_machine.py      # LangGraph state and control-flow patterns
 
   agents/
-    rag_agent.py                    # RAG agent over Lilian Weng's agents blog post
-    rag_chain.py                    # RAG chain with retrieval middleware
+    rag_agent.py                    # Agentic RAG over Lilian Weng's agents blog post
+    rag_chain.py                    # Deterministic RAG chain with retrieval middleware
     arithmetic_tool_agent.py        # Explicit tool-calling agent loop
     weather_tool_graph.py           # Tool-backed graph workflow
 
 docs/
-  langgraph_orchestration_notes.md  # Concept notes for graph orchestration
+  langgraph_orchestration_notes.md  # Notes on graph orchestration concepts
   publishing.md                     # Public repo checklist
 
 data/
   README.md                         # Sample data instructions
 ```
 
-Local scratch work lives in `sandbox/` and is ignored by Git.
-Large local data files, model caches, virtual environments, and secrets are not
-committed.
+Local scratch work lives in `sandbox/` and is ignored by Git. Large local data
+files, model caches, virtual environments, and secrets are not committed.
 
 ## Setup
 
@@ -51,17 +61,27 @@ dependency management.
 
 ```bash
 uv sync
-```
-
-Create a local `.env` file from the example:
-
-```bash
 cp .env.example .env
 ```
 
 Never commit `.env`.
 
-## Retrieval: Semantic Search
+## Embedding Strategy
+
+The active embedding path uses a local Hugging Face model:
+
+```text
+Qwen/Qwen3-Embedding-0.6B
+```
+
+This avoids hosted embedding API costs. The first run downloads model weights to
+the Hugging Face cache; later runs reuse the local cache. The code also shows a
+commented `OpenAIEmbeddings` option for comparison when a hosted embedding model
+is preferred.
+
+## Running The Systems
+
+### Semantic Search
 
 Download the sample PDF described in [data/README.md](data/README.md), then run:
 
@@ -69,30 +89,45 @@ Download the sample PDF described in [data/README.md](data/README.md), then run:
 uv run python src/retrieval/semantic_search.py
 ```
 
-By default, the pipeline embeds only the first `20` chunks so it is friendly for
-laptops running local embedding models.
-
-To embed the full PDF:
+By default, the pipeline embeds only the first `20` chunks to keep local runs
+laptop-friendly. To index the full PDF:
 
 ```bash
 MAX_CHUNKS=0 uv run python src/retrieval/semantic_search.py
 ```
 
-That can take longer and may make your machine warm because it uses a local
-embedding model.
+### RAG Agent
 
-## Local vs Paid Embeddings
+The RAG agent follows the LangChain RAG tutorial pattern: load a public blog
+post, split it into chunks, index it, expose retrieval as a tool, and let the
+model decide when to search.
 
-The retrieval pipeline uses:
-
-```text
-Qwen/Qwen3-Embedding-0.6B
+```bash
+MODEL_PROVIDER=ollama uv run python src/agents/rag_agent.py
 ```
 
-This model is downloaded from Hugging Face and runs locally in the Python
-process. There is no OpenAI API cost for that path.
+Debug retrieval and model messages:
 
-## Orchestration: LangGraph State Machine
+```bash
+SHOW_RETRIEVED_CONTEXT=true SHOW_AGENT_MESSAGES=true MODEL_PROVIDER=ollama uv run python src/agents/rag_agent.py
+```
+
+### RAG Chain
+
+The RAG chain retrieves first in middleware, injects context into the model input,
+and calls the model once.
+
+```bash
+MODEL_PROVIDER=ollama uv run python src/agents/rag_chain.py
+```
+
+Inspect the exact context-injected model input:
+
+```bash
+SHOW_FINAL_MODEL_INPUT=true MODEL_PROVIDER=ollama uv run python src/agents/rag_chain.py
+```
+
+### LangGraph Orchestration
 
 ```bash
 uv run python src/orchestration/langgraph_state_machine.py --demo reducers
@@ -103,40 +138,49 @@ uv run python src/orchestration/langgraph_state_machine.py --demo subgraphs
 uv run python src/orchestration/langgraph_state_machine.py --demo streaming
 ```
 
-## Agents: Tool-Calling Workflows
+### Tool-Calling Agents
 
 ```bash
-uv run python src/agents/rag_agent.py
-uv run python src/agents/rag_chain.py
 uv run python src/agents/arithmetic_tool_agent.py
 uv run python src/agents/weather_tool_graph.py
 ```
 
-`rag_agent.py` and `rag_chain.py` fetch a public blog post, create local
-embeddings, and may call a chat model. Use `MODEL_PROVIDER=ollama` for local
-chat inference. To run hosted OpenAI calls, set `MODEL_PROVIDER=openai` and
-`ALLOW_PAID_API_CALLS=true` explicitly.
+## Hosted Model Safety
 
-`rag_agent.py` follows the LangChain RAG tutorial structure: load a blog post,
-split it into chunks, index it in a vector store, expose retrieval as a tool,
-and let the agent decide when to search.
+RAG modules may call a chat model. Use Ollama for local chat inference:
 
-`rag_chain.py` shows the deterministic alternative from the same tutorial:
-retrieve first in middleware, inject context into the model input, and call the
-model once.
+```bash
+MODEL_PROVIDER=ollama uv run python src/agents/rag_agent.py
+```
 
-## Safety Notes
+To use hosted OpenAI models, opt in explicitly:
+
+```bash
+MODEL_PROVIDER=openai ALLOW_PAID_API_CALLS=true uv run python src/agents/rag_agent.py
+```
+
+This explicit flag prevents accidental paid API calls.
+
+## Operational Notes
 
 - `.env` is ignored because it may contain API keys.
 - `.venv` is ignored because environments should be rebuilt with `uv sync`.
+- `data/*.pdf` is ignored to avoid committing large source documents.
 - Hugging Face model weights are cached outside this repo by default.
-- `InMemoryVectorStore` stores vectors only in RAM; vectors disappear when the
-  script exits.
+- `InMemoryVectorStore` stores vectors only in RAM; vectors disappear when a script exits.
 - `sandbox/` is ignored because it contains rough local experiments.
-- OpenAI calls are guarded by `ALLOW_PAID_API_CALLS=true` in the RAG modules.
+
+## Roadmap
+
+Planned additions:
+
+- SQL agent with safe query execution and review flow
+- Persistent vector store example
+- LangGraph custom RAG workflow with relevance grading and query rewriting
+- Multi-agent patterns for routing, handoffs, and subagents
 
 ## Positioning
 
-This repository is intentionally small and inspectable. It is meant to show that
-I understand the mechanics behind agentic AI systems, not just how to call a
-high-level API.
+This repository is intentionally small, executable, and inspectable. It shows the
+mechanics behind agentic AI systems instead of hiding everything behind a single
+high-level API call.
