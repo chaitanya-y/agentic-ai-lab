@@ -4,11 +4,11 @@ from pathlib import Path
 from typing import Annotated, Literal, TypedDict
 
 from dotenv import load_dotenv
-from langchain.chat_models import init_chat_model
 from langchain.messages import AnyMessage, HumanMessage, SystemMessage, ToolMessage
 from langchain.tools import tool
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
+from model_config import build_chat_model
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 load_dotenv(PROJECT_ROOT / ".env")
@@ -35,7 +35,7 @@ def divide(a: int, b: int) -> float:
 tools = [add, multiply, divide]
 tools_by_name = {tool.name: tool for tool in tools}
 
-model = init_chat_model("openai:gpt-5-nano", temperature=0)
+model = build_chat_model(temperature=0)
 model_with_tools = model.bind_tools(tools)
 
 

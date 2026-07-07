@@ -27,10 +27,13 @@ uv.lock
 data/README.md
 docs/langgraph_orchestration_notes.md
 docs/publishing.md
+src/utils/token_usage.py
 src/retrieval/semantic_search.py
 src/orchestration/langgraph_state_machine.py
 src/agents/rag_agent.py
 src/agents/rag_chain.py
+src/agents/model_config.py
+src/agents/sql_agent.py
 src/agents/arithmetic_tool_agent.py
 src/agents/weather_tool_graph.py
 ```
@@ -42,6 +45,7 @@ src/agents/weather_tool_graph.py
 .venv/
 __pycache__/
 data/nke-10k-2023.pdf
+data/Chinook.db
 sandbox/
 ```
 
@@ -54,5 +58,5 @@ into `src/` later when they become production-quality modules.
 ## Suggested Commit Message
 
 ```text
-Add RAG agent and chain modules
+Add SQL agent and local Qwen model config
 ```

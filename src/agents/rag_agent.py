@@ -24,13 +24,13 @@ import bs4
 import requests
 from dotenv import load_dotenv
 from langchain.agents import create_agent
-from langchain.chat_models import init_chat_model
 from langchain.tools import tool
 from langchain_core.documents import Document
 from langchain_core.vectorstores import InMemoryVectorStore
 # from langchain_openai import OpenAIEmbeddings
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from model_config import build_chat_model
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 BLOG_URL = "https://lilianweng.github.io/posts/2023-06-23-agent/"
@@ -101,33 +101,7 @@ def build_vector_store() -> InMemoryVectorStore:
 
 def build_model() -> Any:
     """Build a chat model from environment variables."""
-    provider = os.getenv("MODEL_PROVIDER", "openai").lower()
-
-    if provider == "openai":
-        if os.getenv("ALLOW_PAID_API_CALLS", "").lower() != "true":
-            raise RuntimeError(
-                "OpenAI chat calls may cost money. Set "
-                "ALLOW_PAID_API_CALLS=true to run with MODEL_PROVIDER=openai, "
-                "or set MODEL_PROVIDER=ollama for a local chat model."
-            )
-        model_name = os.getenv("OPENAI_MODEL", "gpt-5-nano")
-        print(f"Using OpenAI model: {model_name}")
-        return init_chat_model(model_name, model_provider="openai")
-
-    if provider == "ollama":
-        model_name = os.getenv("OLLAMA_MODEL", "llama3.2")
-        base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-        print(f"Using Ollama model: {model_name}")
-        return init_chat_model(
-            model_name,
-            model_provider="ollama",
-            base_url=base_url,
-        )
-
-    raise RuntimeError(
-        "MODEL_PROVIDER must be 'openai' or 'ollama'. "
-        f"Received: {provider!r}"
-    )
+    return build_chat_model()
 
 
 def build_rag_agent():
@@ -193,7 +167,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
 
 
 

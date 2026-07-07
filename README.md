@@ -12,9 +12,10 @@ tooling, state, and operational safety.
 - End-to-end semantic search over documents with chunking, embeddings, and vector search
 - RAG agent that exposes retrieval as a tool and lets the model decide when to search
 - RAG chain that retrieves deterministically before generation for lower latency and easier debugging
+- SQL agent over the Chinook sample database with query checking and optional human review
 - Tool-calling agents with explicit control flow and model/tool message inspection
 - LangGraph state-machine examples covering reducers, routing, checkpoints, interrupts, subgraphs, and streaming
-- Local Hugging Face embeddings with commented hosted OpenAI embedding alternatives for comparison
+- Local Qwen chat and embedding models with hosted OpenAI alternatives gated behind explicit opt-in
 - Guardrails for secrets, local data, model caches, and paid API calls
 
 ## Architecture Coverage
@@ -24,13 +25,18 @@ tooling, state, and operational safety.
 | Retrieval | PDF loading, chunking, local embeddings, vector search | `src/retrieval/semantic_search.py` |
 | Agentic RAG | Retrieval as a tool, multi-step tool use, grounded answers | `src/agents/rag_agent.py` |
 | RAG Chain | Middleware-driven retrieval before a single model call | `src/agents/rag_chain.py` |
+| SQL Agent | Schema inspection, query checking, read-only execution, human review | `src/agents/sql_agent.py` |
 | Tool Agents | Tool schemas, tool execution loops, final response routing | `src/agents/arithmetic_tool_agent.py` |
 | Graph Workflows | State, reducers, conditional routing, checkpoints, interrupts | `src/orchestration/langgraph_state_machine.py` |
+| Model Operations | Local/hosted model selection, token accounting, cost estimates | `src/agents/model_config.py`, `src/utils/token_usage.py` |
 
 ## Repository Structure
 
 ```text
 src/
+  utils/
+    token_usage.py                  # Token accounting and OpenAI cost estimates
+
   retrieval/
     semantic_search.py              # PDF retrieval pipeline with local embeddings
 
@@ -38,8 +44,10 @@ src/
     langgraph_state_machine.py      # LangGraph state and control-flow patterns
 
   agents/
+    model_config.py                 # Shared local Qwen / hosted OpenAI model selection
     rag_agent.py                    # Agentic RAG over Lilian Weng's agents blog post
     rag_chain.py                    # Deterministic RAG chain with retrieval middleware
+    sql_agent.py                    # SQL agent over the Chinook SQLite database
     arithmetic_tool_agent.py        # Explicit tool-calling agent loop
     weather_tool_graph.py           # Tool-backed graph workflow
 
@@ -62,6 +70,12 @@ dependency management.
 ```bash
 uv sync
 cp .env.example .env
+```
+
+Local chat demos use Qwen through Ollama by default:
+
+```bash
+ollama pull qwen3.5:9b
 ```
 
 Never commit `.env`.
@@ -103,13 +117,13 @@ post, split it into chunks, index it, expose retrieval as a tool, and let the
 model decide when to search.
 
 ```bash
-MODEL_PROVIDER=ollama uv run python src/agents/rag_agent.py
+MODEL_PROVIDER=qwen uv run python src/agents/rag_agent.py
 ```
 
 Debug retrieval and model messages:
 
 ```bash
-SHOW_RETRIEVED_CONTEXT=true SHOW_AGENT_MESSAGES=true MODEL_PROVIDER=ollama uv run python src/agents/rag_agent.py
+SHOW_RETRIEVED_CONTEXT=true SHOW_AGENT_MESSAGES=true MODEL_PROVIDER=qwen uv run python src/agents/rag_agent.py
 ```
 
 ### RAG Chain
@@ -118,13 +132,13 @@ The RAG chain retrieves first in middleware, injects context into the model inpu
 and calls the model once.
 
 ```bash
-MODEL_PROVIDER=ollama uv run python src/agents/rag_chain.py
+MODEL_PROVIDER=qwen uv run python src/agents/rag_chain.py
 ```
 
 Inspect the exact context-injected model input:
 
 ```bash
-SHOW_FINAL_MODEL_INPUT=true MODEL_PROVIDER=ollama uv run python src/agents/rag_chain.py
+SHOW_FINAL_MODEL_INPUT=true MODEL_PROVIDER=qwen uv run python src/agents/rag_chain.py
 ```
 
 ### LangGraph Orchestration
@@ -141,16 +155,26 @@ uv run python src/orchestration/langgraph_state_machine.py --demo streaming
 ### Tool-Calling Agents
 
 ```bash
+MODEL_PROVIDER=qwen uv run python src/agents/sql_agent.py
 uv run python src/agents/arithmetic_tool_agent.py
 uv run python src/agents/weather_tool_graph.py
 ```
 
-## Hosted Model Safety
-
-RAG modules may call a chat model. Use Ollama for local chat inference:
+The SQL agent downloads the Chinook SQLite sample database into `data/` on first
+run. Query execution is read-only, restricted to `SELECT` statements, and limited
+to one successful SQL query by default through `MAX_SQL_QUERIES=1`. To pause
+before query execution for human review:
 
 ```bash
-MODEL_PROVIDER=ollama uv run python src/agents/rag_agent.py
+SQL_HUMAN_REVIEW=true MODEL_PROVIDER=qwen uv run python src/agents/sql_agent.py
+```
+
+## Hosted Model Safety
+
+Agent modules may call a chat model. Use local Qwen through Ollama for free local chat inference:
+
+```bash
+MODEL_PROVIDER=qwen uv run python src/agents/rag_agent.py
 ```
 
 To use hosted OpenAI models, opt in explicitly:
@@ -161,11 +185,20 @@ MODEL_PROVIDER=openai ALLOW_PAID_API_CALLS=true uv run python src/agents/rag_age
 
 This explicit flag prevents accidental paid API calls.
 
+The SQL agent prints an OpenAI token and cost estimate when `MODEL_PROVIDER=openai`.
+Pricing can change, so override rates in `.env` when needed:
+
+```env
+OPENAI_INPUT_COST_PER_1M=0.05
+OPENAI_OUTPUT_COST_PER_1M=0.40
+```
+
 ## Operational Notes
 
 - `.env` is ignored because it may contain API keys.
 - `.venv` is ignored because environments should be rebuilt with `uv sync`.
 - `data/*.pdf` is ignored to avoid committing large source documents.
+- `data/*.db` is ignored to avoid committing local SQLite databases.
 - Hugging Face model weights are cached outside this repo by default.
 - `InMemoryVectorStore` stores vectors only in RAM; vectors disappear when a script exits.
 - `sandbox/` is ignored because it contains rough local experiments.
@@ -174,7 +207,6 @@ This explicit flag prevents accidental paid API calls.
 
 Planned additions:
 
-- SQL agent with safe query execution and review flow
 - Persistent vector store example
 - LangGraph custom RAG workflow with relevance grading and query rewriting
 - Multi-agent patterns for routing, handoffs, and subagents
