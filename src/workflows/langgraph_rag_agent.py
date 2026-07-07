@@ -17,6 +17,15 @@ Repo adaptations:
 - local Qwen Hugging Face embeddings by default
 - hosted OpenAI embeddings are shown as a commented option
 - chunk and recursion limits keep local runs laptop-friendly
+- optional temporary vector cache in sandbox/vector_cache for faster local tests
+
+Temporary cache notes:
+- Set RAG_GRAPH_USE_VECTOR_CACHE=true to persist the InMemoryVectorStore.
+- Cache files are written under sandbox/vector_cache and ignored by Git.
+- Changing MAX_CHUNKS, RAG_GRAPH_CHUNK_SIZE, or RAG_GRAPH_CHUNK_OVERLAP creates
+  a different cache file so old vectors are not accidentally reused.
+- Delete sandbox/vector_cache when you want to force document embeddings to be
+  regenerated from scratch.
 """
 
 from __future__ import annotations
@@ -46,6 +55,7 @@ SRC_ROOT = PROJECT_ROOT / "src"
 sys.path.insert(0, str(SRC_ROOT))
 
 from agents.model_config import build_chat_model
+from utils.token_usage import TokenUsage, print_openai_usage_report
 
 BLOG_URLS = [
     "https://lilianweng.github.io/posts/2024-11-28-reward-hacking/",
@@ -59,6 +69,24 @@ load_dotenv(PROJECT_ROOT / ".env")
 def enabled(env_var: str) -> bool:
     """Return True when an env var is set to a truthy value."""
     return os.getenv(env_var, "").lower() in {"1", "true", "yes", "on"}
+
+
+def get_vector_cache_path() -> pathlib.Path:
+    """Return the temporary vector cache path for the current chunk settings."""
+    configured_path = os.getenv("RAG_GRAPH_VECTOR_CACHE_PATH")
+    if configured_path:
+        return PROJECT_ROOT / configured_path
+
+    max_chunks = os.getenv("MAX_CHUNKS", "60")
+    chunk_size = os.getenv("RAG_GRAPH_CHUNK_SIZE", "300")
+    chunk_overlap = os.getenv("RAG_GRAPH_CHUNK_OVERLAP", "75")
+    cache_name = (
+        "langgraph_rag_"
+        f"chunks-{max_chunks}_"
+        f"size-{chunk_size}_"
+        f"overlap-{chunk_overlap}.json"
+    )
+    return PROJECT_ROOT / "sandbox" / "vector_cache" / cache_name
 
 
 def log_line(message: str = "") -> None:
@@ -102,9 +130,11 @@ def load_blog_documents() -> list[Document]:
 
 def split_documents(docs: list[Document]) -> list[Document]:
     """Split documents into retrieval chunks."""
+    chunk_size = int(os.getenv("RAG_GRAPH_CHUNK_SIZE", "300"))
+    chunk_overlap = int(os.getenv("RAG_GRAPH_CHUNK_OVERLAP", "75"))
     text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-        chunk_size=100,
-        chunk_overlap=50,
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
     )
     splits = text_splitter.split_documents(docs)
     log_line(f"Total chunks: {len(splits)}")
@@ -122,9 +152,6 @@ def split_documents(docs: list[Document]) -> list[Document]:
 @lru_cache(maxsize=1)
 def get_retriever():
     """Build and cache the in-memory retriever."""
-    docs = load_blog_documents()
-    splits = split_documents(docs)
-
     # Hosted API option:
     # embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 
@@ -134,12 +161,28 @@ def get_retriever():
         model_kwargs={"device": "cpu"},
         encode_kwargs={"normalize_embeddings": True},
     )
+
+    cache_path = get_vector_cache_path()
+    if enabled("RAG_GRAPH_USE_VECTOR_CACHE") and cache_path.exists():
+        log_line(f"Loading vector store cache: {cache_path.relative_to(PROJECT_ROOT)}")
+        vector_store = InMemoryVectorStore.load(str(cache_path), embedding=embeddings)
+        retrieval_k = int(os.getenv("RAG_GRAPH_RETRIEVAL_K", "4"))
+        return vector_store.as_retriever(search_kwargs={"k": retrieval_k})
+
+    docs = load_blog_documents()
+    splits = split_documents(docs)
+
     vector_store = InMemoryVectorStore.from_documents(
         documents=splits,
         embedding=embeddings,
     )
     log_line("Indexed chunks in InMemoryVectorStore")
-    retrieval_k = int(os.getenv("RAG_GRAPH_RETRIEVAL_K", "2"))
+
+    if enabled("RAG_GRAPH_USE_VECTOR_CACHE"):
+        vector_store.dump(str(cache_path))
+        log_line(f"Saved vector store cache: {cache_path.relative_to(PROJECT_ROOT)}")
+
+    retrieval_k = int(os.getenv("RAG_GRAPH_RETRIEVAL_K", "4"))
     return vector_store.as_retriever(search_kwargs={"k": retrieval_k})
 
 
@@ -164,7 +207,7 @@ def get_decision_model():
     """Build and cache the tool-decision chat model."""
     return build_chat_model(
         temperature=0,
-        max_tokens=int(os.getenv("RAG_GRAPH_DECISION_MAX_TOKENS", "192")),
+        max_tokens=int(os.getenv("RAG_GRAPH_DECISION_MAX_TOKENS", "1024")),
     )
 
 
@@ -173,14 +216,17 @@ def get_answer_model():
     """Build and cache the final-answer chat model."""
     return build_chat_model(
         temperature=0,
-        max_tokens=int(os.getenv("RAG_GRAPH_ANSWER_MAX_TOKENS", "768")),
+        max_tokens=int(os.getenv("RAG_GRAPH_ANSWER_MAX_TOKENS", "1024")),
     )
 
 
 @lru_cache(maxsize=1)
 def get_grader_model():
     """Build and cache the document-grading chat model."""
-    return build_chat_model(temperature=0, max_tokens=64)
+    return build_chat_model(
+        temperature=0,
+        max_tokens=int(os.getenv("RAG_GRAPH_GRADER_MAX_TOKENS", "512")),
+    )
 
 
 def generate_query_or_respond(state: MessagesState):
@@ -198,6 +244,8 @@ def generate_query_or_respond(state: MessagesState):
         *state["messages"],
     ]
     response = decision_model.bind_tools([retriever_tool]).invoke(messages)
+    if not getattr(response, "tool_calls", None) and not getattr(response, "content", ""):
+        log_line("Decision model returned empty content and did not call a tool")
     return {"messages": [response]}
 
 
@@ -337,11 +385,13 @@ def generate_answer(state: MessagesState):
     response_model = get_answer_model()
     response = response_model.invoke([{"role": "user", "content": prompt}])
     if not response.content:
+        log_line("Answer model returned empty content; using retrieved-context fallback")
         relevant_sentence = extract_relevant_sentence(question=question, context=context)
+        fallback_sentence = relevant_sentence[:1].lower() + relevant_sentence[1:]
         response = AIMessage(
             content=(
-                "The local model returned an empty final message, so here is the "
-                f"most relevant retrieved context: {relevant_sentence}."
+                "Based on the retrieved context, "
+                f"{fallback_sentence}."
             )
         )
     return {"messages": [response]}
@@ -378,10 +428,18 @@ def build_graph():
     return workflow.compile()
 
 
+def collect_token_usage(messages: list) -> TokenUsage:
+    """Collect token usage from messages in the final graph state."""
+    usage = TokenUsage()
+    for message in messages:
+        usage.add_from_message(message)
+    return usage
+
+
 def run_agentic_rag() -> None:
     """Run the graph with the tutorial question."""
     graph = build_graph()
-    question = "What does Lilian Weng say about types of reward hacking?"
+    question = "What is reward hacking in reinforcement learning?"
     recursion_limit = int(os.getenv("RAG_GRAPH_RECURSION_LIMIT", "8"))
     inputs = {"messages": [{"role": "user", "content": question}]}
     config = {"recursion_limit": recursion_limit}
@@ -417,6 +475,9 @@ def run_agentic_rag() -> None:
                 log_line(f"tool_calls={tool_calls}")
             if message_content:
                 log_block(f"Message {index} content", message_content)
+
+    usage = collect_token_usage(final_state["messages"])
+    print_openai_usage_report(usage)
 
 
 if __name__ == "__main__":

@@ -182,9 +182,27 @@ For local Qwen runs, the workflow uses a small token budget for tool decisions
 and a larger budget for final answers:
 
 ```env
-RAG_GRAPH_DECISION_MAX_TOKENS=192
-RAG_GRAPH_ANSWER_MAX_TOKENS=768
+MAX_CHUNKS=60
+RAG_GRAPH_CHUNK_SIZE=300
+RAG_GRAPH_CHUNK_OVERLAP=75
+RAG_GRAPH_RETRIEVAL_K=4
+RAG_GRAPH_USE_VECTOR_CACHE=true
+RAG_GRAPH_DECISION_MAX_TOKENS=1024
+RAG_GRAPH_GRADER_MAX_TOKENS=512
+RAG_GRAPH_ANSWER_MAX_TOKENS=1024
 ```
+
+Temporary vector cache:
+
+```text
+sandbox/vector_cache/
+```
+
+The first run creates document embeddings and saves the in-memory vector store
+there. Later runs with the same `MAX_CHUNKS`, `RAG_GRAPH_CHUNK_SIZE`, and
+`RAG_GRAPH_CHUNK_OVERLAP` load the cache and skip document re-embedding. The
+cache is only for local testing and is ignored by Git. Delete the matching cache
+file to force embeddings to regenerate.
 
 ### Tool-Calling Agents
 
@@ -235,6 +253,7 @@ OPENAI_OUTPUT_COST_PER_1M=0.40
 - `data/*.db` is ignored to avoid committing local SQLite databases.
 - Hugging Face model weights are cached outside this repo by default.
 - `InMemoryVectorStore` stores vectors only in RAM; vectors disappear when a script exits.
+- `sandbox/vector_cache/` may contain temporary LangGraph RAG vector-store caches for faster local testing.
 - `sandbox/` is ignored because it contains rough local experiments.
 
 ## Roadmap
