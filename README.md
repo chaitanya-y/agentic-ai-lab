@@ -25,6 +25,7 @@ tooling, state, and operational safety.
 | Retrieval | PDF loading, chunking, local embeddings, vector search | `src/retrieval/semantic_search.py` |
 | Agentic RAG | Retrieval as a tool, multi-step tool use, grounded answers | `src/agents/rag_agent.py` |
 | RAG Chain | Middleware-driven retrieval before a single model call | `src/agents/rag_chain.py` |
+| LangGraph RAG | Custom retrieval agent with grading, query rewriting, and graph routing | `src/workflows/langgraph_rag_agent.py` |
 | SQL Agent | Schema inspection, query checking, read-only execution, human review | `src/agents/sql_agent.py` |
 | Tool Agents | Tool schemas, tool execution loops, final response routing | `src/agents/arithmetic_tool_agent.py` |
 | Graph Workflows | State, reducers, conditional routing, checkpoints, interrupts | `src/orchestration/langgraph_state_machine.py` |
@@ -42,6 +43,9 @@ src/
 
   orchestration/
     langgraph_state_machine.py      # LangGraph state and control-flow patterns
+
+  workflows/
+    langgraph_rag_agent.py          # Custom LangGraph agentic RAG workflow
 
   agents/
     model_config.py                 # Shared local Qwen / hosted OpenAI model selection
@@ -152,6 +156,36 @@ uv run python src/orchestration/langgraph_state_machine.py --demo subgraphs
 uv run python src/orchestration/langgraph_state_machine.py --demo streaming
 ```
 
+### LangGraph Agentic RAG
+
+This workflow follows the LangGraph custom RAG agent tutorial: the graph decides
+whether to retrieve, grades retrieved context, rewrites the query when retrieval
+is not relevant, and generates a grounded answer.
+
+```bash
+MODEL_PROVIDER=qwen uv run python src/workflows/langgraph_rag_agent.py
+```
+
+Inspect retrieved context:
+
+```bash
+SHOW_RETRIEVED_CONTEXT=true MODEL_PROVIDER=qwen uv run python src/workflows/langgraph_rag_agent.py
+```
+
+Inspect the LangGraph message history:
+
+```bash
+SHOW_GRAPH_MESSAGES=true MODEL_PROVIDER=qwen uv run python src/workflows/langgraph_rag_agent.py
+```
+
+For local Qwen runs, the workflow uses a small token budget for tool decisions
+and a larger budget for final answers:
+
+```env
+RAG_GRAPH_DECISION_MAX_TOKENS=192
+RAG_GRAPH_ANSWER_MAX_TOKENS=768
+```
+
 ### Tool-Calling Agents
 
 ```bash
@@ -208,7 +242,6 @@ OPENAI_OUTPUT_COST_PER_1M=0.40
 Planned additions:
 
 - Persistent vector store example
-- LangGraph custom RAG workflow with relevance grading and query rewriting
 - Multi-agent patterns for routing, handoffs, and subagents
 
 ## Positioning

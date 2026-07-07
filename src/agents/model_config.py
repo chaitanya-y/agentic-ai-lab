@@ -17,7 +17,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 load_dotenv(PROJECT_ROOT / ".env")
 
 
-def build_chat_model(temperature: float = 0) -> Any:
+def build_chat_model(temperature: float = 0, max_tokens: int | None = None) -> Any:
     """Build a chat model from environment variables.
 
     Supported providers:
@@ -36,24 +36,28 @@ def build_chat_model(temperature: float = 0) -> Any:
             )
         model_name = os.getenv("OPENAI_MODEL", "gpt-5-nano")
         print(f"Using OpenAI model: {model_name}")
-        return init_chat_model(
-            model_name,
-            model_provider="openai",
-            temperature=temperature,
-            stream_usage=True,
-        )
+        kwargs = {
+            "model_provider": "openai",
+            "temperature": temperature,
+            "stream_usage": True,
+        }
+        if max_tokens is not None:
+            kwargs["max_tokens"] = max_tokens
+        return init_chat_model(model_name, **kwargs)
 
     if provider in {"qwen", "ollama"}:
         model_name = os.getenv("OLLAMA_MODEL", "qwen3.5:9b")
         base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
         label = "Qwen via Ollama" if provider == "qwen" else "Ollama"
         print(f"Using {label} model: {model_name}")
-        return init_chat_model(
-            model_name,
-            model_provider="ollama",
-            base_url=base_url,
-            temperature=temperature,
-        )
+        kwargs = {
+            "model_provider": "ollama",
+            "base_url": base_url,
+            "temperature": temperature,
+        }
+        if max_tokens is not None:
+            kwargs["num_predict"] = max_tokens
+        return init_chat_model(model_name, **kwargs)
 
     raise RuntimeError(
         "MODEL_PROVIDER must be 'qwen', 'ollama', or 'openai'. "

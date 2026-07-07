@@ -30,6 +30,7 @@ docs/publishing.md
 src/utils/token_usage.py
 src/retrieval/semantic_search.py
 src/orchestration/langgraph_state_machine.py
+src/workflows/langgraph_rag_agent.py
 src/agents/rag_agent.py
 src/agents/rag_chain.py
 src/agents/model_config.py
@@ -58,5 +59,5 @@ into `src/` later when they become production-quality modules.
 ## Suggested Commit Message
 
 ```text
-Add SQL agent and local Qwen model config
+Add LangGraph agentic RAG workflow
 ```
