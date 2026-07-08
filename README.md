@@ -13,6 +13,7 @@ tooling, state, and operational safety.
 - RAG agent that exposes retrieval as a tool and lets the model decide when to search
 - RAG chain that retrieves deterministically before generation for lower latency and easier debugging
 - SQL agent over the Chinook sample database with query checking and optional human review
+- Multi-agent supervisor pattern with calendar and email specialist subagents
 - Tool-calling agents with explicit control flow and model/tool message inspection
 - LangGraph state-machine examples covering reducers, routing, checkpoints, interrupts, subgraphs, and streaming
 - Local Qwen chat and embedding models with hosted OpenAI alternatives gated behind explicit opt-in
@@ -28,6 +29,7 @@ tooling, state, and operational safety.
 | LangGraph RAG | Custom retrieval agent with grading, query rewriting, and graph routing | `src/workflows/langgraph_rag_agent.py` |
 | SQL Agent | Schema inspection, query checking, read-only execution, human review | `src/agents/sql_agent.py` |
 | LangGraph SQL | Custom SQL graph with explicit query generation, checking, execution, and final answer loop | `src/workflows/langgraph_sql_agent.py` |
+| Multi-Agent | Supervisor pattern, specialist subagents, safe delegated tool execution | `src/multi_agent/personal_assistant.py` |
 | Tool Agents | Tool schemas, tool execution loops, final response routing | `src/agents/arithmetic_tool_agent.py` |
 | Graph Workflows | State, reducers, conditional routing, checkpoints, interrupts | `src/orchestration/langgraph_state_machine.py` |
 | Model Operations | Local/hosted model selection, token accounting, cost estimates | `src/agents/model_config.py`, `src/utils/token_usage.py` |
@@ -48,6 +50,9 @@ src/
   workflows/
     langgraph_rag_agent.py          # Custom LangGraph agentic RAG workflow
     langgraph_sql_agent.py          # Custom LangGraph SQL workflow
+
+  multi_agent/
+    personal_assistant.py           # Supervisor with calendar and email subagents
 
   agents/
     model_config.py                 # Shared local Qwen / hosted OpenAI model selection
@@ -239,6 +244,23 @@ Show token and cost estimates for OpenAI runs:
 SHOW_TOKEN_USAGE=true
 LANGGRAPH_SQL_MAX_TOKENS=4096
 LANGGRAPH_SQL_RECURSION_LIMIT=8
+```
+
+### Multi-Agent Personal Assistant
+
+This workflow follows the LangChain multi-agent subagents tutorial. A supervisor
+agent delegates to a calendar specialist and an email specialist. Calendar and
+email side effects are stubbed, so the demo is safe and does not call real
+calendar or email APIs.
+
+```bash
+MODEL_PROVIDER=qwen uv run python src/multi_agent/personal_assistant.py
+```
+
+Inspect the final supervisor message history:
+
+```bash
+SHOW_MULTI_AGENT_MESSAGES=true MODEL_PROVIDER=qwen uv run python src/multi_agent/personal_assistant.py
 ```
 
 ## Hosted Model Safety
