@@ -46,7 +46,7 @@ def build_chat_model(temperature: float = 0, max_tokens: int | None = None) -> A
         return init_chat_model(model_name, **kwargs)
 
     if provider in {"qwen", "ollama"}:
-        model_name = os.getenv("OLLAMA_MODEL", "qwen3.5:9b")
+        model_name = os.getenv("OLLAMA_MODEL", "qwen3:14b")
         base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
         label = "Qwen via Ollama" if provider == "qwen" else "Ollama"
         print(f"Using {label} model: {model_name}")

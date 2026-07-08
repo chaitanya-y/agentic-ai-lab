@@ -27,6 +27,7 @@ tooling, state, and operational safety.
 | RAG Chain | Middleware-driven retrieval before a single model call | `src/agents/rag_chain.py` |
 | LangGraph RAG | Custom retrieval agent with grading, query rewriting, and graph routing | `src/workflows/langgraph_rag_agent.py` |
 | SQL Agent | Schema inspection, query checking, read-only execution, human review | `src/agents/sql_agent.py` |
+| LangGraph SQL | Custom SQL graph with explicit query generation, checking, execution, and final answer loop | `src/workflows/langgraph_sql_agent.py` |
 | Tool Agents | Tool schemas, tool execution loops, final response routing | `src/agents/arithmetic_tool_agent.py` |
 | Graph Workflows | State, reducers, conditional routing, checkpoints, interrupts | `src/orchestration/langgraph_state_machine.py` |
 | Model Operations | Local/hosted model selection, token accounting, cost estimates | `src/agents/model_config.py`, `src/utils/token_usage.py` |
@@ -46,6 +47,7 @@ src/
 
   workflows/
     langgraph_rag_agent.py          # Custom LangGraph agentic RAG workflow
+    langgraph_sql_agent.py          # Custom LangGraph SQL workflow
 
   agents/
     model_config.py                 # Shared local Qwen / hosted OpenAI model selection
@@ -79,7 +81,7 @@ cp .env.example .env
 Local chat demos use Qwen through Ollama by default:
 
 ```bash
-ollama pull qwen3.5:9b
+ollama pull qwen3:14b
 ```
 
 Never commit `.env`.
@@ -178,8 +180,8 @@ Inspect the LangGraph message history:
 SHOW_GRAPH_MESSAGES=true MODEL_PROVIDER=qwen uv run python src/workflows/langgraph_rag_agent.py
 ```
 
-For local Qwen runs, the workflow uses a small token budget for tool decisions
-and a larger budget for final answers:
+The workflow separates token budgets for tool decisions, document grading, and
+final answers:
 
 ```env
 MAX_CHUNKS=60
@@ -221,6 +223,24 @@ before query execution for human review:
 SQL_HUMAN_REVIEW=true MODEL_PROVIDER=qwen uv run python src/agents/sql_agent.py
 ```
 
+### LangGraph SQL Agent
+
+This workflow follows the LangGraph SQL agent tutorial. Unlike the high-level
+LangChain SQL agent, it makes the control flow explicit: list tables, select
+schema, generate SQL, check SQL, execute SQL, then produce a final answer.
+
+```bash
+MODEL_PROVIDER=qwen uv run python src/workflows/langgraph_sql_agent.py
+```
+
+Show token and cost estimates for OpenAI runs:
+
+```env
+SHOW_TOKEN_USAGE=true
+LANGGRAPH_SQL_MAX_TOKENS=4096
+LANGGRAPH_SQL_RECURSION_LIMIT=8
+```
+
 ## Hosted Model Safety
 
 Agent modules may call a chat model. Use local Qwen through Ollama for free local chat inference:
@@ -244,6 +264,32 @@ Pricing can change, so override rates in `.env` when needed:
 OPENAI_INPUT_COST_PER_1M=0.05
 OPENAI_OUTPUT_COST_PER_1M=0.40
 ```
+
+## Token Budget Tuning
+
+The `*_MAX_TOKENS` settings in `.env` are practical defaults, not fixed rules.
+Increase them if a model returns an empty message, fails to emit a tool call,
+cuts off a structured response, or answers before a tool result appears.
+
+This is especially important for hosted reasoning models because their output
+budget can include hidden reasoning tokens plus visible text or tool-call JSON.
+For example, if a SQL workflow does not produce a `sql_db_query` tool result,
+try raising:
+
+```env
+LANGGRAPH_SQL_MAX_TOKENS=4096
+```
+
+For the LangGraph RAG workflow, tune these independently:
+
+```env
+RAG_GRAPH_DECISION_MAX_TOKENS=1024
+RAG_GRAPH_GRADER_MAX_TOKENS=512
+RAG_GRAPH_ANSWER_MAX_TOKENS=1024
+```
+
+Rule of thumb: if the model is choosing tools or producing structured output,
+give it more budget before assuming the workflow logic is wrong.
 
 ## Operational Notes
 

@@ -31,6 +31,7 @@ src/utils/token_usage.py
 src/retrieval/semantic_search.py
 src/orchestration/langgraph_state_machine.py
 src/workflows/langgraph_rag_agent.py
+src/workflows/langgraph_sql_agent.py
 src/agents/rag_agent.py
 src/agents/rag_chain.py
 src/agents/model_config.py
