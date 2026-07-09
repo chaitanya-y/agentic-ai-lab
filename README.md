@@ -29,7 +29,7 @@ tooling, state, and operational safety.
 | LangGraph RAG | Custom retrieval agent with grading, query rewriting, and graph routing | `src/workflows/langgraph_rag_agent.py` |
 | SQL Agent | Schema inspection, query checking, read-only execution, human review | `src/agents/sql_agent.py` |
 | LangGraph SQL | Custom SQL graph with explicit query generation, checking, execution, and final answer loop | `src/workflows/langgraph_sql_agent.py` |
-| Multi-Agent | Supervisor pattern, specialist subagents, safe delegated tool execution | `src/multi_agent/personal_assistant.py` |
+| Multi-Agent | Subagents, handoffs, specialist routing, safe delegated tool execution | `src/multi_agent/` |
 | Tool Agents | Tool schemas, tool execution loops, final response routing | `src/agents/arithmetic_tool_agent.py` |
 | Graph Workflows | State, reducers, conditional routing, checkpoints, interrupts | `src/orchestration/langgraph_state_machine.py` |
 | Model Operations | Local/hosted model selection, token accounting, cost estimates | `src/agents/model_config.py`, `src/utils/token_usage.py` |
@@ -53,6 +53,7 @@ src/
 
   multi_agent/
     personal_assistant.py           # Supervisor with calendar and email subagents
+    customer_support_handoffs.py    # Customer support state-machine handoffs
 
   agents/
     model_config.py                 # Shared local Qwen / hosted OpenAI model selection
@@ -265,6 +266,34 @@ SHOW_MULTI_AGENT_MESSAGES=true MODEL_PROVIDER=qwen uv run python src/multi_agent
 
 OpenAI runs also report combined supervisor and subagent token usage when
 `SHOW_TOKEN_USAGE=true`.
+
+### Multi-Agent Customer Support Handoffs
+
+This workflow follows the LangChain multi-agent handoffs tutorial. A single
+support agent changes behavior across warranty collection, issue classification,
+and resolution steps. Tools return `Command` updates that move the workflow to
+the next support state.
+
+This example demonstrates a state-machine style support flow:
+
+1. Collect warranty status.
+2. Classify the issue as hardware or software.
+3. Route to repair guidance, troubleshooting, or human escalation.
+
+The state-transition tools use `return_direct=True` so each stage stops after it
+updates state. That makes the handoff boundary visible: the next user turn
+continues from the updated `current_step` instead of letting the model solve the
+entire case in one response.
+
+```bash
+MODEL_PROVIDER=qwen uv run python src/multi_agent/customer_support_handoffs.py
+```
+
+Inspect the state-machine message history:
+
+```bash
+SHOW_MULTI_AGENT_MESSAGES=true MODEL_PROVIDER=qwen uv run python src/multi_agent/customer_support_handoffs.py
+```
 
 ## Hosted Model Safety
 
