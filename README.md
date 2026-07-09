@@ -263,6 +263,9 @@ Inspect the final supervisor message history:
 SHOW_MULTI_AGENT_MESSAGES=true MODEL_PROVIDER=qwen uv run python src/multi_agent/personal_assistant.py
 ```
 
+OpenAI runs also report combined supervisor and subagent token usage when
+`SHOW_TOKEN_USAGE=true`.
+
 ## Hosted Model Safety
 
 Agent modules may call a chat model. Use local Qwen through Ollama for free local chat inference:

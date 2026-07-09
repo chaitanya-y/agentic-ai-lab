@@ -31,6 +31,7 @@ SRC_ROOT = PROJECT_ROOT / "src"
 sys.path.insert(0, str(SRC_ROOT))
 
 from agents.model_config import build_chat_model
+from utils.token_usage import TokenUsage, print_openai_usage_report
 
 load_dotenv(PROJECT_ROOT / ".env")
 
@@ -143,12 +144,19 @@ def final_text(result: dict) -> str:
     return content if isinstance(content, str) else str(content)
 
 
+def collect_token_usage(messages: list, usage: TokenUsage) -> None:
+    """Add token usage from agent messages when providers expose metadata."""
+    for message in messages:
+        usage.add_from_message(message)
+
+
 def build_personal_assistant():
     """Create a supervisor that delegates to calendar and email subagents."""
     model = build_chat_model(
         temperature=0,
         max_tokens=int(os.getenv("MULTI_AGENT_MAX_TOKENS", "4096")),
     )
+    usage = TokenUsage()
     calendar_agent = build_calendar_agent(model)
     email_agent = build_email_agent(model)
 
@@ -162,6 +170,7 @@ def build_personal_assistant():
         """
         log_block("Supervisor delegated to calendar agent", request)
         result = calendar_agent.invoke({"messages": [{"role": "user", "content": request}]})
+        collect_token_usage(result["messages"], usage)
         response = final_text(result)
         log_block("Calendar agent result", response)
         return response
@@ -176,15 +185,17 @@ def build_personal_assistant():
         """
         log_block("Supervisor delegated to email agent", request)
         result = email_agent.invoke({"messages": [{"role": "user", "content": request}]})
+        collect_token_usage(result["messages"], usage)
         response = final_text(result)
         log_block("Email agent result", response)
         return response
 
-    return create_agent(
+    supervisor = create_agent(
         model,
         tools=[schedule_event, manage_email],
         system_prompt=SUPERVISOR_PROMPT,
     )
+    return supervisor, usage
 
 
 def run_personal_assistant() -> None:
@@ -195,11 +206,12 @@ def run_personal_assistant() -> None:
     )
     log_block("User request", query)
 
-    supervisor = build_personal_assistant()
+    supervisor, usage = build_personal_assistant()
     result = supervisor.invoke({"messages": [{"role": "user", "content": query}]})
+    collect_token_usage(result["messages"], usage)
     log_block("Final supervisor answer", final_text(result))
 
-    if os.getenv("SHOW_MULTI_AGENT_MESSAGES", "").lower() in {"1", "true", "yes", "on"}:
+    if os.getenv("SHOW_MULTI_AGENT_MESSAGES", "true").lower() in {"1", "true", "yes", "on"}:
         log_line("Final supervisor messages")
         for index, message in enumerate(result["messages"], start=1):
             message_type = getattr(message, "type", message.__class__.__name__)
@@ -210,6 +222,9 @@ def run_personal_assistant() -> None:
                 log_line(f"tool_calls={tool_calls}")
             if content:
                 log_block(f"Message {index} content", content)
+
+    if os.getenv("SHOW_TOKEN_USAGE", "true").lower() in {"1", "true", "yes", "on"}:
+        print_openai_usage_report(usage)
 
 
 if __name__ == "__main__":
