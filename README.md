@@ -54,6 +54,7 @@ src/
   multi_agent/
     personal_assistant.py           # Supervisor with calendar and email subagents
     customer_support_handoffs.py    # Customer support state-machine handoffs
+    knowledge_base_router.py        # Multi-source GitHub/Notion/Slack router
 
   agents/
     model_config.py                 # Shared local Qwen / hosted OpenAI model selection
@@ -295,6 +296,37 @@ Inspect the state-machine message history:
 SHOW_MULTI_AGENT_MESSAGES=true MODEL_PROVIDER=qwen uv run python src/multi_agent/customer_support_handoffs.py
 ```
 
+### Multi-Agent Knowledge Base Router
+
+This workflow follows the LangChain multi-agent router tutorial. A router
+classifies a question, fans out source-specific sub-questions to GitHub, Notion,
+and Slack specialists with LangGraph `Send`, then synthesizes the specialist
+results into one answer.
+
+The demo uses local simulated knowledge sources, so it does not call real
+GitHub, Notion, or Slack APIs. This workflow is intended for OpenAI because it
+makes several model calls: routing, source specialists, and final synthesis.
+The router asks the model for JSON and falls back to deterministic routing if
+JSON parsing fails; a production version should use structured output for the
+routing decision.
+
+What to observe:
+
+1. The router selects relevant sources and creates source-specific sub-questions.
+2. LangGraph `Send` fans out work to multiple specialist nodes.
+3. `operator.add` merges parallel specialist results into one state field.
+4. The synthesis node combines routed evidence into a final answer.
+
+```bash
+MODEL_PROVIDER=openai ALLOW_PAID_API_CALLS=true uv run python src/multi_agent/knowledge_base_router.py
+```
+
+Inspect the routed specialist messages:
+
+```bash
+SHOW_MULTI_AGENT_MESSAGES=true MODEL_PROVIDER=openai ALLOW_PAID_API_CALLS=true uv run python src/multi_agent/knowledge_base_router.py
+```
+
 ## Hosted Model Safety
 
 Agent modules may call a chat model. Use local Qwen through Ollama for free local chat inference:
@@ -340,6 +372,15 @@ For the LangGraph RAG workflow, tune these independently:
 RAG_GRAPH_DECISION_MAX_TOKENS=1024
 RAG_GRAPH_GRADER_MAX_TOKENS=512
 RAG_GRAPH_ANSWER_MAX_TOKENS=1024
+```
+
+For the multi-agent router workflow, tune routing, specialist answers, and final
+synthesis independently:
+
+```env
+ROUTER_MAX_TOKENS=2048
+ROUTER_SPECIALIST_MAX_TOKENS=2048
+ROUTER_SYNTHESIS_MAX_TOKENS=2048
 ```
 
 Rule of thumb: if the model is choosing tools or producing structured output,
