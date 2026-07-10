@@ -41,6 +41,7 @@ src/agents/rag_agent.py
 src/agents/rag_chain.py
 src/agents/model_config.py
 src/agents/sql_agent.py
+src/agents/voice_agent.py
 src/agents/arithmetic_tool_agent.py
 src/agents/weather_tool_graph.py
 ```
@@ -65,5 +66,5 @@ into `src/` later when they become production-quality modules.
 ## Suggested Commit Message
 
 ```text
-Add skills-based SQL assistant workflow
+Add docs-aligned voice agent pipeline
 ```

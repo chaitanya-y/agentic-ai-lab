@@ -14,6 +14,7 @@ tooling, state, and operational safety.
 - RAG chain that retrieves deterministically before generation for lower latency and easier debugging
 - SQL agent over the Chinook sample database with query checking and optional human review
 - Multi-agent supervisor pattern with calendar and email specialist subagents
+- Docs-aligned voice-agent sandwich pipeline with STT, LangChain agent, and TTS stages
 - Tool-calling agents with explicit control flow and model/tool message inspection
 - LangGraph state-machine examples covering reducers, routing, checkpoints, interrupts, subgraphs, and streaming
 - Local Qwen chat and embedding models with hosted OpenAI alternatives gated behind explicit opt-in
@@ -30,6 +31,7 @@ tooling, state, and operational safety.
 | SQL Agent | Schema inspection, query checking, read-only execution, human review | `src/agents/sql_agent.py` |
 | LangGraph SQL | Custom SQL graph with explicit query generation, checking, execution, and final answer loop | `src/workflows/langgraph_sql_agent.py` |
 | Multi-Agent | Subagents, handoffs, specialist routing, safe delegated tool execution | `src/multi_agent/` |
+| Voice Agent | STT -> LangChain agent -> TTS sandwich pipeline with async streaming stages | `src/agents/voice_agent.py` |
 | Tool Agents | Tool schemas, tool execution loops, final response routing | `src/agents/arithmetic_tool_agent.py` |
 | Graph Workflows | State, reducers, conditional routing, checkpoints, interrupts | `src/orchestration/langgraph_state_machine.py` |
 | Model Operations | Local/hosted model selection, token accounting, cost estimates | `src/agents/model_config.py`, `src/utils/token_usage.py` |
@@ -62,6 +64,7 @@ src/
     rag_agent.py                    # Agentic RAG over Lilian Weng's agents blog post
     rag_chain.py                    # Deterministic RAG chain with retrieval middleware
     sql_agent.py                    # SQL agent over the Chinook SQLite database
+    voice_agent.py                  # Voice-agent sandwich pipeline
     arithmetic_tool_agent.py        # Explicit tool-calling agent loop
     weather_tool_graph.py           # Tool-backed graph workflow
 
@@ -249,6 +252,47 @@ Show token and cost estimates for OpenAI runs:
 SHOW_TOKEN_USAGE=true
 LANGGRAPH_SQL_MAX_TOKENS=4096
 LANGGRAPH_SQL_RECURSION_LIMIT=8
+```
+
+### Voice Agent
+
+This workflow follows the LangChain voice-agent tutorial architecture: audio
+bytes stream into speech-to-text, final transcripts trigger a LangChain agent,
+and streamed agent text is sent to text-to-speech.
+
+The LangChain docs use AssemblyAI for STT and Cartesia for TTS over WebSockets.
+This repo keeps that same sandwich pipeline and adapter shape. By default,
+`VOICE_AGENT_MODE=mock` feeds local mock audio through the same pipeline so the
+code can run without microphone/browser setup or STT/TTS provider keys. Set
+`VOICE_AGENT_MODE=provider` only when you have provider credentials and optional
+WebSocket dependencies installed.
+
+What to observe:
+
+1. `stt_stream` emits `stt_chunk` partial transcripts and a final `stt_output`.
+2. `agent_stream` passes through STT events and emits `agent_chunk` text.
+3. `tts_stream` sends agent chunks to TTS and emits `tts_chunk` audio bytes.
+4. `build_pipeline` composes all stages with LangChain `RunnableGenerator`.
+
+```bash
+VOICE_AGENT_MODE=mock MODEL_PROVIDER=qwen uv run python src/agents/voice_agent.py
+```
+
+Provider mode requires real STT/TTS credentials:
+
+```env
+VOICE_AGENT_MODE=provider
+ASSEMBLYAI_API_KEY=your_assemblyai_api_key_here
+CARTESIA_API_KEY=your_cartesia_api_key_here
+```
+
+Provider mode also requires WebSocket provider dependencies such as
+`websockets`. They are not required for the default mock mode.
+
+For hosted-model testing:
+
+```bash
+VOICE_AGENT_MODE=mock MODEL_PROVIDER=openai ALLOW_PAID_API_CALLS=true uv run python src/agents/voice_agent.py
 ```
 
 ### Multi-Agent Personal Assistant
