@@ -55,6 +55,7 @@ src/
     personal_assistant.py           # Supervisor with calendar and email subagents
     customer_support_handoffs.py    # Customer support state-machine handoffs
     knowledge_base_router.py        # Multi-source GitHub/Notion/Slack router
+    skills_sql_assistant.py         # On-demand SQL skills and progressive disclosure
 
   agents/
     model_config.py                 # Shared local Qwen / hosted OpenAI model selection
@@ -92,6 +93,8 @@ ollama pull qwen3:14b
 ```
 
 Never commit `.env`.
+If an API key is accidentally pasted into chat, logs, or a public issue, rotate
+that key in the provider console even if `.env` is ignored by Git.
 
 ## Embedding Strategy
 
@@ -327,6 +330,33 @@ Inspect the routed specialist messages:
 SHOW_MULTI_AGENT_MESSAGES=true MODEL_PROVIDER=openai ALLOW_PAID_API_CALLS=true uv run python src/multi_agent/knowledge_base_router.py
 ```
 
+### Multi-Agent Skills SQL Assistant
+
+This workflow follows the LangChain multi-agent skills tutorial. The assistant
+uses `SkillMiddleware` to inject lightweight skill descriptions into the model
+request, then calls `load_skill` only when it needs full schema and business-rule
+context.
+
+This example demonstrates progressive disclosure:
+
+1. `SkillMiddleware` injects available skill descriptions without loading full schemas.
+2. The model calls `load_skill("sales_analytics")` for a sales query.
+3. The tool returns domain-specific tables, columns, and business logic.
+4. The final answer writes SQL using only the loaded skill context.
+
+Unlike the SQL agents in `src/agents/` and `src/workflows/`, this demo does not
+execute SQL. It focuses on on-demand context loading.
+
+```bash
+MODEL_PROVIDER=openai ALLOW_PAID_API_CALLS=true uv run python src/multi_agent/skills_sql_assistant.py
+```
+
+Inspect the skill-loading message history:
+
+```bash
+SHOW_MULTI_AGENT_MESSAGES=true MODEL_PROVIDER=openai ALLOW_PAID_API_CALLS=true uv run python src/multi_agent/skills_sql_assistant.py
+```
+
 ## Hosted Model Safety
 
 Agent modules may call a chat model. Use local Qwen through Ollama for free local chat inference:
@@ -381,6 +411,7 @@ synthesis independently:
 ROUTER_MAX_TOKENS=2048
 ROUTER_SPECIALIST_MAX_TOKENS=2048
 ROUTER_SYNTHESIS_MAX_TOKENS=2048
+SKILLS_SQL_MAX_TOKENS=2048
 ```
 
 Rule of thumb: if the model is choosing tools or producing structured output,

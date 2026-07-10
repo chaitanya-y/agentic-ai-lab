@@ -36,6 +36,7 @@ src/multi_agent/__init__.py
 src/multi_agent/personal_assistant.py
 src/multi_agent/customer_support_handoffs.py
 src/multi_agent/knowledge_base_router.py
+src/multi_agent/skills_sql_assistant.py
 src/agents/rag_agent.py
 src/agents/rag_chain.py
 src/agents/model_config.py
@@ -64,5 +65,5 @@ into `src/` later when they become production-quality modules.
 ## Suggested Commit Message
 
 ```text
-Add LangGraph agentic RAG workflow
+Add skills-based SQL assistant workflow
 ```
