@@ -58,6 +58,7 @@ SRC_ROOT = PROJECT_ROOT / "src"
 sys.path.insert(0, str(SRC_ROOT))
 
 from agents.model_config import build_chat_model
+from utils.demo_io import enabled, log_block, log_line
 from utils.token_usage import TokenUsage, print_openai_usage_report
 
 load_dotenv(PROJECT_ROOT / ".env")
@@ -112,27 +113,6 @@ class TTSChunkEvent(VoiceAgentEvent):
     @classmethod
     def create(cls, audio: bytes) -> "TTSChunkEvent":
         return cls(type="tts_chunk", audio=audio)
-
-
-def enabled(env_var: str, default: bool = False) -> bool:
-    """Return True when an env var is truthy, with a configurable default."""
-    value = os.getenv(env_var)
-    if value is None:
-        return default
-    return value.lower() in {"1", "true", "yes", "on"}
-
-
-def log_line(message: str = "") -> None:
-    """Print a labeled line so streaming output is easy to scan."""
-    print(f">> {message}" if message else ">>")
-
-
-def log_block(title: str, content: str) -> None:
-    """Print a labeled multi-line block."""
-    print(f"\n>> {title}")
-    for line in content.splitlines():
-        print(f">>   {line}")
-    print(f">> End {title}\n")
 
 
 async def merge_async_iters(*iters: AsyncIterator[VoiceAgentEvent]) -> AsyncIterator[VoiceAgentEvent]:

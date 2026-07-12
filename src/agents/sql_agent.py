@@ -35,17 +35,13 @@ SRC_ROOT = PROJECT_ROOT / "src"
 sys.path.insert(0, str(SRC_ROOT))
 
 from model_config import build_chat_model
+from utils.demo_io import enabled
 from utils.token_usage import TokenUsage, print_openai_usage_report
 
 DATABASE_PATH = PROJECT_ROOT / "data" / "Chinook.db"
 CHINOOK_URL = "https://storage.googleapis.com/benchmarks-artifacts/chinook/Chinook.db"
 
 load_dotenv(PROJECT_ROOT / ".env")
-
-
-def enabled(env_var: str) -> bool:
-    """Return True when an env var is set to a truthy value."""
-    return os.getenv(env_var, "").lower() in {"1", "true", "yes", "on"}
 
 
 def ensure_database() -> None:

@@ -55,6 +55,19 @@ class TokenUsage:
         )
 
 
+def add_messages_to_usage(messages: list, usage: TokenUsage) -> None:
+    """Add token usage from a list of LangChain messages to an existing total."""
+    for message in messages:
+        usage.add_from_message(message)
+
+
+def collect_token_usage(messages: list) -> TokenUsage:
+    """Return token usage collected from a list of LangChain messages."""
+    usage = TokenUsage()
+    add_messages_to_usage(messages, usage)
+    return usage
+
+
 def get_openai_rates_per_1m() -> tuple[float, float]:
     """Return input/output OpenAI prices per 1M tokens."""
     model_name = os.getenv("OPENAI_MODEL", "gpt-5-nano")

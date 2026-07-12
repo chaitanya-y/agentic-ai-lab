@@ -15,6 +15,7 @@ flexible because the model cannot decide to run multiple searches.
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -31,14 +32,13 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from model_config import build_chat_model
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+SRC_ROOT = PROJECT_ROOT / "src"
+sys.path.insert(0, str(SRC_ROOT))
 BLOG_URL = "https://lilianweng.github.io/posts/2023-06-23-agent/"
 
+from utils.demo_io import enabled
+
 load_dotenv(PROJECT_ROOT / ".env")
-
-
-def enabled(env_var: str) -> bool:
-    """Return True when an env var is set to a truthy value."""
-    return os.getenv(env_var, "").lower() in {"1", "true", "yes", "on"}
 
 
 def load_web_page(url: str, bs_kwargs: dict | None = None) -> list[Document]:

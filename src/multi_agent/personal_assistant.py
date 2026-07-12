@@ -31,22 +31,10 @@ SRC_ROOT = PROJECT_ROOT / "src"
 sys.path.insert(0, str(SRC_ROOT))
 
 from agents.model_config import build_chat_model
-from utils.token_usage import TokenUsage, print_openai_usage_report
+from utils.demo_io import final_text, log_block, log_line
+from utils.token_usage import TokenUsage, add_messages_to_usage, print_openai_usage_report
 
 load_dotenv(PROJECT_ROOT / ".env")
-
-
-def log_line(message: str = "") -> None:
-    """Print a labeled line so demo output is easy to scan."""
-    print(f">> {message}" if message else ">>")
-
-
-def log_block(title: str, content: str) -> None:
-    """Print a labeled multi-line block."""
-    print(f"\n>> {title}")
-    for line in content.splitlines():
-        print(f">>   {line}")
-    print(f">> End {title}\n")
 
 
 @tool
@@ -137,19 +125,6 @@ def build_email_agent(model):
     )
 
 
-def final_text(result: dict) -> str:
-    """Return the final message content from an agent invocation result."""
-    message = result["messages"][-1]
-    content = getattr(message, "content", "")
-    return content if isinstance(content, str) else str(content)
-
-
-def collect_token_usage(messages: list, usage: TokenUsage) -> None:
-    """Add token usage from agent messages when providers expose metadata."""
-    for message in messages:
-        usage.add_from_message(message)
-
-
 def build_personal_assistant():
     """Create a supervisor that delegates to calendar and email subagents."""
     model = build_chat_model(
@@ -170,7 +145,7 @@ def build_personal_assistant():
         """
         log_block("Supervisor delegated to calendar agent", request)
         result = calendar_agent.invoke({"messages": [{"role": "user", "content": request}]})
-        collect_token_usage(result["messages"], usage)
+        add_messages_to_usage(result["messages"], usage)
         response = final_text(result)
         log_block("Calendar agent result", response)
         return response
@@ -185,7 +160,7 @@ def build_personal_assistant():
         """
         log_block("Supervisor delegated to email agent", request)
         result = email_agent.invoke({"messages": [{"role": "user", "content": request}]})
-        collect_token_usage(result["messages"], usage)
+        add_messages_to_usage(result["messages"], usage)
         response = final_text(result)
         log_block("Email agent result", response)
         return response
@@ -208,7 +183,7 @@ def run_personal_assistant() -> None:
 
     supervisor, usage = build_personal_assistant()
     result = supervisor.invoke({"messages": [{"role": "user", "content": query}]})
-    collect_token_usage(result["messages"], usage)
+    add_messages_to_usage(result["messages"], usage)
     log_block("Final supervisor answer", final_text(result))
 
     if os.getenv("SHOW_MULTI_AGENT_MESSAGES", "true").lower() in {"1", "true", "yes", "on"}:

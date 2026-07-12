@@ -14,6 +14,7 @@ tooling, state, and operational safety.
 - RAG chain that retrieves deterministically before generation for lower latency and easier debugging
 - SQL agent over the Chinook sample database with query checking and optional human review
 - Multi-agent supervisor pattern with calendar and email specialist subagents
+- Deep Agents research harness with planning, file-system, and delegation-ready capabilities
 - Docs-aligned voice-agent sandwich pipeline with STT, LangChain agent, and TTS stages
 - Tool-calling agents with explicit control flow and model/tool message inspection
 - LangGraph state-machine examples covering reducers, routing, checkpoints, interrupts, subgraphs, and streaming
@@ -31,10 +32,11 @@ tooling, state, and operational safety.
 | SQL Agent | Schema inspection, query checking, read-only execution, human review | `src/agents/sql_agent.py` |
 | LangGraph SQL | Custom SQL graph with explicit query generation, checking, execution, and final answer loop | `src/workflows/langgraph_sql_agent.py` |
 | Multi-Agent | Subagents, handoffs, specialist routing, safe delegated tool execution | `src/multi_agent/` |
+| Deep Agents | Agent harness with planning, virtual filesystem, context management, and subagent-ready execution | `src/deep_agents/` |
 | Voice Agent | STT -> LangChain agent -> TTS sandwich pipeline with async streaming stages | `src/agents/voice_agent.py` |
 | Tool Agents | Tool schemas, tool execution loops, final response routing | `src/agents/arithmetic_tool_agent.py` |
 | Graph Workflows | State, reducers, conditional routing, checkpoints, interrupts | `src/orchestration/langgraph_state_machine.py` |
-| Model Operations | Local/hosted model selection, token accounting, cost estimates | `src/agents/model_config.py`, `src/utils/token_usage.py` |
+| Model Operations | Local/hosted model selection, token accounting, cost estimates, shared demo output helpers | `src/agents/model_config.py`, `src/utils/` |
 
 ## Repository Structure
 
@@ -42,6 +44,7 @@ tooling, state, and operational safety.
 src/
   utils/
     token_usage.py                  # Token accounting and OpenAI cost estimates
+    demo_io.py                      # Shared console-output helpers for demos
 
   retrieval/
     semantic_search.py              # PDF retrieval pipeline with local embeddings
@@ -58,6 +61,9 @@ src/
     customer_support_handoffs.py    # Customer support state-machine handoffs
     knowledge_base_router.py        # Multi-source GitHub/Notion/Slack router
     skills_sql_assistant.py         # On-demand SQL skills and progressive disclosure
+
+  deep_agents/
+    research_agent.py               # Deep Agents research harness quickstart
 
   agents/
     model_config.py                 # Shared local Qwen / hosted OpenAI model selection
@@ -401,6 +407,41 @@ Inspect the skill-loading message history:
 SHOW_MULTI_AGENT_MESSAGES=true MODEL_PROVIDER=openai ALLOW_PAID_API_CALLS=true uv run python src/multi_agent/skills_sql_assistant.py
 ```
 
+### Deep Agents Research Agent
+
+This workflow follows the Deep Agents quickstart. It creates a research agent
+with `create_deep_agent`, a Tavily-backed `internet_search` tool, and research
+instructions that ask the harness to gather evidence and synthesize a polished
+report.
+
+Deep Agents is a higher-level agent harness built on LangChain and LangGraph. It
+adds built-in planning, virtual filesystem tools, context management, subagent
+delegation, streaming, and human-in-the-loop hooks. This demo intentionally
+follows the docs and requires a real `TAVILY_API_KEY`.
+
+Because the Deep Agents harness injects planning, filesystem, subagent, and
+context-management middleware, hosted tool-calling models are recommended for
+this demo.
+
+What to observe:
+
+1. `agent = create_deep_agent(...)` builds the Deep Agents harness.
+2. `internet_search` calls Tavily exactly like the docs quickstart pattern.
+3. The harness may use built-in planning/file/context tools depending on the model.
+4. `SHOW_DEEP_AGENT_MESSAGES=true` prints the final message and tool history.
+
+Required environment:
+
+```env
+ALLOW_PAID_API_CALLS=true
+DEEP_AGENT_MODEL=openai:gpt-5-nano
+TAVILY_API_KEY=your_tavily_api_key_here
+```
+
+```bash
+uv run python src/deep_agents/research_agent.py
+```
+
 ## Hosted Model Safety
 
 Agent modules may call a chat model. Use local Qwen through Ollama for free local chat inference:
@@ -456,6 +497,8 @@ ROUTER_MAX_TOKENS=2048
 ROUTER_SPECIALIST_MAX_TOKENS=2048
 ROUTER_SYNTHESIS_MAX_TOKENS=2048
 SKILLS_SQL_MAX_TOKENS=2048
+DEEP_AGENT_MODEL=openai:gpt-5-nano
+DEEP_AGENT_RECURSION_LIMIT=8
 ```
 
 Rule of thumb: if the model is choosing tools or producing structured output,

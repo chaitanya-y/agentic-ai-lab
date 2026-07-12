@@ -54,7 +54,8 @@ SRC_ROOT = PROJECT_ROOT / "src"
 sys.path.insert(0, str(SRC_ROOT))
 
 from agents.model_config import build_chat_model
-from utils.token_usage import TokenUsage, print_openai_usage_report
+from utils.demo_io import enabled, log_block, log_line
+from utils.token_usage import collect_token_usage, print_openai_usage_report
 
 load_dotenv(PROJECT_ROOT / ".env")
 
@@ -67,27 +68,6 @@ class SupportState(AgentState):
     current_step: NotRequired[SupportStep]
     warranty_status: NotRequired[Literal["in_warranty", "out_of_warranty"]]
     issue_type: NotRequired[Literal["hardware", "software"]]
-
-
-def enabled(env_var: str, default: bool = False) -> bool:
-    """Return True when an env var is truthy, with a configurable default."""
-    value = os.getenv(env_var)
-    if value is None:
-        return default
-    return value.lower() in {"1", "true", "yes", "on"}
-
-
-def log_line(message: str = "") -> None:
-    """Print a labeled line so demo output is easy to scan."""
-    print(f">> {message}" if message else ">>")
-
-
-def log_block(title: str, content: str) -> None:
-    """Print a labeled multi-line block."""
-    print(f"\n>> {title}")
-    for line in content.splitlines():
-        print(f">>   {line}")
-    print(f">> End {title}\n")
 
 
 @tool(return_direct=True)
@@ -266,14 +246,6 @@ def build_customer_support_agent():
         middleware=[apply_step_config],
         checkpointer=InMemorySaver(),
     )
-
-
-def collect_token_usage(messages: list) -> TokenUsage:
-    """Collect token usage from the final persisted message history."""
-    usage = TokenUsage()
-    for message in messages:
-        usage.add_from_message(message)
-    return usage
 
 
 def print_messages(result: dict) -> None:

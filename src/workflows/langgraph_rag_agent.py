@@ -55,7 +55,8 @@ SRC_ROOT = PROJECT_ROOT / "src"
 sys.path.insert(0, str(SRC_ROOT))
 
 from agents.model_config import build_chat_model
-from utils.token_usage import TokenUsage, print_openai_usage_report
+from utils.demo_io import enabled, log_block, log_line
+from utils.token_usage import collect_token_usage, print_openai_usage_report
 
 BLOG_URLS = [
     "https://lilianweng.github.io/posts/2024-11-28-reward-hacking/",
@@ -64,11 +65,6 @@ BLOG_URLS = [
 ]
 
 load_dotenv(PROJECT_ROOT / ".env")
-
-
-def enabled(env_var: str) -> bool:
-    """Return True when an env var is set to a truthy value."""
-    return os.getenv(env_var, "").lower() in {"1", "true", "yes", "on"}
 
 
 def get_vector_cache_path() -> pathlib.Path:
@@ -87,19 +83,6 @@ def get_vector_cache_path() -> pathlib.Path:
         f"overlap-{chunk_overlap}.json"
     )
     return PROJECT_ROOT / "sandbox" / "vector_cache" / cache_name
-
-
-def log_line(message: str = "") -> None:
-    """Print a labeled line so demo output is easy to scan."""
-    print(f">> {message}" if message else ">>")
-
-
-def log_block(title: str, content: str) -> None:
-    """Print a labeled multi-line block."""
-    print(f"\n>> {title}")
-    for line in content.splitlines():
-        print(f">>   {line}")
-    print(f">> End {title}\n")
 
 
 def load_web_page(url: str, bs_kwargs: dict | None = None) -> list[Document]:
@@ -426,14 +409,6 @@ def build_graph():
     workflow.add_edge("rewrite_question", "generate_query_or_respond")
     workflow.add_edge("generate_answer", END)
     return workflow.compile()
-
-
-def collect_token_usage(messages: list) -> TokenUsage:
-    """Collect token usage from messages in the final graph state."""
-    usage = TokenUsage()
-    for message in messages:
-        usage.add_from_message(message)
-    return usage
 
 
 def run_agentic_rag() -> None:

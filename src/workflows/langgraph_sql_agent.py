@@ -46,33 +46,13 @@ SRC_ROOT = PROJECT_ROOT / "src"
 sys.path.insert(0, str(SRC_ROOT))
 
 from agents.model_config import build_chat_model
-from utils.token_usage import TokenUsage, print_openai_usage_report
+from utils.demo_io import enabled, log_block, log_line
+from utils.token_usage import collect_token_usage, print_openai_usage_report
 
 DATABASE_PATH = PROJECT_ROOT / "data" / "Chinook.db"
 CHINOOK_URL = "https://storage.googleapis.com/benchmarks-artifacts/chinook/Chinook.db"
 
 load_dotenv(PROJECT_ROOT / ".env")
-
-
-def enabled(env_var: str, default: bool = False) -> bool:
-    """Return True when an env var is truthy, with a configurable default."""
-    value = os.getenv(env_var)
-    if value is None:
-        return default
-    return value.lower() in {"1", "true", "yes", "on"}
-
-
-def log_line(message: str = "") -> None:
-    """Print a labeled line so demo output is easy to scan."""
-    print(f">> {message}" if message else ">>")
-
-
-def log_block(title: str, content: str) -> None:
-    """Print a labeled multi-line block."""
-    print(f"\n>> {title}")
-    for line in content.splitlines():
-        print(f">>   {line}")
-    print(f">> End {title}\n")
 
 
 def ensure_database() -> None:
@@ -344,14 +324,6 @@ def build_graph():
     builder.add_edge("run_query", "generate_final_answer")
     builder.add_edge("generate_final_answer", END)
     return builder.compile()
-
-
-def collect_token_usage(messages: list) -> TokenUsage:
-    """Collect token usage from messages in the final graph state."""
-    usage = TokenUsage()
-    for message in messages:
-        usage.add_from_message(message)
-    return usage
 
 
 def run_langgraph_sql_agent() -> None:

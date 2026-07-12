@@ -28,6 +28,7 @@ data/README.md
 docs/langgraph_orchestration_notes.md
 docs/publishing.md
 src/utils/token_usage.py
+src/utils/demo_io.py
 src/retrieval/semantic_search.py
 src/orchestration/langgraph_state_machine.py
 src/workflows/langgraph_rag_agent.py
@@ -37,6 +38,8 @@ src/multi_agent/personal_assistant.py
 src/multi_agent/customer_support_handoffs.py
 src/multi_agent/knowledge_base_router.py
 src/multi_agent/skills_sql_assistant.py
+src/deep_agents/__init__.py
+src/deep_agents/research_agent.py
 src/agents/rag_agent.py
 src/agents/rag_chain.py
 src/agents/model_config.py
@@ -66,5 +69,5 @@ into `src/` later when they become production-quality modules.
 ## Suggested Commit Message
 
 ```text
-Add docs-aligned voice agent pipeline
+Refactor shared demo utilities
 ```

@@ -45,7 +45,8 @@ SRC_ROOT = PROJECT_ROOT / "src"
 sys.path.insert(0, str(SRC_ROOT))
 
 from agents.model_config import build_chat_model
-from utils.token_usage import TokenUsage, print_openai_usage_report
+from utils.demo_io import enabled, final_text, log_block, log_line
+from utils.token_usage import collect_token_usage, print_openai_usage_report
 
 load_dotenv(PROJECT_ROOT / ".env")
 
@@ -138,27 +139,6 @@ reorder points, backorders, or inventory movement.
 }
 
 
-def enabled(env_var: str, default: bool = False) -> bool:
-    """Return True when an env var is truthy, with a configurable default."""
-    value = os.getenv(env_var)
-    if value is None:
-        return default
-    return value.lower() in {"1", "true", "yes", "on"}
-
-
-def log_line(message: str = "") -> None:
-    """Print a labeled line so demo output is easy to scan."""
-    print(f">> {message}" if message else ">>")
-
-
-def log_block(title: str, content: str) -> None:
-    """Print a labeled multi-line block."""
-    print(f"\n>> {title}")
-    for line in content.splitlines():
-        print(f">>   {line}")
-    print(f">> End {title}\n")
-
-
 SKILL_DESCRIPTIONS: dict[SkillName, str] = {
     "sales_analytics": (
         "Database schema and business logic for sales data analysis including "
@@ -231,21 +211,6 @@ Rules:
 - Generate SQL only; do not execute SQL.
 - Explain briefly which loaded skill informed the query.
 """
-
-
-def final_text(result: dict) -> str:
-    """Return the final message content from an agent invocation result."""
-    message = result["messages"][-1]
-    content = getattr(message, "content", "")
-    return content if isinstance(content, str) else str(content)
-
-
-def collect_token_usage(messages: list) -> TokenUsage:
-    """Collect token usage from agent messages when providers expose metadata."""
-    usage = TokenUsage()
-    for message in messages:
-        usage.add_from_message(message)
-    return usage
 
 
 def print_messages(result: dict) -> None:
