@@ -22,6 +22,25 @@ tooling, state, and operational safety.
 - Local Qwen chat and embedding models with hosted OpenAI alternatives gated behind explicit opt-in
 - Guardrails for secrets, local data, model caches, and paid API calls
 
+## Explore The Portfolio UI
+
+The fastest way to review this project is through the Next.js portfolio app. It
+groups every implemented agent by category, explains the architecture and
+concepts behind each system, and links directly to the relevant GitHub source
+file.
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:3000
+```
+
 ## Architecture Coverage
 
 | Area | What It Demonstrates | Module |
@@ -125,23 +144,6 @@ commented `OpenAIEmbeddings` option for comparison when a hosted embedding model
 is preferred.
 
 ## Running The Systems
-
-### Portfolio UI
-
-The `web/` app is a Next.js dashboard that explains every implemented agent,
-groups agents by category, and links each agent page to its GitHub source file.
-
-```bash
-cd web
-npm install
-npm run dev
-```
-
-Open:
-
-```text
-http://localhost:3000
-```
 
 ### Semantic Search
 
