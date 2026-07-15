@@ -15,6 +15,7 @@ tooling, state, and operational safety.
 - SQL agent over the Chinook sample database with query checking and optional human review
 - Multi-agent supervisor pattern with calendar and email specialist subagents
 - Deep Agents research harness with planning, file-system, and delegation-ready capabilities
+- Next.js portfolio UI for browsing every implemented agent with GitHub source links
 - Docs-aligned voice-agent sandwich pipeline with STT, LangChain agent, and TTS stages
 - Tool-calling agents with explicit control flow and model/tool message inspection
 - LangGraph state-machine examples covering reducers, routing, checkpoints, interrupts, subgraphs, and streaming
@@ -37,6 +38,7 @@ tooling, state, and operational safety.
 | Tool Agents | Tool schemas, tool execution loops, final response routing | `src/agents/arithmetic_tool_agent.py` |
 | Graph Workflows | State, reducers, conditional routing, checkpoints, interrupts | `src/orchestration/langgraph_state_machine.py` |
 | Model Operations | Local/hosted model selection, token accounting, cost estimates, shared demo output helpers | `src/agents/model_config.py`, `src/utils/` |
+| Portfolio UI | Next.js dashboard for explaining and linking to each agent implementation | `web/` |
 
 ## Repository Structure
 
@@ -80,6 +82,10 @@ docs/
 
 data/
   README.md                         # Sample data instructions
+
+web/
+  app/                              # Next.js app router pages
+  lib/agents.ts                     # Agent catalog and GitHub source links
 ```
 
 Local scratch work lives in `sandbox/` and is ignored by Git. Large local data
@@ -119,6 +125,23 @@ commented `OpenAIEmbeddings` option for comparison when a hosted embedding model
 is preferred.
 
 ## Running The Systems
+
+### Portfolio UI
+
+The `web/` app is a Next.js dashboard that explains every implemented agent,
+groups agents by category, and links each agent page to its GitHub source file.
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:3000
+```
 
 ### Semantic Search
 

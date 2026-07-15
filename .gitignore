@@ -6,6 +6,9 @@
 # Python environments and caches
 .venv/
 venv/
+node_modules/
+.next/
+out/
 __pycache__/
 *.py[cod]
 .pytest_cache/

@@ -24,6 +24,17 @@ LICENSE
 README.md
 pyproject.toml
 uv.lock
+web/package.json
+web/package-lock.json
+web/next.config.ts
+web/tsconfig.json
+web/next-env.d.ts
+web/app/layout.tsx
+web/app/page.tsx
+web/app/globals.css
+web/app/components/AgentExplorer.tsx
+web/app/agents/[slug]/page.tsx
+web/lib/agents.ts
 data/README.md
 docs/langgraph_orchestration_notes.md
 docs/publishing.md
