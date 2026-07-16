@@ -80,5 +80,5 @@ into `src/` later when they become production-quality modules.
 ## Suggested Commit Message
 
 ```text
-Refactor shared demo utilities
+Improve portfolio documentation
 ```

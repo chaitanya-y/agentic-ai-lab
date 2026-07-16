@@ -41,6 +41,21 @@ Open:
 http://localhost:3000
 ```
 
+## Recommended Review Path
+
+For a quick technical review of the repository:
+
+1. Start with the portfolio UI to understand the agent catalog and system map.
+2. Review `src/agents/model_config.py` and `src/utils/` to see model selection,
+   paid-call gating, shared output helpers, and token/cost accounting.
+3. Inspect `src/retrieval/semantic_search.py`, then compare
+   `src/agents/rag_chain.py` with `src/agents/rag_agent.py` to see deterministic
+   RAG versus agentic RAG.
+4. Move to `src/workflows/` for explicit LangGraph control flow, including
+   custom RAG and SQL workflows.
+5. Finish with `src/multi_agent/` and `src/deep_agents/` for supervisor,
+   handoff, routing, skill-loading, and Deep Agents patterns.
+
 ## Architecture Coverage
 
 | Area | What It Demonstrates | Module |
