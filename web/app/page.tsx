@@ -66,7 +66,7 @@ export default function Home() {
       <section className="hero">
         <div className="hero-copy centered">
           <span className="eyebrow">Hands-on AI engineering roadmap</span>
-          <h1>AI Agentic Lab</h1>
+          <h1>Agentic AI Lab</h1>
           <p>
             A practical lab for software engineers transitioning into agentic engineering and applied AI/ML. The goal
             is not to spend months wandering through every math topic first. Start with the in-demand skills that ship

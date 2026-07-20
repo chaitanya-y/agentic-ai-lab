@@ -4,7 +4,7 @@ export function SiteHeader() {
   return (
     <header className="site-header">
       <a className="brand" href="/">
-        AI Agentic Lab
+        Agentic AI Lab
       </a>
       <nav aria-label="Primary navigation">
         <a href="/#roadmap">Roadmap</a>

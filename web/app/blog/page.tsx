@@ -29,7 +29,7 @@ const learningPath = [
 ];
 
 export const metadata = {
-  title: "What AI Agentic Lab Is Building | Agentic AI Lab",
+  title: "What Agentic AI Lab Is Building | Agentic AI Lab",
   description:
     "A practical guide to the Agentic AI Lab roadmap for software engineers transitioning into agentic engineering."
 };
@@ -41,7 +41,7 @@ export default function BlogPage() {
         <span className="eyebrow">Lab blog</span>
         <h1>What this lab is really building</h1>
         <p>
-          AI Agentic Lab is a hands-on portfolio for software engineers who want to transition into agentic engineering
+          Agentic AI Lab is a hands-on portfolio for software engineers who want to transition into agentic engineering
           without getting lost in every possible AI/ML topic. The goal is simple: learn the concepts that help you ship
           useful AI systems, then deepen the theory as the systems demand it.
         </p>
