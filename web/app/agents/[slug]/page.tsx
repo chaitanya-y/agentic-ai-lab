@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { agentBlogs } from "../../../lib/agentBlogs";
 import { agents, getAgent, repoUrl } from "../../../lib/agents";
 
 type AgentPageProps = {
@@ -29,6 +30,8 @@ export default async function AgentPage({ params }: AgentPageProps) {
   if (!agent) {
     notFound();
   }
+
+  const blog = agentBlogs[agent.slug];
 
   return (
     <main className="agent-page">
@@ -90,6 +93,67 @@ export default async function AgentPage({ params }: AgentPageProps) {
           <p className="source-path">Source: {agent.sourcePath}</p>
         </article>
       </section>
+
+      {blog ? (
+        <article className="agent-blog">
+          <span className="eyebrow">Field notes</span>
+          <h2>{blog.headline}</h2>
+
+          <div className="blog-prose">
+            {blog.intro.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
+
+          <section className="blog-callout">
+            <span>Simple example</span>
+            <p>{blog.simpleExample}</p>
+          </section>
+
+          <section className="blog-grid">
+            <div>
+              <h3>Real-life use cases</h3>
+              <ul>
+                {blog.realWorldUseCases.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3>Technologies used</h3>
+              <ul>
+                {blog.technologies.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </section>
+
+          <section className="blog-grid">
+            <div>
+              <h3>Pros</h3>
+              <ul>
+                {blog.pros.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3>Tradeoffs</h3>
+              <ul>
+                {blog.cons.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </section>
+
+          <section className="blog-takeaway">
+            <span>Takeaway</span>
+            <p>{blog.takeaway}</p>
+          </section>
+        </article>
+      ) : null}
     </main>
   );
 }
