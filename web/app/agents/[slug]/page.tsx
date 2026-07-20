@@ -31,7 +31,7 @@ export default async function AgentPage({ params }: AgentPageProps) {
     notFound();
   }
 
-  const blog = agentBlogs[agent.slug];
+  const blog = agentBlogs[agent.slug as keyof typeof agentBlogs];
 
   return (
     <main className="agent-page">
@@ -105,6 +105,15 @@ export default async function AgentPage({ params }: AgentPageProps) {
             ))}
           </div>
 
+          <section className="blog-deep-dive">
+            <h3>In-depth explanation</h3>
+            <ol>
+              {blog.deepDive.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ol>
+          </section>
+
           <section className="blog-callout">
             <span>Simple example</span>
             <p>{blog.simpleExample}</p>
@@ -147,6 +156,19 @@ export default async function AgentPage({ params }: AgentPageProps) {
               </ul>
             </div>
           </section>
+
+          {blog.references?.length ? (
+            <section className="blog-references">
+              <h3>Official and helpful links</h3>
+              <div className="reference-list">
+                {blog.references.map((reference) => (
+                  <a href={reference.url} key={reference.url} rel="noreferrer" target="_blank">
+                    {reference.label}
+                  </a>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           <section className="blog-takeaway">
             <span>Takeaway</span>

@@ -1,11 +1,16 @@
 export type AgentBlog = {
   headline: string;
   intro: string[];
+  deepDive: string[];
   simpleExample: string;
   realWorldUseCases: string[];
   pros: string[];
   cons: string[];
   technologies: string[];
+  references?: {
+    label: string;
+    url: string;
+  }[];
   takeaway: string;
 };
 
@@ -15,6 +20,18 @@ export const agentBlogs = {
     intro: [
       "Semantic search lets an application search by meaning instead of exact keywords. The document is split into chunks, each chunk is converted into an embedding vector, and a vector store finds chunks that are close to the user's question.",
       "This is usually the first hands-on retrieval system an agentic engineer should build. It teaches the core mechanics behind RAG without adding the complexity of tool-calling or multi-step agent loops."
+    ],
+    deepDive: [
+      "Traditional search depends heavily on matching words. Semantic search works with meaning, so a question and a document can match even when they use different vocabulary.",
+      "The first important object is a document. In LangChain, a document usually contains page content plus metadata such as source file, page number, or URL.",
+      "Large documents are split into chunks because embedding an entire PDF page or full report often loses detail and makes retrieval less precise.",
+      "Chunk size and overlap matter. Small chunks can be precise but lose context, while large chunks preserve context but may retrieve noisy text.",
+      "Embeddings convert text into vectors. Similar ideas should land close together in vector space, which makes similarity search possible.",
+      "A vector store saves those vectors and lets the application ask, 'Which chunks are closest to this query vector?'",
+      "In this lab the vector store is in memory, so it is perfect for learning but disappears when the script exits.",
+      "The embedding model is local by default, which avoids hosted embedding cost and helps engineers understand the full retrieval pipeline.",
+      "Semantic search does not generate an answer. It retrieves evidence that another layer, such as a RAG chain or agent, can use.",
+      "This is the base skill for almost every knowledge assistant, documentation bot, and enterprise AI search system."
     ],
     simpleExample:
       "If a user asks, 'What risks did Nike mention in the annual report?', the system does not search only for the word risks. It embeds the question, compares it against embedded PDF chunks, and returns passages that are semantically related to risk disclosures.",
@@ -39,6 +56,12 @@ export const agentBlogs = {
       "Qwen local embeddings through Hugging Face",
       "InMemoryVectorStore"
     ],
+    references: [
+      {
+        label: "LangChain Python docs",
+        url: "https://docs.langchain.com/oss/python/langchain/overview"
+      }
+    ],
     takeaway:
       "Learn semantic search first because it gives you the mental model for documents, chunks, embeddings, vector stores, and retrieval quality."
   },
@@ -47,6 +70,18 @@ export const agentBlogs = {
     intro: [
       "A RAG chain follows a deterministic sequence: retrieve relevant context, place that context into the model input, and ask the model to answer from the retrieved information.",
       "Unlike an agent, the model does not decide whether retrieval is needed. The application decides retrieval is mandatory, which makes the system easier to reason about."
+    ],
+    deepDive: [
+      "RAG stands for retrieval-augmented generation. The model is augmented with retrieved context before it generates an answer.",
+      "A RAG chain is deterministic because the application always retrieves first. The model does not choose whether to use the retriever.",
+      "This is useful when you know every user question should be answered from a specific knowledge base.",
+      "The chain usually has three parts: retriever, prompt builder, and model call.",
+      "The retriever finds relevant chunks from a vector store using semantic similarity.",
+      "The prompt builder places the user question and retrieved context into a clear instruction format.",
+      "The model then answers from the supplied context and should say it does not know when context is insufficient.",
+      "The main advantage is predictability. You can log the exact retrieved context and the exact model input.",
+      "The main limitation is flexibility. The chain retrieves even for questions that may not need retrieval.",
+      "This pattern is common in production because it is cheaper, easier to test, and easier to debug than a free-form agent loop."
     ],
     simpleExample:
       "For a question like 'What does this blog say about task decomposition?', the chain retrieves matching chunks first, builds a prompt with those chunks, and makes one model call to generate the answer.",
@@ -71,6 +106,12 @@ export const agentBlogs = {
       "Prompt context injection",
       "Local Qwen or hosted OpenAI chat model"
     ],
+    references: [
+      {
+        label: "LangChain Python docs",
+        url: "https://docs.langchain.com/oss/python/langchain/overview"
+      }
+    ],
     takeaway:
       "Use a RAG chain when you want predictable, grounded answers and do not need the model to make tool-use decisions."
   },
@@ -79,6 +120,18 @@ export const agentBlogs = {
     intro: [
       "In an agentic RAG system, retrieval is exposed as a tool. The model reads the user request, decides whether it needs external context, calls the retriever if needed, then uses the returned context to answer.",
       "This is closer to how real assistants behave: they do not always search, but they can search when the task needs facts from a private or external source."
+    ],
+    deepDive: [
+      "A RAG agent is different from a RAG chain because retrieval becomes optional and model-controlled.",
+      "The retriever is wrapped as a tool, which means the model can call it only when the user request requires external knowledge.",
+      "The agent receives the user message, reasons about the task, and may produce a tool call instead of a final answer.",
+      "The application executes the retrieval tool and sends the retrieved content back as a tool message.",
+      "The model then receives both the original question and the tool result, and it can generate a grounded response.",
+      "This pattern teaches the full agent loop: user message, AI tool call, tool message, and final AI message.",
+      "It is more realistic than always-on retrieval because many assistants must mix normal conversation, reasoning, and knowledge lookup.",
+      "It can also be more expensive because every tool decision and final answer may require separate LLM calls.",
+      "Tool-calling reliability depends on the model. Strong hosted models usually follow tool schemas better than small local models.",
+      "Use this pattern when retrieval is one capability among several, not the only thing the system ever does."
     ],
     simpleExample:
       "If the user asks 'Summarize the retrieved article', the model should call the retriever. If the user asks 'Say hello', the model can skip retrieval and answer directly.",
@@ -103,6 +156,12 @@ export const agentBlogs = {
       "Tool messages",
       "Qwen or OpenAI model providers"
     ],
+    references: [
+      {
+        label: "LangChain agents docs",
+        url: "https://docs.langchain.com/oss/python/langchain/overview"
+      }
+    ],
     takeaway:
       "Use agentic RAG when retrieval is optional, conditional, or part of a larger tool-using workflow."
   },
@@ -111,6 +170,18 @@ export const agentBlogs = {
     intro: [
       "A custom LangGraph RAG workflow breaks the RAG process into named graph nodes: decide, retrieve, grade, rewrite, and answer.",
       "Instead of relying on a hidden agent loop, every decision becomes visible. This is valuable when you want reliability, observability, and control over how the system recovers from weak retrieval."
+    ],
+    deepDive: [
+      "LangGraph is an orchestration framework for building stateful, long-running agent workflows as graphs.",
+      "A graph is made of nodes and edges. Nodes do work, and edges decide which node runs next.",
+      "State is the shared data object that moves through the graph. It can contain messages, retrieved documents, flags, counters, or decisions.",
+      "This is different from a simple LangChain agent because the workflow is not hidden inside one generic loop.",
+      "In this RAG workflow, the graph can decide whether retrieval is needed, retrieve documents, grade relevance, rewrite the query, and generate the answer.",
+      "Document grading is important because retrieval can return weak or unrelated chunks even when the vector search technically succeeds.",
+      "Query rewriting is a recovery step. If the first query is too vague, the graph can improve the query and try again.",
+      "The graph makes these steps inspectable, so an engineer can see where the system failed: retrieval, grading, rewriting, or generation.",
+      "LangGraph is useful when agent behavior needs checkpoints, branching, retries, human review, or careful state transitions.",
+      "The tradeoff is more code, but the reward is control. For production-grade RAG, that control is often worth it."
     ],
     simpleExample:
       "The graph can retrieve a blog chunk, grade whether it answers the question, rewrite the query if the chunk is not relevant, and only then generate the final response.",
@@ -136,6 +207,16 @@ export const agentBlogs = {
       "Document grading",
       "Vector cache for local testing"
     ],
+    references: [
+      {
+        label: "Official LangGraph docs",
+        url: "https://docs.langchain.com/oss/python/langgraph/overview"
+      },
+      {
+        label: "LangGraph graph API",
+        url: "https://docs.langchain.com/oss/python/langgraph/graph-api"
+      }
+    ],
     takeaway:
       "Use LangGraph RAG when you want an inspectable retrieval workflow instead of a black-box agent loop."
   },
@@ -144,6 +225,18 @@ export const agentBlogs = {
     intro: [
       "A SQL agent converts a natural-language question into a database workflow. It can list tables, inspect schema, draft a query, check the query, execute it, and explain the result.",
       "The important engineering lesson is not just SQL generation. It is how to put guardrails around a model that can touch data."
+    ],
+    deepDive: [
+      "A SQL agent connects natural language to structured data, but the model should not blindly write and run arbitrary SQL.",
+      "The first step is schema discovery. The agent needs to know which tables exist before it can choose a table.",
+      "The second step is schema inspection. The agent needs column names, relationships, and data types before it can write a valid query.",
+      "The third step is query generation. The model turns the user's question into SQL using the inspected schema.",
+      "The fourth step is query checking. This is where the system can catch common mistakes before execution.",
+      "The fifth step is execution, ideally with read-only permissions and strict limits.",
+      "The final step is explanation, where the raw database rows are translated into a clear answer.",
+      "This lab uses the Chinook database because it is small enough to inspect but realistic enough to show joins, grouping, and aggregation.",
+      "Human review matters for SQL because databases may contain sensitive or business-critical data.",
+      "A production SQL agent should include access control, query timeouts, audit logs, row limits, and protection against destructive operations."
     ],
     simpleExample:
       "For 'Which genre has the longest tracks on average?', the agent inspects the Genre and Track tables, writes a SELECT query with a JOIN and AVG, runs it, then turns the result into a human-readable answer.",
@@ -169,6 +262,12 @@ export const agentBlogs = {
       "Human-in-the-loop review",
       "Token usage reporting"
     ],
+    references: [
+      {
+        label: "LangChain Python docs",
+        url: "https://docs.langchain.com/oss/python/langchain/overview"
+      }
+    ],
     takeaway:
       "A SQL agent is useful when people need data answers, but production versions must be designed around safety before convenience."
   },
@@ -177,6 +276,18 @@ export const agentBlogs = {
     intro: [
       "The LangGraph SQL workflow takes the same database-answering idea and turns it into a graph. Each stage has a clear responsibility: list tables, select schema, generate SQL, execute SQL, and synthesize the final answer.",
       "This pattern is useful when an open-ended SQL agent is too unpredictable for production."
+    ],
+    deepDive: [
+      "LangGraph is useful for SQL because database workflows naturally have stages that should happen in a controlled order.",
+      "Instead of letting a model call SQL tools repeatedly, the graph defines a path: list tables, choose schema, generate query, execute query, and answer.",
+      "Each node has one job. This makes it easier to debug when the model chooses the wrong table or writes the wrong query.",
+      "The graph state stores the conversation and tool results as the workflow moves forward.",
+      "The model still performs reasoning, but the application controls when and where that reasoning happens.",
+      "This is a major difference between orchestration and simple prompting. The graph becomes the system boundary.",
+      "Recursion limits protect the workflow from accidental loops.",
+      "Max-token limits protect the workflow from responses that are cut off or too expensive.",
+      "This style is valuable when a company wants natural-language analytics but cannot accept unbounded agent behavior.",
+      "It is less magical than a general agent, but more trustworthy for data workflows."
     ],
     simpleExample:
       "Instead of letting the model repeatedly call SQL tools until it feels done, the graph guides the model through a bounded path and uses recursion limits and max-token settings to prevent runaway behavior.",
@@ -202,6 +313,16 @@ export const agentBlogs = {
       "Query validation",
       "Recursion and token limits"
     ],
+    references: [
+      {
+        label: "Official LangGraph docs",
+        url: "https://docs.langchain.com/oss/python/langgraph/overview"
+      },
+      {
+        label: "LangGraph graph API",
+        url: "https://docs.langchain.com/oss/python/langgraph/graph-api"
+      }
+    ],
     takeaway:
       "Use a graph-based SQL workflow when reliability and inspectability matter more than maximum agent flexibility."
   },
@@ -210,6 +331,18 @@ export const agentBlogs = {
     intro: [
       "This small agent is intentionally simple. It gives the model arithmetic tools and shows how the model asks for a tool call, how the application executes the tool, and how the result returns as a tool message.",
       "Because the domain is tiny, it is easier to focus on the agent loop instead of getting distracted by external APIs."
+    ],
+    deepDive: [
+      "Tool calling is one of the most important agentic engineering concepts because it lets a model ask software to do something.",
+      "A tool has a name, description, and input schema. The model uses that schema to decide how to call it.",
+      "The model does not execute the tool by itself. It emits a structured tool call, and the application runs the function.",
+      "The function result comes back as a tool message, which becomes part of the conversation history.",
+      "The model then reads the tool result and produces the final answer.",
+      "Arithmetic is intentionally boring here, and that is the point. It removes business complexity so the message loop is visible.",
+      "This example helps beginners understand why one user request can create multiple model calls.",
+      "It also shows why local models and hosted models can behave differently with tool schemas.",
+      "In real applications, the same pattern powers calendar tools, database tools, search tools, email tools, and API actions.",
+      "Once this loop is clear, more complex agent systems become much easier to reason about."
     ],
     simpleExample:
       "If the user asks 'What is 7 times 10?', the model can call multiply with a=7 and b=10. The tool returns 70, and the model uses that result in the final answer.",
@@ -234,6 +367,12 @@ export const agentBlogs = {
       "Model/tool loop",
       "Local and hosted chat models"
     ],
+    references: [
+      {
+        label: "LangChain Python docs",
+        url: "https://docs.langchain.com/oss/python/langchain/overview"
+      }
+    ],
     takeaway:
       "Start here if tool calling feels confusing. The same loop powers much more serious agents."
   },
@@ -242,6 +381,18 @@ export const agentBlogs = {
     intro: [
       "This example uses a simple weather-style tool to demonstrate how a graph can route a user request through a tool call and final response.",
       "The weather result is simulated, which keeps the learning focused on graph execution rather than API keys, rate limits, or third-party reliability."
+    ],
+    deepDive: [
+      "The weather graph is a safe version of a real API-backed assistant.",
+      "It teaches the same shape as production tools without requiring a live weather provider.",
+      "The model receives the user request and can decide to call the weather tool.",
+      "The tool returns a simulated result, which keeps the demo deterministic and cheap.",
+      "The final model response should be based on the tool result, not invented from prior knowledge.",
+      "This pattern is useful because many production agents start with mocked tools before real integrations are added.",
+      "A graph wrapper makes the tool path explicit and inspectable.",
+      "If a real API were added later, the same interface could support retries, validation, and error messages.",
+      "This example also teaches that tools are trust boundaries. The model requests action, but application code executes action.",
+      "That boundary is essential when tools can spend money, send emails, update records, or expose private data."
     ],
     simpleExample:
       "When the user asks about a city's weather, the model can call the weather tool, receive the simulated result, and then produce a concise answer using that tool output.",
@@ -266,6 +417,16 @@ export const agentBlogs = {
       "Tool messages",
       "Simulated API response"
     ],
+    references: [
+      {
+        label: "Official LangGraph docs",
+        url: "https://docs.langchain.com/oss/python/langgraph/overview"
+      },
+      {
+        label: "LangChain Python docs",
+        url: "https://docs.langchain.com/oss/python/langchain/overview"
+      }
+    ],
     takeaway:
       "Stubbed tools are a smart way to learn and test agent flow before paying for or depending on real APIs."
   },
@@ -274,6 +435,18 @@ export const agentBlogs = {
     intro: [
       "Most voice agents can be understood as three stages: speech-to-text, text agent reasoning, and text-to-speech.",
       "The hard part is not only transcription or audio generation. It is streaming the stages cleanly so users feel the assistant is responsive."
+    ],
+    deepDive: [
+      "A voice agent is not a completely different kind of agent. It is usually a text agent wrapped with audio input and audio output.",
+      "The first stage is speech-to-text, where audio bytes become text the language model can understand.",
+      "The second stage is the agent step, where the text request can trigger reasoning, tool calls, retrieval, or workflow execution.",
+      "The third stage is text-to-speech, where the final or partial text response becomes audio for the user.",
+      "Streaming matters because users do not want to wait for a full transcript, full reasoning step, and full audio file every time.",
+      "Async generators are a useful programming pattern because they let each stage yield events as soon as they are available.",
+      "The mock mode in this lab removes microphone and audio-provider complexity so the architecture is easier to learn.",
+      "Real voice systems add interruption handling, turn detection, latency tuning, audio codecs, and privacy controls.",
+      "The same text agent can often be reused across chat and voice interfaces if the I/O layer is designed cleanly.",
+      "Voice is best learned after tool calling and streaming are understood, because it combines both concepts."
     ],
     simpleExample:
       "The demo can run in mock mode: fake audio becomes text, the LangChain agent responds, and the response is streamed as simulated audio chunks.",
@@ -299,6 +472,12 @@ export const agentBlogs = {
       "LangChain agent stage",
       "TTS stage"
     ],
+    references: [
+      {
+        label: "LangChain Python docs",
+        url: "https://docs.langchain.com/oss/python/langchain/overview"
+      }
+    ],
     takeaway:
       "Think of voice as an I/O layer around an agent. Build the text agent well first, then make it conversational through streaming audio."
   },
@@ -307,6 +486,18 @@ export const agentBlogs = {
     intro: [
       "The personal assistant demonstrates a common multi-agent pattern: one supervisor receives the user request and delegates specialized work to focused subagents.",
       "Instead of giving one model every tool and every responsibility, the workflow separates calendar behavior from email behavior."
+    ],
+    deepDive: [
+      "A multi-agent system is useful when one request contains multiple responsibilities that should not all live in one prompt.",
+      "The supervisor agent acts like a coordinator. It understands the user's overall goal and decides which specialist should handle each part.",
+      "Specialist agents have narrower instructions and narrower tool access, which can make them easier to control.",
+      "In this demo the calendar specialist handles scheduling language, while the email specialist handles reminder language.",
+      "The supervisor delegates work through tools, receives each specialist result, and writes one final response to the user.",
+      "This is different from simply changing prompts because each specialist can have its own tools, instructions, and execution boundary.",
+      "The demo uses simulated side effects, so no real calendar invite or email is sent.",
+      "In production, calendar and email actions would need user confirmation, OAuth permissions, audit logs, and undo paths.",
+      "The pattern works well when tasks are parallel or separable, but it can become expensive if every subagent requires multiple model calls.",
+      "A good supervisor should delegate clearly, avoid duplicate work, and summarize specialist results accurately."
     ],
     simpleExample:
       "A user asks to schedule a meeting and send a reminder. The supervisor delegates scheduling to the calendar specialist and email drafting to the email specialist, then combines both results into one final answer.",
@@ -331,6 +522,12 @@ export const agentBlogs = {
       "Calendar and email stubs",
       "Model message inspection"
     ],
+    references: [
+      {
+        label: "LangChain Python docs",
+        url: "https://docs.langchain.com/oss/python/langchain/overview"
+      }
+    ],
     takeaway:
       "Use supervisor-subagent design when tasks naturally belong to different specialists with different tools."
   },
@@ -339,6 +536,18 @@ export const agentBlogs = {
     intro: [
       "Support conversations often move through predictable phases: collect account or warranty information, classify the issue, and route to a resolution path.",
       "This demo shows how a workflow can hand control from one stage to another while preserving conversation state."
+    ],
+    deepDive: [
+      "A handoff means one part of the system finishes its responsibility and passes control to another part.",
+      "Customer support is a natural fit because support flows often have required stages and policy boundaries.",
+      "The workflow should not offer a replacement, refund, or escalation before collecting the required context.",
+      "State is important because the system needs to remember what the user already provided.",
+      "LangGraph helps represent this as a state machine, where each node handles one support stage.",
+      "The warranty step can collect account or device information before the issue-classification step runs.",
+      "The classifier can decide whether the case is hardware, billing, warranty, or general troubleshooting.",
+      "The resolution specialist can then respond using the correct policy path.",
+      "This approach is more reliable than one giant prompt because each stage has a smaller job.",
+      "Production support agents would also need policy retrieval, escalation rules, customer identity checks, and conversation auditing."
     ],
     simpleExample:
       "A customer reports a cracked phone screen. The workflow collects warranty information, classifies the issue, and routes the conversation to the right support response.",
@@ -364,6 +573,12 @@ export const agentBlogs = {
       "Short-term memory",
       "Controlled routing"
     ],
+    references: [
+      {
+        label: "Official LangGraph docs",
+        url: "https://docs.langchain.com/oss/python/langgraph/overview"
+      }
+    ],
     takeaway:
       "Use handoffs when the conversation has stages and each stage needs its own policy, tools, or completion criteria."
   },
@@ -372,6 +587,18 @@ export const agentBlogs = {
     intro: [
       "Modern teams store knowledge across many systems: GitHub, Notion, Slack, docs, tickets, and databases. A router agent decides which sources are relevant and sends the query to the right specialist.",
       "This pattern is important because not every question should search every system."
+    ],
+    deepDive: [
+      "A knowledge-base router solves a common enterprise problem: useful context is scattered across many tools.",
+      "Searching every source for every question is slow, expensive, and often noisy.",
+      "A router reads the user question and decides which specialist sources are likely relevant.",
+      "One specialist might represent GitHub issues and pull requests, another might represent Notion docs, and another might represent Slack discussions.",
+      "The router can send work to multiple specialists when the question needs more than one source.",
+      "Fan-out means several source-specific searches can happen in parallel.",
+      "The final synthesis step merges those specialist answers into one response for the user.",
+      "This pattern makes source boundaries visible, which is important for trust and permission handling.",
+      "The risk is routing failure. If the router chooses the wrong source, the final answer may miss important evidence.",
+      "Production routers need permissions, source citations, observability, and fallback behavior when the first routing decision is uncertain."
     ],
     simpleExample:
       "If a question asks about an API error and release notes, the router can ask a GitHub specialist for code or issues and a docs specialist for product guidance, then merge the results.",
@@ -397,6 +624,12 @@ export const agentBlogs = {
       "Result synthesis",
       "Structured routing decisions"
     ],
+    references: [
+      {
+        label: "Official LangGraph docs",
+        url: "https://docs.langchain.com/oss/python/langgraph/overview"
+      }
+    ],
     takeaway:
       "Use a knowledge router when users ask questions whose answers may live across multiple systems."
   },
@@ -405,6 +638,18 @@ export const agentBlogs = {
     intro: [
       "A skills-based assistant starts with compact skill descriptions instead of loading every schema, policy, and instruction into the prompt.",
       "When the user asks a relevant question, the agent loads the full skill file and uses that domain-specific context to answer."
+    ],
+    deepDive: [
+      "Skills are a context-management pattern. They help an agent avoid loading every possible instruction into every prompt.",
+      "The model first sees a short menu of available skills and descriptions.",
+      "If the user request matches a skill, the agent loads the full skill content.",
+      "This is called progressive disclosure because the model receives detailed context only when it is needed.",
+      "In the SQL example, the skill contains table descriptions, relationships, and business rules.",
+      "The model uses that loaded skill to write a better SQL query than it could write from the user question alone.",
+      "This pattern becomes more important as systems grow across many domains, datasets, policies, or customer workflows.",
+      "Without skills, the prompt can become too large, expensive, and confusing.",
+      "The risk is skill selection. If descriptions are vague, the model may load the wrong skill or skip the right one.",
+      "A production implementation should version skills, test skill selection, and validate outputs from loaded skills."
     ],
     simpleExample:
       "For a sales analytics SQL request, the agent loads the sales_analytics skill, reads the table definitions and business rules, then writes a SQL query using that context.",
@@ -430,6 +675,12 @@ export const agentBlogs = {
       "Progressive disclosure",
       "SQL generation"
     ],
+    references: [
+      {
+        label: "LangChain Python docs",
+        url: "https://docs.langchain.com/oss/python/langchain/overview"
+      }
+    ],
     takeaway:
       "Skills are a practical answer to context overload: show the model a menu first, then load the full recipe only when needed."
   },
@@ -438,6 +689,18 @@ export const agentBlogs = {
     intro: [
       "Deep Agents are designed for tasks that need planning, research, file operations, and possible delegation to subagents.",
       "This demo follows the Deep Agents research pattern: connect a search tool, define instructions, and let the harness manage a more capable research workflow."
+    ],
+    deepDive: [
+      "Deep Agents are meant for tasks that feel more like projects than single chat answers.",
+      "A normal agent may call a tool and answer. A deep agent may plan, search, write intermediate notes, use files, and delegate subtasks.",
+      "The key idea is that complex work needs structure around the model, not just a longer prompt.",
+      "This lab uses Tavily search so the research agent can gather current external information.",
+      "The agent instructions define the research behavior and tell the system how to use the search tool.",
+      "The harness can support planning and file-system style workflows, which are useful for longer research tasks.",
+      "This is different from RAG because the source of knowledge is not only a pre-indexed local vector store.",
+      "It is also different from a basic tool agent because the task may involve multiple steps and intermediate artifacts.",
+      "Costs and latency can be higher because research work often requires several model and search calls.",
+      "Use this pattern when the user wants a researched deliverable, not just a quick answer."
     ],
     simpleExample:
       "A user asks for research on a technical topic. The agent searches the web through Tavily, reasons over the results, and produces a more complete research-style answer.",
@@ -463,6 +726,16 @@ export const agentBlogs = {
       "Planning-capable agent harness",
       "OpenAI model provider"
     ],
+    references: [
+      {
+        label: "Deep Agents docs",
+        url: "https://docs.langchain.com/oss/python/deepagents/overview"
+      },
+      {
+        label: "Tavily",
+        url: "https://www.tavily.com/"
+      }
+    ],
     takeaway:
       "Use Deep Agents when the task looks like a project, not just a single answer."
   },
@@ -471,6 +744,20 @@ export const agentBlogs = {
     intro: [
       "Before building large graph agents, it helps to learn the primitives: state, nodes, edges, reducers, conditional routing, checkpoints, interrupts, subgraphs, and streaming.",
       "This file is the concept gym for the rest of the repository."
+    ],
+    deepDive: [
+      "LangGraph is a framework for building agent workflows as explicit graphs instead of hidden loops.",
+      "The basic unit is a node. A node is usually a function that reads the current state and returns an update.",
+      "Edges connect nodes and define what runs next.",
+      "Conditional edges let the graph choose different paths based on state, such as routing to an even or odd branch.",
+      "State is the shared object that flows through the graph. It can contain messages, counters, flags, retrieved documents, or tool results.",
+      "Reducers define how state updates are merged. For example, a reducer can append new messages to an existing message list.",
+      "Checkpoints let a graph remember progress, which is important for long-running or multi-turn workflows.",
+      "Interrupts allow human-in-the-loop behavior, such as pausing for approval before continuing.",
+      "Subgraphs let you compose smaller graphs into larger systems, which keeps complex workflows manageable.",
+      "Streaming lets you observe intermediate updates instead of waiting only for the final result.",
+      "These primitives are the foundation for reliable RAG graphs, SQL workflows, support handoffs, and multi-agent systems.",
+      "LangGraph is most valuable when you need state, branching, persistence, recovery, or human control around an agent."
     ],
     simpleExample:
       "A small graph can classify a number as odd or even, route to the correct node, append trace messages with a reducer, and return the final state.",
@@ -495,6 +782,16 @@ export const agentBlogs = {
       "Conditional edges",
       "Checkpointers",
       "Interrupts and streaming"
+    ],
+    references: [
+      {
+        label: "Official LangGraph docs",
+        url: "https://docs.langchain.com/oss/python/langgraph/overview"
+      },
+      {
+        label: "LangGraph graph API",
+        url: "https://docs.langchain.com/oss/python/langgraph/graph-api"
+      }
     ],
     takeaway:
       "If agents are systems, LangGraph teaches you how to draw and execute the system map."
