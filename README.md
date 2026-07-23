@@ -7,6 +7,28 @@ The repository combines a structured curriculum with runnable implementations of
 retrieval, tool use, MCP, workflow orchestration, multi-agent coordination,
 evaluation, security, and production operations.
 
+## Explore the Learning App
+
+The web application provides the complete curriculum, roadmap, glossary, and
+implementation catalog.
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+The application includes:
+
+- A searchable lesson catalog
+- Prerequisites and time estimates for every phase
+- Plain-language explanations and application examples
+- Practical exercises and expected outputs
+- Detailed pages for each runnable implementation
+- Direct links between lessons and relevant source code
+
 ## About the Project
 
 Software engineers entering agentic engineering need more than experience with
@@ -83,28 +105,6 @@ Each topic follows a consistent engineering workflow:
 3. **Test** — Introduce realistic failure conditions and identify system boundaries.
 4. **Evaluate** — Measure quality, safety, latency, cost, and operational behavior.
 5. **Document** — Record the architecture, tradeoffs, results, and remaining limitations.
-
-## Explore the Learning App
-
-The Next.js application provides the complete curriculum, roadmap, glossary, and
-implementation catalog.
-
-```bash
-cd web
-npm install
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-The application includes:
-
-- A searchable lesson catalog
-- Prerequisites and time estimates for every phase
-- Plain-language explanations and application examples
-- Practical exercises and expected outputs
-- Detailed pages for each runnable implementation
-- Direct links between lessons and relevant source code
 
 ## Implementation Labs
 
