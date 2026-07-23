@@ -64,12 +64,12 @@ export default async function AgentPage({ params }: AgentPageProps) {
 
       <section className="detail-layout">
         <article className="detail-card wide">
-          <span className="eyebrow">How to use this page</span>
-          <h2>Read, run, inspect, then change one constraint.</h2>
+          <span className="eyebrow">Recommended lab workflow</span>
+          <h2>Review the architecture, execute the lab, and evaluate one variation.</h2>
           <p>
             Spend about 15 minutes on the architecture, 20–30 minutes running and tracing the command, and the
-            remaining time changing a prompt, tool, model, or failure path. The lesson is complete when you can explain
-            the tradeoff from evidence rather than from the happy-path output.
+            remaining time changing a prompt, tool, model, or failure path. Complete the lab by documenting the
+            observed behavior and the resulting technical tradeoff.
           </p>
         </article>
 
@@ -91,7 +91,7 @@ export default async function AgentPage({ params }: AgentPageProps) {
 
         <article className="detail-card">
           <span className="eyebrow">Concepts</span>
-          <h2>What to learn</h2>
+          <h2>Learning objectives</h2>
           <div className="concept-list large">
             {agent.concepts.map((concept) => (
               <span key={concept}>{concept}</span>
@@ -100,8 +100,8 @@ export default async function AgentPage({ params }: AgentPageProps) {
         </article>
 
         <article className="detail-card wide">
-          <span className="eyebrow">Run it</span>
-          <h2>Command</h2>
+          <span className="eyebrow">Execution</span>
+          <h2>Run command</h2>
           <pre>
             <code>{agent.runCommand}</code>
           </pre>
@@ -111,7 +111,7 @@ export default async function AgentPage({ params }: AgentPageProps) {
 
       {blog ? (
         <article className="agent-blog">
-          <span className="eyebrow">Field notes</span>
+          <span className="eyebrow">Technical analysis</span>
           <h2>{blog.headline}</h2>
 
           <div className="blog-prose">
@@ -130,13 +130,13 @@ export default async function AgentPage({ params }: AgentPageProps) {
           </section>
 
           <section className="blog-callout">
-            <span>Simple example</span>
+            <span>Implementation example</span>
             <p>{blog.simpleExample}</p>
           </section>
 
           <section className="blog-grid">
             <div>
-              <h3>Real-life use cases</h3>
+              <h3>Applications</h3>
               <ul>
                 {blog.realWorldUseCases.map((item) => (
                   <li key={item}>{item}</li>
@@ -155,7 +155,7 @@ export default async function AgentPage({ params }: AgentPageProps) {
 
           <section className="blog-grid">
             <div>
-              <h3>Pros</h3>
+              <h3>Advantages</h3>
               <ul>
                 {blog.pros.map((item) => (
                   <li key={item}>{item}</li>
@@ -174,7 +174,7 @@ export default async function AgentPage({ params }: AgentPageProps) {
 
           {blog.references?.length ? (
             <section className="blog-references">
-              <h3>Official and helpful links</h3>
+              <h3>References</h3>
               <div className="reference-list">
                 {blog.references.map((reference) => (
                   <a href={reference.url} key={reference.url} rel="noreferrer" target="_blank">
@@ -186,7 +186,7 @@ export default async function AgentPage({ params }: AgentPageProps) {
           ) : null}
 
           <section className="blog-takeaway">
-            <span>Takeaway</span>
+            <span>Key consideration</span>
             <p>{blog.takeaway}</p>
           </section>
         </article>

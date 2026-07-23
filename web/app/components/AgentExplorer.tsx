@@ -17,10 +17,10 @@ export function AgentExplorer() {
     <section className="explorer" id="agents">
       <div className="section-heading">
         <span className="eyebrow">Runnable repository labs</span>
-        <h2>Read the concept, then inspect a system that makes it concrete.</h2>
+        <h2>Runnable implementations of the curriculum&apos;s core concepts.</h2>
         <p>
-          These are implementation pages, not additional curriculum phases. Most labs take 60–90 minutes to read,
-          configure, run, and compare with the written lesson.
+          Each implementation page complements the curriculum with source code, architecture notes, and execution
+          instructions. Most labs require 60–90 minutes to review, configure, and run.
         </p>
       </div>
 

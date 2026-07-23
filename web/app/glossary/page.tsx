@@ -11,7 +11,7 @@ export default function GlossaryPage() {
     <main className="inner-page">
       <section className="page-hero">
         <p className="eyebrow">Plain-language reference</p>
-        <h1>Understand the words without memorizing the jargon.</h1>
+        <h1>Definitions for core agentic engineering terminology.</h1>
         <p>
           {glossary.length} short definitions covering LLM foundations, retrieval, agents, orchestration, and production
           operations. Read the whole list in about 25–35 minutes or search as you learn.

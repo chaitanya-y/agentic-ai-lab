@@ -12,19 +12,19 @@ const schedules = [
     title: "Steady",
     pace: "8 hours / week",
     duration: "5–6 months",
-    fit: "Best for a working engineer who wants time to complete the exercises and write strong project notes."
+    fit: "Designed for working engineers who need time for exercises, review, and project documentation."
   },
   {
     title: "Focused",
     pace: "12 hours / week",
     duration: "3.5–4.5 months",
-    fit: "A strong default when the role transition is an active priority and weekends are available."
+    fit: "Designed for engineers who can dedicate regular weekday and weekend study time to the transition."
   },
   {
     title: "Intensive",
     pace: "20 hours / week",
     duration: "9–11 weeks",
-    fit: "Works during a career break, but only if you still test, document, and reflect instead of rushing."
+    fit: "Suitable for a career break when the schedule includes sufficient time for testing, documentation, and review."
   }
 ];
 
@@ -33,7 +33,7 @@ export default function RoadmapPage() {
     <main className="inner-page">
       <section className="page-hero roadmap-hero">
         <p className="eyebrow">Prerequisite-aware roadmap</p>
-        <h1>A realistic path from backend features to dependable agents.</h1>
+        <h1>A structured path from software engineering to production agent systems.</h1>
         <p>
           Plan for 150–200 total hours. The written curriculum is about {totalHours} guided hours; the remaining time
           covers repetition, debugging, evaluation runs, documentation, and portfolio polish.
@@ -86,8 +86,8 @@ export default function RoadmapPage() {
 
       <section className="schedule-section">
         <div className="section-intro">
-          <p className="eyebrow">Choose a pace you can sustain</p>
-          <h2>The fastest useful roadmap is the one you actually finish.</h2>
+          <p className="eyebrow">Study schedules</p>
+          <h2>Choose a schedule that supports consistent practice and documentation.</h2>
           <p>
             These estimates assume you already write production software. If Python, APIs, testing, or databases are
             new, add time for those prerequisites rather than skipping them.
@@ -107,13 +107,13 @@ export default function RoadmapPage() {
 
       <section className="roadmap-note">
         <div>
-          <p className="eyebrow">What comes after</p>
-          <h2>Add deeper AI/ML when your projects give it a purpose.</h2>
+          <p className="eyebrow">Advanced study</p>
+          <h2>Advanced AI/ML topics after the core roadmap.</h2>
         </div>
         <p>
           After the capstone, useful next subjects include probability, linear algebra, classical ML, neural-network
-          training, fine-tuning, recommendation systems, and model serving. They matter—but this roadmap first gets you
-          to the point where you can connect that theory to a real system decision.
+          training, fine-tuning, recommendation systems, and model serving. The core roadmap provides the system
+          experience needed to connect these subjects to specific engineering decisions.
         </p>
       </section>
     </main>

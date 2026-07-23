@@ -95,7 +95,7 @@ export const curriculum: CurriculumPhase[] = [
         "Learn how text becomes tokens and why context size, output limits, latency, and cost move together.",
         "A prompt that fits during a demo can fail or become expensive when real users attach long documents and conversation history.",
         "Models process token sequences rather than characters or words. The context window contains instructions, messages, retrieved passages, tool results, and the requested output. More context is not automatically better: irrelevant text raises cost and can hide the important evidence.",
-        "A 100-page policy manual may fit in a large window, but retrieving the three relevant sections is usually cheaper and easier to audit.",
+        "A 100-page policy manual may fit in a large context window, but retrieving the three relevant sections usually reduces cost and improves auditability.",
         [
           "Measure the approximate size of a prompt, chat history, and retrieved context.",
           "Create a context budget that reserves space for the answer and tool responses."
@@ -116,7 +116,7 @@ export const curriculum: CurriculumPhase[] = [
           "Embed a small set of support questions and compare nearest neighbors.",
           "Add an ambiguous query and inspect where semantic similarity makes a bad match."
         ],
-        "A tiny semantic matching notebook or script with observed failure cases.",
+        "A small semantic-matching implementation with documented failure cases.",
         ["embeddings", "vectors", "cosine similarity", "semantic search"]
       ),
       lesson(
@@ -216,7 +216,7 @@ export const curriculum: CurriculumPhase[] = [
       ),
       lesson(
         "conversation-state",
-        "Conversation state without prompt sprawl",
+        "Conversation state and context management",
         "90 minutes",
         "Build",
         "Store useful state explicitly instead of replaying an unlimited transcript.",
@@ -258,7 +258,7 @@ export const curriculum: CurriculumPhase[] = [
     summary:
       "Build retrieval systems that find useful evidence, show their sources, and can be measured independently from generation.",
     prerequisite: "Phases 01–02 and comfort working with files, APIs, and simple data pipelines.",
-    outcome: "You can design, debug, and evaluate a grounded RAG system rather than treating retrieval as a black box.",
+    outcome: "You can design, debug, and evaluate a grounded RAG system with inspectable retrieval behavior.",
     accent: "coral",
     lessons: [
       lesson(
@@ -413,7 +413,7 @@ export const curriculum: CurriculumPhase[] = [
         "3 hours",
         "Build",
         "Implement and inspect the full cycle from user request to tool proposal, tool result, and final response.",
-        "Tool calling is a protocol, not magic. Missing one message or confusing a proposal with an execution causes subtle failures.",
+        "Tool calling follows a defined message protocol. Missing a message or confusing a proposal with an execution can cause subtle failures.",
         "The model emits a structured tool call. The application validates and runs it, appends a tool-result message with the matching identifier, and asks the model to continue. The loop needs limits, error messages the model can use, and a trace for debugging.",
         "A calculator agent proposes `multiply(17, 23)`, receives `391` from code, then explains the result to the user.",
         [
@@ -557,7 +557,7 @@ export const curriculum: CurriculumPhase[] = [
         "3 hours",
         "Concept + Build",
         "Use explicit plans and targeted self-review only when they improve difficult multi-step work.",
-        "Planning can reduce missed steps, but repeated reflection can become expensive model-generated ceremony.",
+        "Planning can reduce missed steps, while repeated reflection can add unnecessary model calls, latency, and cost.",
         "A useful plan is a small, editable task structure tied to observable completion. Reflection should evaluate specific criteria and trigger a bounded correction, not ask the same model whether its own answer is “good.” External evidence and deterministic checks are stronger reviewers.",
         "A migration assistant plans schema inspection, compatibility checks, code changes, and validation; a test runner—not the model—confirms success.",
         [
@@ -572,8 +572,8 @@ export const curriculum: CurriculumPhase[] = [
         "Agent failure modes and budgets",
         "3 hours",
         "Concept + Build",
-        "Design for loops, tool errors, context drift, conflicting instructions, partial completion, and runaway spend.",
-        "An agent that works on the happy path can still be unsafe or unaffordable under real traffic and messy inputs.",
+        "Design for loops, tool errors, context drift, conflicting instructions, partial completion, and uncontrolled spend.",
+        "An agent that succeeds under expected conditions may still be unsafe or unaffordable under production traffic and unpredictable inputs.",
         "Bound every variable resource: steps, wall-clock time, tokens, tool calls, result size, and monetary spend. Preserve enough state to explain why the run stopped. Distinguish a successful answer from partial completion, refusal, timeout, and system error.",
         "A data assistant stops after three failed schema lookups, returns what it learned, and asks for a human-provided table name.",
         [
@@ -798,7 +798,7 @@ export const curriculum: CurriculumPhase[] = [
         "4 hours",
         "Concept + Build",
         "Create a representative dataset, scoring rules, baselines, and release gates before tuning endlessly.",
-        "Anecdotal demos reward lucky examples and make regressions easy to miss.",
+        "Anecdotal demonstrations can overrepresent successful examples and make regressions difficult to detect.",
         "Start with real task categories and important failure modes. Record expected facts, tools, sources, actions, or refusal behavior. Combine deterministic checks, carefully designed model graders, and human review. Keep a baseline so every prompt, model, or retrieval change has a comparison.",
         "A support agent release fails if policy citation accuracy drops, even when its average writing score improves.",
         [
@@ -816,7 +816,7 @@ export const curriculum: CurriculumPhase[] = [
         "Trace model calls, tool calls, graph transitions, retrieval, errors, latency, and usage without leaking sensitive content.",
         "Application logs that say only “request failed” cannot explain a bad tool choice or missing evidence.",
         "A trace connects the user request to every meaningful span: context assembly, retrieval, model call, tool execution, state transition, and final result. Store identifiers, timing, status, model and prompt versions, and redacted metadata. Sample or restrict raw content based on privacy requirements.",
-        "A slow request is traced to a reranker timeout and a fallback model call rather than blamed on “the AI.”",
+        "A trace attributes a slow request to a reranker timeout and a fallback model call.",
         [
           "Instrument one repository agent with structured run events.",
           "Use a trace to diagnose a deliberately injected failure."
@@ -830,12 +830,12 @@ export const curriculum: CurriculumPhase[] = [
         "4 hours",
         "Concept + Build",
         "Estimate per-run cost and use caching, context reduction, batching, or model routing deliberately.",
-        "Agent loops can multiply model and tool usage, turning a cheap prototype into an unpredictable service.",
+        "Agent loops can multiply model and tool usage, turning a low-cost prototype into an unpredictable service.",
         "Track input, cached-input, and output tokens per call and aggregate them by workflow. Cache only when inputs and permissions make reuse safe. Route simple, low-risk tasks to smaller models and reserve stronger models for cases where evaluations show a benefit.",
         "A high-volume intent classifier uses a small model; only uncertain cases reach the expensive reasoning model.",
         [
           "Add a per-run cost estimate and a budget warning.",
-          "Evaluate one cheaper routing or caching change against quality and latency."
+          "Evaluate one lower-cost routing or caching change against quality and latency."
         ],
         "A cost model and a quality-checked optimization.",
         ["token accounting", "caching", "model routing", "batching", "cost budget"]
@@ -916,7 +916,7 @@ export const curriculum: CurriculumPhase[] = [
     summary:
       "Combine the roadmap into a portfolio-safe customer operations system built with synthetic data and generic business rules.",
     prerequisite: "Core phases 01–08. Voice and deep-research extensions are optional.",
-    outcome: "You finish with an interview-ready system that demonstrates architecture, reliability, safety, and operating judgment.",
+    outcome: "You complete a portfolio system supported by architecture, reliability, safety, and operational evidence.",
     accent: "coral",
     lessons: [
       lesson(
@@ -978,7 +978,7 @@ export const curriculum: CurriculumPhase[] = [
         "10–16 hours",
         "Capstone",
         "Prove the system works, explain its limits, and package it as a portfolio project.",
-        "Interviewers learn more from measured tradeoffs and known failure modes than from an unverified feature list.",
+        "A technical review is more credible when it presents measured tradeoffs and documented failure modes.",
         "Create an evaluation set spanning routing, retrieval, SQL, tool choice, safety, and refusal. Trace every run, calculate latency and cost, and test prompt injection plus permission boundaries. Package a repeatable demo, architecture diagram, README, and short walkthrough using only synthetic data.",
         "The final report shows 90% routing accuracy, citation failures by category, p95 latency, estimated run cost, and the exact cases still routed to humans.",
         [
@@ -986,7 +986,7 @@ export const curriculum: CurriculumPhase[] = [
           "Add traces, cost accounting, security tests, and a load baseline.",
           "Record a five-minute demo explaining one success, one failure, and one tradeoff."
         ],
-        "An interview-ready capstone with evidence, documentation, and a safe public demo.",
+        "A portfolio-ready capstone with evidence, documentation, and a safe public demonstration.",
         ["evaluation", "observability", "security", "deployment", "portfolio"]
       )
     ]
@@ -1022,4 +1022,5 @@ export function getAdjacentLessons(slug: string) {
   };
 }
 
-export const totalHours = curriculum.reduce((sum, phase) => sum + phase.hours, 0);
+export const totalHours =
+  Math.round(curriculum.reduce((sum, phase) => sum + phase.hours, 0) / 5) * 5;

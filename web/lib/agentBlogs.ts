@@ -16,10 +16,10 @@ export type AgentBlog = {
 
 export const agentBlogs = {
   "semantic-search": {
-    headline: "Semantic search is the foundation of practical AI retrieval.",
+    headline: "Semantic search retrieves documents by meaning.",
     intro: [
       "Semantic search lets an application search by meaning instead of exact keywords. The document is split into chunks, each chunk is converted into an embedding vector, and a vector store finds chunks that are close to the user's question.",
-      "This is usually the first hands-on retrieval system an agentic engineer should build. It teaches the core mechanics behind RAG without adding the complexity of tool-calling or multi-step agent loops."
+      "This implementation introduces the core mechanics behind RAG before adding tool calling or multi-step agent workflows."
     ],
     deepDive: [
       "Traditional search depends heavily on matching words. Semantic search works with meaning, so a question and a document can match even when they use different vocabulary.",
@@ -28,10 +28,10 @@ export const agentBlogs = {
       "Chunk size and overlap matter. Small chunks can be precise but lose context, while large chunks preserve context but may retrieve noisy text.",
       "Embeddings convert text into vectors. Similar ideas should land close together in vector space, which makes similarity search possible.",
       "A vector store saves those vectors and lets the application ask, 'Which chunks are closest to this query vector?'",
-      "In this lab the vector store is in memory, so it is perfect for learning but disappears when the script exits.",
+      "The lab uses an in-memory vector store, which keeps the implementation simple but does not persist data after the script exits.",
       "The embedding model is local by default, which avoids hosted embedding cost and helps engineers understand the full retrieval pipeline.",
       "Semantic search does not generate an answer. It retrieves evidence that another layer, such as a RAG chain or agent, can use.",
-      "This is the base skill for almost every knowledge assistant, documentation bot, and enterprise AI search system."
+      "These retrieval concepts support knowledge assistants, documentation systems, and enterprise search applications."
     ],
     simpleExample:
       "If a user asks, 'What risks did Nike mention in the annual report?', the system does not search only for the word risks. It embeds the question, compares it against embedded PDF chunks, and returns passages that are semantically related to risk disclosures.",
@@ -41,14 +41,14 @@ export const agentBlogs = {
       "Developer search across architecture notes, runbooks, and incident reports."
     ],
     pros: [
-      "No LLM call is required for retrieval, so it can be cheap and fast after embeddings exist.",
+      "No LLM call is required for retrieval, so query execution can be low cost and fast after embeddings exist.",
       "Retrieved chunks are easy to inspect, which makes debugging simpler.",
       "It creates the reusable retrieval layer for later RAG and agent systems."
     ],
     cons: [
-      "It returns relevant passages, not a polished final answer.",
+      "It returns relevant passages and requires a separate generation layer for a synthesized answer.",
       "Quality depends heavily on chunk size, overlap, embedding model, and source document quality.",
-      "An in-memory vector store is great for learning but not persistent enough for production."
+      "An in-memory vector store does not provide the persistence required for production."
     ],
     technologies: [
       "LangChain document loaders",
@@ -66,7 +66,7 @@ export const agentBlogs = {
       "Learn semantic search first because it gives you the mental model for documents, chunks, embeddings, vector stores, and retrieval quality."
   },
   "rag-chain": {
-    headline: "A RAG chain is the simplest reliable path from documents to answers.",
+    headline: "A RAG chain follows a deterministic retrieval and generation sequence.",
     intro: [
       "A RAG chain follows a deterministic sequence: retrieve relevant context, place that context into the model input, and ask the model to answer from the retrieved information.",
       "Unlike an agent, the model does not decide whether retrieval is needed. The application decides retrieval is mandatory, which makes the system easier to reason about."
@@ -81,7 +81,7 @@ export const agentBlogs = {
       "The model then answers from the supplied context and should say it does not know when context is insufficient.",
       "The main advantage is predictability. You can log the exact retrieved context and the exact model input.",
       "The main limitation is flexibility. The chain retrieves even for questions that may not need retrieval.",
-      "This pattern is common in production because it is cheaper, easier to test, and easier to debug than a free-form agent loop."
+      "This pattern is common in production because it has lower operating costs and is easier to test and debug than a free-form agent loop."
     ],
     simpleExample:
       "For a question like 'What does this blog say about task decomposition?', the chain retrieves matching chunks first, builds a prompt with those chunks, and makes one model call to generate the answer.",
@@ -93,7 +93,7 @@ export const agentBlogs = {
     pros: [
       "Usually fewer LLM calls than an agentic RAG loop.",
       "Simple to debug because retrieval always happens before generation.",
-      "Good fit when every question should use the same knowledge source."
+      "Appropriate when every question should use the same knowledge source."
     ],
     cons: [
       "It may retrieve even when the user asks a question that does not need retrieval.",
@@ -119,7 +119,7 @@ export const agentBlogs = {
     headline: "A RAG agent turns retrieval into a model-controlled tool.",
     intro: [
       "In an agentic RAG system, retrieval is exposed as a tool. The model reads the user request, decides whether it needs external context, calls the retriever if needed, then uses the returned context to answer.",
-      "This is closer to how real assistants behave: they do not always search, but they can search when the task needs facts from a private or external source."
+      "This design supports assistants that combine direct responses with selective searches of private or external sources."
     ],
     deepDive: [
       "A RAG agent is different from a RAG chain because retrieval becomes optional and model-controlled.",
@@ -218,13 +218,13 @@ export const agentBlogs = {
       }
     ],
     takeaway:
-      "Use LangGraph RAG when you want an inspectable retrieval workflow instead of a black-box agent loop."
+      "Use LangGraph RAG when the retrieval workflow requires explicit state, inspectable decisions, and controlled recovery paths."
   },
   "sql-agent": {
-    headline: "A SQL agent lets a model ask questions of a database safely.",
+    headline: "A SQL agent translates natural-language questions into controlled database queries.",
     intro: [
       "A SQL agent converts a natural-language question into a database workflow. It can list tables, inspect schema, draft a query, check the query, execute it, and explain the result.",
-      "The important engineering lesson is not just SQL generation. It is how to put guardrails around a model that can touch data."
+      "The primary engineering requirement is controlled database access through schema inspection, query validation, permissions, and execution limits."
     ],
     deepDive: [
       "A SQL agent connects natural language to structured data, but the model should not blindly write and run arbitrary SQL.",
@@ -286,11 +286,11 @@ export const agentBlogs = {
       "This is a major difference between orchestration and simple prompting. The graph becomes the system boundary.",
       "Recursion limits protect the workflow from accidental loops.",
       "Max-token limits protect the workflow from responses that are cut off or too expensive.",
-      "This style is valuable when a company wants natural-language analytics but cannot accept unbounded agent behavior.",
-      "It is less magical than a general agent, but more trustworthy for data workflows."
+      "This design is appropriate when an organization needs natural-language analytics with bounded execution behavior.",
+      "The explicit workflow improves auditability and control for data access."
     ],
     simpleExample:
-      "Instead of letting the model repeatedly call SQL tools until it feels done, the graph guides the model through a bounded path and uses recursion limits and max-token settings to prevent runaway behavior.",
+      "The graph guides the model through a bounded sequence and uses recursion and token limits to prevent uncontrolled execution.",
     realWorldUseCases: [
       "Analytics copilots with strict execution policies.",
       "Internal dashboards where SQL generation must be audited.",
@@ -327,18 +327,18 @@ export const agentBlogs = {
       "Use a graph-based SQL workflow when reliability and inspectability matter more than maximum agent flexibility."
   },
   "arithmetic-tool-agent": {
-    headline: "The arithmetic tool agent teaches the basic mechanics of tool calling.",
+    headline: "The arithmetic tool agent demonstrates the mechanics of tool calling.",
     intro: [
-      "This small agent is intentionally simple. It gives the model arithmetic tools and shows how the model asks for a tool call, how the application executes the tool, and how the result returns as a tool message.",
-      "Because the domain is tiny, it is easier to focus on the agent loop instead of getting distracted by external APIs."
+      "This focused agent gives the model arithmetic tools and shows how the model requests a tool call, how the application executes it, and how the result returns as a tool message.",
+      "The narrow domain isolates the agent loop from external API and business-domain complexity."
     ],
     deepDive: [
-      "Tool calling is one of the most important agentic engineering concepts because it lets a model ask software to do something.",
+      "Tool calling allows a model to request a controlled action from application code.",
       "A tool has a name, description, and input schema. The model uses that schema to decide how to call it.",
       "The model does not execute the tool by itself. It emits a structured tool call, and the application runs the function.",
       "The function result comes back as a tool message, which becomes part of the conversation history.",
       "The model then reads the tool result and produces the final answer.",
-      "Arithmetic is intentionally boring here, and that is the point. It removes business complexity so the message loop is visible.",
+      "Arithmetic removes business-domain complexity and makes the message loop easier to inspect.",
       "This example helps beginners understand why one user request can create multiple model calls.",
       "It also shows why local models and hosted models can behave differently with tool schemas.",
       "In real applications, the same pattern powers calendar tools, database tools, search tools, email tools, and API actions.",
@@ -352,12 +352,12 @@ export const agentBlogs = {
       "Prototyping tool loops before connecting real business tools."
     ],
     pros: [
-      "Very easy to inspect and understand.",
+      "The narrow scope makes the message sequence straightforward to inspect.",
       "No external dependencies or paid APIs are required.",
-      "Great for learning why multiple LLM calls can happen in one agent run."
+      "Demonstrates why one agent run may require multiple model calls."
     ],
     cons: [
-      "The task is intentionally simple and not a production use case by itself.",
+      "The narrow task demonstrates the protocol but does not represent a production domain.",
       "It does not cover tool authorization, API failures, or long-running side effects.",
       "Some models may solve the math directly instead of calling the tool."
     ],
@@ -374,19 +374,19 @@ export const agentBlogs = {
       }
     ],
     takeaway:
-      "Start here if tool calling feels confusing. The same loop powers much more serious agents."
+      "Use this lab to understand the message sequence that supports more complex tool-using agents."
   },
   "weather-tool-graph": {
-    headline: "The weather tool graph shows safe tool-backed graph execution.",
+    headline: "The weather tool graph demonstrates simulated tool execution.",
     intro: [
       "This example uses a simple weather-style tool to demonstrate how a graph can route a user request through a tool call and final response.",
       "The weather result is simulated, which keeps the learning focused on graph execution rather than API keys, rate limits, or third-party reliability."
     ],
     deepDive: [
-      "The weather graph is a safe version of a real API-backed assistant.",
+      "The weather graph uses a simulated alternative to a live API-backed assistant.",
       "It teaches the same shape as production tools without requiring a live weather provider.",
       "The model receives the user request and can decide to call the weather tool.",
-      "The tool returns a simulated result, which keeps the demo deterministic and cheap.",
+      "The tool returns a simulated result, which keeps the demonstration deterministic and low cost.",
       "The final model response should be based on the tool result, not invented from prior knowledge.",
       "This pattern is useful because many production agents start with mocked tools before real integrations are added.",
       "A graph wrapper makes the tool path explicit and inspectable.",
@@ -402,14 +402,14 @@ export const agentBlogs = {
       "Building safe demos where side effects and external dependencies are removed."
     ],
     pros: [
-      "Safe and cheap because the tool is stubbed.",
+      "The stubbed tool avoids external side effects and service costs.",
       "Makes graph and tool flow visible.",
       "Easy to replace later with a real API adapter."
     ],
     cons: [
       "A simulated weather tool does not prove production API reliability.",
       "Real tools need retries, validation, auth, and monitoring.",
-      "The example is intentionally narrow."
+      "The scope is limited to one tool-execution path."
     ],
     technologies: [
       "LangGraph",
@@ -428,16 +428,16 @@ export const agentBlogs = {
       }
     ],
     takeaway:
-      "Stubbed tools are a smart way to learn and test agent flow before paying for or depending on real APIs."
+      "Use stubbed tools to validate agent control flow before introducing live APIs and external dependencies."
   },
   "voice-agent": {
-    headline: "A voice agent is a streaming sandwich around a text agent.",
+    headline: "A voice agent connects streaming audio input and output to a text-based agent.",
     intro: [
       "Most voice agents can be understood as three stages: speech-to-text, text agent reasoning, and text-to-speech.",
-      "The hard part is not only transcription or audio generation. It is streaming the stages cleanly so users feel the assistant is responsive."
+      "The principal engineering challenge is coordinating these stages with sufficiently low latency for a responsive interaction."
     ],
     deepDive: [
-      "A voice agent is not a completely different kind of agent. It is usually a text agent wrapped with audio input and audio output.",
+      "A voice agent commonly reuses a text-based agent and adds audio input and output layers.",
       "The first stage is speech-to-text, where audio bytes become text the language model can understand.",
       "The second stage is the agent step, where the text request can trigger reasoning, tool calls, retrieval, or workflow execution.",
       "The third stage is text-to-speech, where the final or partial text response becomes audio for the user.",
@@ -446,7 +446,7 @@ export const agentBlogs = {
       "The mock mode in this lab removes microphone and audio-provider complexity so the architecture is easier to learn.",
       "Real voice systems add interruption handling, turn detection, latency tuning, audio codecs, and privacy controls.",
       "The same text agent can often be reused across chat and voice interfaces if the I/O layer is designed cleanly.",
-      "Voice is best learned after tool calling and streaming are understood, because it combines both concepts."
+      "The curriculum places voice after tool calling and streaming because the implementation combines both concepts."
     ],
     simpleExample:
       "The demo can run in mock mode: fake audio becomes text, the LangChain agent responds, and the response is streamed as simulated audio chunks.",
@@ -546,7 +546,7 @@ export const agentBlogs = {
       "The warranty step can collect account or device information before the issue-classification step runs.",
       "The classifier can decide whether the case is hardware, billing, warranty, or general troubleshooting.",
       "The resolution specialist can then respond using the correct policy path.",
-      "This approach is more reliable than one giant prompt because each stage has a smaller job.",
+      "This approach assigns a bounded responsibility to each stage, which improves control and testability.",
       "Production support agents would also need policy retrieval, escalation rules, customer identity checks, and conversation auditing."
     ],
     simpleExample:
@@ -558,7 +558,7 @@ export const agentBlogs = {
     ],
     pros: [
       "State makes the workflow easier to reason about.",
-      "Handoffs reduce the chance that one giant prompt handles every scenario poorly.",
+      "Handoffs give each stage a defined scope and policy boundary.",
       "Checkpointing makes multi-turn flows easier to resume."
     ],
     cons: [
@@ -583,7 +583,7 @@ export const agentBlogs = {
       "Use handoffs when the conversation has stages and each stage needs its own policy, tools, or completion criteria."
   },
   "knowledge-base-router": {
-    headline: "A knowledge-base router sends questions to the right source.",
+    headline: "A knowledge-base router selects relevant information sources.",
     intro: [
       "Modern teams store knowledge across many systems: GitHub, Notion, Slack, docs, tickets, and databases. A router agent decides which sources are relevant and sends the query to the right specialist.",
       "This pattern is important because not every question should search every system."
@@ -682,10 +682,10 @@ export const agentBlogs = {
       }
     ],
     takeaway:
-      "Skills are a practical answer to context overload: show the model a menu first, then load the full recipe only when needed."
+      "Skills reduce context load by presenting compact capability descriptions and loading detailed instructions only when required."
   },
   "deep-research-agent": {
-    headline: "Deep Agents provide a higher-level harness for complex work.",
+    headline: "Deep Agents provide a structured harness for multi-step research.",
     intro: [
       "Deep Agents are designed for tasks that need planning, research, file operations, and possible delegation to subagents.",
       "This demo follows the Deep Agents research pattern: connect a search tool, define instructions, and let the harness manage a more capable research workflow."
@@ -693,26 +693,26 @@ export const agentBlogs = {
     deepDive: [
       "Deep Agents are meant for tasks that feel more like projects than single chat answers.",
       "A normal agent may call a tool and answer. A deep agent may plan, search, write intermediate notes, use files, and delegate subtasks.",
-      "The key idea is that complex work needs structure around the model, not just a longer prompt.",
+      "Complex research requires planning, tool coordination, intermediate artifacts, and explicit completion criteria.",
       "This lab uses Tavily search so the research agent can gather current external information.",
       "The agent instructions define the research behavior and tell the system how to use the search tool.",
       "The harness can support planning and file-system style workflows, which are useful for longer research tasks.",
       "This is different from RAG because the source of knowledge is not only a pre-indexed local vector store.",
       "It is also different from a basic tool agent because the task may involve multiple steps and intermediate artifacts.",
       "Costs and latency can be higher because research work often requires several model and search calls.",
-      "Use this pattern when the user wants a researched deliverable, not just a quick answer."
+      "Use this pattern when the required output depends on multi-step research and source synthesis."
     ],
     simpleExample:
-      "A user asks for research on a technical topic. The agent searches the web through Tavily, reasons over the results, and produces a more complete research-style answer.",
+      "For a technical research request, the agent searches through Tavily, evaluates the results, and produces a sourced research summary.",
     realWorldUseCases: [
       "Research assistants that gather and synthesize current information.",
       "Competitive analysis and market research workflows.",
       "Longer-running tasks that need planning and intermediate artifacts."
     ],
     pros: [
-      "Provides a more capable starting point for complex agent behavior.",
+      "Provides planning, search, file, and delegation capabilities for complex workflows.",
       "Can combine search, planning, files, and subagents.",
-      "Good fit for research tasks that are too broad for one simple tool call."
+      "Appropriate for research tasks that require multiple searches, source comparison, or intermediate artifacts."
     ],
     cons: [
       "Requires external services like Tavily for live search.",
@@ -737,13 +737,13 @@ export const agentBlogs = {
       }
     ],
     takeaway:
-      "Use Deep Agents when the task looks like a project, not just a single answer."
+      "Use Deep Agents for research tasks that require planning, multiple tool calls, intermediate artifacts, or delegated subtasks."
   },
   "langgraph-state-machine": {
-    headline: "LangGraph state machines teach the control-flow primitives behind agents.",
+    headline: "LangGraph state machines expose the control-flow primitives used by agents.",
     intro: [
       "Before building large graph agents, it helps to learn the primitives: state, nodes, edges, reducers, conditional routing, checkpoints, interrupts, subgraphs, and streaming.",
-      "This file is the concept gym for the rest of the repository."
+      "This implementation isolates the control-flow primitives used by the repository's larger workflows."
     ],
     deepDive: [
       "LangGraph is a framework for building agent workflows as explicit graphs instead of hidden loops.",
@@ -768,7 +768,7 @@ export const agentBlogs = {
     ],
     pros: [
       "Makes control flow explicit and inspectable.",
-      "Great for learning reducers, routing, interrupts, and subgraphs in isolation.",
+      "Demonstrates reducers, routing, interrupts, and subgraphs in isolation.",
       "The same concepts scale into production workflows."
     ],
     cons: [
@@ -794,6 +794,6 @@ export const agentBlogs = {
       }
     ],
     takeaway:
-      "If agents are systems, LangGraph teaches you how to draw and execute the system map."
+      "LangGraph provides explicit structures for implementing and executing stateful agent workflows."
   }
 } satisfies Record<string, AgentBlog>;

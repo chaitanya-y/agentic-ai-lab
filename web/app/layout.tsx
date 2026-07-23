@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     "A 150–200 hour, project-first roadmap for software engineers transitioning into agentic engineering.",
   openGraph: {
     title: "Agentic AI engineering Lab for software engineers",
-    description: "A practical roadmap from software engineering to production-minded agentic engineering.",
+    description: "A practical roadmap from software engineering to production agent engineering.",
     images: [
       {
         url: "/og.png",

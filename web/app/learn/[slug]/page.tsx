@@ -71,10 +71,10 @@ export default async function LessonPage({ params }: LessonPageProps) {
         <aside className="lesson-aside">
           <p>In this lesson</p>
           <a href="#problem">Why it matters</a>
-          <a href="#concept">Simple explanation</a>
-          <a href="#example">Real-world example</a>
-          <a href="#build">Build it</a>
-          <a href="#outcome">Finish line</a>
+          <a href="#concept">Concept explanation</a>
+          <a href="#example">Application example</a>
+          <a href="#build">Practical exercise</a>
+          <a href="#outcome">Expected output</a>
           {linkedLab ? <a href="#lab">Runnable lab</a> : null}
           <div className="tag-list">
             {item.concepts.map((concept) => (
@@ -92,18 +92,18 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
           <section id="concept">
             <p className="section-label">The concept</p>
-            <h2>A simple way to understand it</h2>
+            <h2>Concept explanation</h2>
             <p>{item.explanation}</p>
           </section>
 
           <section className="example-callout" id="example">
-            <p className="section-label">Real-world example</p>
+            <p className="section-label">Application example</p>
             <p>{item.example}</p>
           </section>
 
           <section id="build">
             <p className="section-label">Practice</p>
-            <h2>Build it</h2>
+            <h2>Practical exercise</h2>
             <ol className="practice-list">
               {item.practice.map((step) => (
                 <li key={step}>{step}</li>
@@ -125,8 +125,8 @@ export default async function LessonPage({ params }: LessonPageProps) {
           ) : null}
 
           <section className="finish-line" id="outcome">
-            <p className="section-label">Definition of done</p>
-            <h2>Finish with evidence</h2>
+            <p className="section-label">Completion criteria</p>
+            <h2>Expected output</h2>
             <p>{item.outcome}</p>
           </section>
         </article>

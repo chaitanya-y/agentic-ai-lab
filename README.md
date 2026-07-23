@@ -1,33 +1,93 @@
-# Agentic AI Lab
+# Agentic AI Engineering Lab for Software Engineers
 
-A focused AI engineering portfolio demonstrating retrieval systems, agentic tool
-use, graph orchestration, local embeddings, and safe model execution patterns.
+Agentic AI Lab is an applied learning project for software engineers who want to
+design, build, evaluate, and operate reliable agent systems.
 
-The implementations use LangChain and LangGraph where they are useful, but the
-repo is organized around engineering capabilities: retrieval, orchestration,
-tooling, state, and operational safety.
+The repository combines a structured curriculum with runnable implementations of
+retrieval, tool use, MCP, workflow orchestration, multi-agent coordination,
+evaluation, security, and production operations.
 
-## Highlights
+## About the Project
 
-- End-to-end semantic search over documents with chunking, embeddings, and vector search
-- RAG agent that exposes retrieval as a tool and lets the model decide when to search
-- RAG chain that retrieves deterministically before generation for lower latency and easier debugging
-- SQL agent over the Chinook sample database with query checking and optional human review
-- Multi-agent supervisor pattern with calendar and email specialist subagents
-- Deep Agents research harness with planning, file-system, and delegation-ready capabilities
-- Next.js portfolio UI for browsing every implemented agent with GitHub source links
-- Docs-aligned voice-agent sandwich pipeline with STT, LangChain agent, and TTS stages
-- Tool-calling agents with explicit control flow and model/tool message inspection
-- LangGraph state-machine examples covering reducers, routing, checkpoints, interrupts, subgraphs, and streaming
-- Local Qwen chat and embedding models with hosted OpenAI alternatives gated behind explicit opt-in
-- Guardrails for secrets, local data, model caches, and paid API calls
+Software engineers entering agentic engineering need more than experience with
+model APIs. They need to understand how context is assembled, how evidence is
+retrieved, how tools are controlled, how workflow state is managed, and how
+quality, safety, latency, and cost are measured in production.
 
-## Explore The Portfolio UI
+Agentic AI Lab organizes these capabilities into a prerequisite-aware roadmap.
+Each phase connects a technical concept to implementation, failure analysis, and
+measurable evaluation.
 
-The fastest way to review this project is through the Next.js portfolio app. It
-groups every implemented agent by category, explains the architecture and
-concepts behind each system, and links directly to the relevant GitHub source
-file.
+The initial curriculum focuses on skills used in agentic engineering roles.
+Advanced AI/ML subjects such as model training, fine-tuning, classical machine
+learning, and deeper mathematics are planned as later extensions.
+
+## Intended Audience
+
+This project is designed for software engineers who are comfortable with:
+
+- Python and backend application development
+- APIs, JSON, and database queries
+- Testing, debugging, and version control
+- Basic cloud or service deployment concepts
+
+Engineers who already have these foundations can focus on the model-specific
+trust boundaries and system-design decisions introduced throughout the roadmap.
+
+## Learning Outcomes
+
+After completing the core roadmap, you should be able to:
+
+- Explain the model, context, and reliability limits that affect an application.
+- Build and evaluate semantic search, deterministic RAG, and agentic RAG.
+- Design tool-calling and MCP integrations with explicit permissions and validation.
+- Implement stateful workflows with routing, memory, checkpoints, and human review.
+- Determine when a multi-agent architecture is appropriate.
+- Evaluate agent behavior using datasets, traces, failure categories, and release gates.
+- Apply security, privacy, observability, latency, and cost controls.
+- Present a production-oriented capstone with documented engineering evidence.
+
+## Roadmap
+
+The curriculum contains 49 lessons across nine phases:
+
+| Phase | Topic | Estimated time |
+| --- | --- | ---: |
+| 01 | Practical LLM Foundations | 5–7 hours |
+| 02 | Reliable LLM Applications | 8–10 hours |
+| 03 | Retrieval and Production RAG | 18–24 hours |
+| 04 | Tools, Actions, and MCP | 16–20 hours |
+| 05 | Agent Foundations and Workflow Patterns | 12–16 hours |
+| 06 | Stateful Workflows with LangGraph | 18–24 hours |
+| 07 | Multi-Agent Systems | 10–14 hours |
+| 08 | Production Agent Engineering | 20–28 hours |
+| 09 | Customer Operations Lite Capstone | 35–50 hours |
+
+The written curriculum represents approximately 175 guided hours. A realistic
+completion estimate for a software engineer is 150–200 total hours, depending on
+prior experience and the amount of time spent repeating exercises, debugging,
+running evaluations, and documenting the capstone.
+
+| Study schedule | Weekly commitment | Expected duration |
+| --- | ---: | ---: |
+| Steady | 8 hours | 5–6 months |
+| Focused | 12 hours | 3.5–4.5 months |
+| Intensive | 20 hours | 9–11 weeks |
+
+## Learning Methodology
+
+Each topic follows a consistent engineering workflow:
+
+1. **Understand** — Learn the concept and the design problem it addresses.
+2. **Build** — Implement the smallest useful version with inspectable behavior.
+3. **Test** — Introduce realistic failure conditions and identify system boundaries.
+4. **Evaluate** — Measure quality, safety, latency, cost, and operational behavior.
+5. **Document** — Record the architecture, tradeoffs, results, and remaining limitations.
+
+## Explore the Learning App
+
+The Next.js application provides the complete curriculum, roadmap, glossary, and
+implementation catalog.
 
 ```bash
 cd web
@@ -35,179 +95,124 @@ npm install
 npm run dev
 ```
 
-Open:
+Open [http://localhost:3000](http://localhost:3000).
 
-```text
-http://localhost:3000
-```
+The application includes:
 
-## Recommended Review Path
+- A searchable lesson catalog
+- Prerequisites and time estimates for every phase
+- Plain-language explanations and application examples
+- Practical exercises and expected outputs
+- Detailed pages for each runnable implementation
+- Direct links between lessons and relevant source code
 
-For a quick technical review of the repository:
+## Implementation Labs
 
-1. Start with the portfolio UI to understand the agent catalog and system map.
-2. Review `src/agents/model_config.py` and `src/utils/` to see model selection,
-   paid-call gating, shared output helpers, and token/cost accounting.
-3. Inspect `src/retrieval/semantic_search.py`, then compare
-   `src/agents/rag_chain.py` with `src/agents/rag_agent.py` to see deterministic
-   RAG versus agentic RAG.
-4. Move to `src/workflows/` for explicit LangGraph control flow, including
-   custom RAG and SQL workflows.
-5. Finish with `src/multi_agent/` and `src/deep_agents/` for supervisor,
-   handoff, routing, skill-loading, and Deep Agents patterns.
+The repository currently includes 15 runnable examples covering the main system
+patterns in the curriculum.
 
-## Architecture Coverage
-
-| Area | What It Demonstrates | Module |
-| --- | --- | --- |
-| Retrieval | PDF loading, chunking, local embeddings, vector search | `src/retrieval/semantic_search.py` |
-| Agentic RAG | Retrieval as a tool, multi-step tool use, grounded answers | `src/agents/rag_agent.py` |
-| RAG Chain | Middleware-driven retrieval before a single model call | `src/agents/rag_chain.py` |
-| LangGraph RAG | Custom retrieval agent with grading, query rewriting, and graph routing | `src/workflows/langgraph_rag_agent.py` |
-| SQL Agent | Schema inspection, query checking, read-only execution, human review | `src/agents/sql_agent.py` |
-| LangGraph SQL | Custom SQL graph with explicit query generation, checking, execution, and final answer loop | `src/workflows/langgraph_sql_agent.py` |
-| Multi-Agent | Subagents, handoffs, specialist routing, safe delegated tool execution | `src/multi_agent/` |
-| Deep Agents | Agent harness with planning, virtual filesystem, context management, and subagent-ready execution | `src/deep_agents/` |
-| Voice Agent | STT -> LangChain agent -> TTS sandwich pipeline with async streaming stages | `src/agents/voice_agent.py` |
-| Tool Agents | Tool schemas, tool execution loops, final response routing | `src/agents/arithmetic_tool_agent.py` |
-| Graph Workflows | State, reducers, conditional routing, checkpoints, interrupts | `src/orchestration/langgraph_state_machine.py` |
-| Model Operations | Local/hosted model selection, token accounting, cost estimates, shared demo output helpers | `src/agents/model_config.py`, `src/utils/` |
-| Portfolio UI | Next.js dashboard for explaining and linking to each agent implementation | `web/` |
+| Area | Implementation |
+| --- | --- |
+| Semantic retrieval | PDF loading, chunking, embeddings, and vector similarity search |
+| Deterministic RAG | Retrieval before generation with explicit context assembly |
+| Agentic RAG | Retrieval exposed as a tool with model-directed tool selection |
+| LangGraph RAG | Retrieval grading, query rewriting, routing, and grounded generation |
+| SQL agents | Schema inspection, query validation, read-only execution, and human review |
+| Tool-calling agents | Tool schemas, execution loops, validation, and result routing |
+| Stateful workflows | Reducers, conditional routing, checkpoints, interrupts, and streaming |
+| Multi-agent systems | Supervisors, specialist routing, handoffs, and parallel delegation |
+| Context skills | On-demand domain context using progressive disclosure |
+| Voice agents | Speech-to-text, agent processing, and text-to-speech stages |
+| Deep Agents | Planning, research, context management, and delegation-ready execution |
 
 ## Repository Structure
 
 ```text
-src/
-  utils/
-    token_usage.py                  # Token accounting and OpenAI cost estimates
-    demo_io.py                      # Shared console-output helpers for demos
-
-  retrieval/
-    semantic_search.py              # PDF retrieval pipeline with local embeddings
-
-  orchestration/
-    langgraph_state_machine.py      # LangGraph state and control-flow patterns
-
-  workflows/
-    langgraph_rag_agent.py          # Custom LangGraph agentic RAG workflow
-    langgraph_sql_agent.py          # Custom LangGraph SQL workflow
-
-  multi_agent/
-    personal_assistant.py           # Supervisor with calendar and email subagents
-    customer_support_handoffs.py    # Customer support state-machine handoffs
-    knowledge_base_router.py        # Multi-source GitHub/Notion/Slack router
-    skills_sql_assistant.py         # On-demand SQL skills and progressive disclosure
-
-  deep_agents/
-    research_agent.py               # Deep Agents research harness quickstart
-
-  agents/
-    model_config.py                 # Shared local Qwen / hosted OpenAI model selection
-    rag_agent.py                    # Agentic RAG over Lilian Weng's agents blog post
-    rag_chain.py                    # Deterministic RAG chain with retrieval middleware
-    sql_agent.py                    # SQL agent over the Chinook SQLite database
-    voice_agent.py                  # Voice-agent sandwich pipeline
-    arithmetic_tool_agent.py        # Explicit tool-calling agent loop
-    weather_tool_graph.py           # Tool-backed graph workflow
-
-docs/
-  langgraph_orchestration_notes.md  # Notes on graph orchestration concepts
-  publishing.md                     # Public repo checklist
-  session_context.md                # Sanitized project/session context notes
-
-data/
-  README.md                         # Sample data instructions
-
-web/
-  app/                              # Next.js app router pages
-  lib/agents.ts                     # Agent catalog and GitHub source links
+agentic-ai-lab/
+├── src/
+│   ├── agents/          # RAG, SQL, voice, weather, and tool-calling agents
+│   ├── retrieval/       # Semantic-search implementation
+│   ├── orchestration/   # LangGraph state and control-flow examples
+│   ├── workflows/       # Custom LangGraph RAG and SQL workflows
+│   ├── multi_agent/     # Supervisors, routers, handoffs, and skills
+│   ├── deep_agents/     # Research-agent harness
+│   └── utils/           # Shared output and token-usage utilities
+├── web/
+│   ├── app/             # Next.js pages and interface components
+│   └── lib/             # Curriculum, glossary, and lab content
+├── data/                # Instructions for local sample data
+├── docs/                # Project and publishing documentation
+└── .env.example         # Environment configuration reference
 ```
 
-Local scratch work lives in `sandbox/` and is ignored by Git. Large local data
-files, model caches, virtual environments, and secrets are not committed.
+## Python Setup
 
-## Setup
-
-This project uses [`uv`](https://docs.astral.sh/uv/) for reproducible Python
-dependency management.
+The Python examples require Python 3.12 or later and use
+[`uv`](https://docs.astral.sh/uv/) for dependency management.
 
 ```bash
 uv sync
 cp .env.example .env
 ```
 
-Local chat demos use Qwen through Ollama by default:
+Local model examples use Qwen through Ollama:
 
 ```bash
 ollama pull qwen3:14b
 ```
 
-Never commit `.env`.
-If an API key is accidentally pasted into chat, logs, or a public issue, rotate
-that key in the provider console even if `.env` is ignored by Git.
-
-## Embedding Strategy
-
-The active embedding path uses a local Hugging Face model:
-
-```text
-Qwen/Qwen3-Embedding-0.6B
-```
-
-This avoids hosted embedding API costs. The first run downloads model weights to
-the Hugging Face cache; later runs reuse the local cache. The code also shows a
-commented `OpenAIEmbeddings` option for comparison when a hosted embedding model
-is preferred.
-
-## Running The Systems
-
-### Semantic Search
-
-Download the sample PDF described in [data/README.md](data/README.md), then run:
-
-```bash
-uv run python src/retrieval/semantic_search.py
-```
-
-By default, the pipeline embeds only the first `20` chunks to keep local runs
-laptop-friendly. To index the full PDF:
-
-```bash
-MAX_CHUNKS=0 uv run python src/retrieval/semantic_search.py
-```
-
-### RAG Agent
-
-The RAG agent follows the LangChain RAG tutorial pattern: load a public blog
-post, split it into chunks, index it, expose retrieval as a tool, and let the
-model decide when to search.
+Run an example with the local model:
 
 ```bash
 MODEL_PROVIDER=qwen uv run python src/agents/rag_agent.py
 ```
 
-Debug retrieval and model messages:
+Hosted OpenAI execution requires explicit opt-in:
 
 ```bash
-SHOW_RETRIEVED_CONTEXT=true SHOW_AGENT_MESSAGES=true MODEL_PROVIDER=qwen uv run python src/agents/rag_agent.py
+MODEL_PROVIDER=openai \
+ALLOW_PAID_API_CALLS=true \
+uv run python src/agents/rag_agent.py
 ```
 
-### RAG Chain
+This requirement reduces the risk of accidental paid API calls.
 
-The RAG chain retrieves first in middleware, injects context into the model input,
-and calls the model once.
+## Selected Commands
+
+### Semantic Search
+
+Follow the sample-document instructions in
+[`data/README.md`](data/README.md), then run:
+
+```bash
+uv run python src/retrieval/semantic_search.py
+```
+
+### Deterministic and Agentic RAG
 
 ```bash
 MODEL_PROVIDER=qwen uv run python src/agents/rag_chain.py
+MODEL_PROVIDER=qwen uv run python src/agents/rag_agent.py
+MODEL_PROVIDER=qwen uv run python src/workflows/langgraph_rag_agent.py
 ```
 
-Inspect the exact context-injected model input:
+### SQL Agents
 
 ```bash
-SHOW_FINAL_MODEL_INPUT=true MODEL_PROVIDER=qwen uv run python src/agents/rag_chain.py
+MODEL_PROVIDER=qwen uv run python src/agents/sql_agent.py
+MODEL_PROVIDER=qwen uv run python src/workflows/langgraph_sql_agent.py
 ```
 
-### LangGraph Orchestration
+SQL execution is restricted to read-only `SELECT` statements. Human review can
+be enabled before execution:
+
+```bash
+SQL_HUMAN_REVIEW=true \
+MODEL_PROVIDER=qwen \
+uv run python src/agents/sql_agent.py
+```
+
+### LangGraph State and Control Flow
 
 ```bash
 uv run python src/orchestration/langgraph_state_machine.py --demo reducers
@@ -218,353 +223,74 @@ uv run python src/orchestration/langgraph_state_machine.py --demo subgraphs
 uv run python src/orchestration/langgraph_state_machine.py --demo streaming
 ```
 
-### LangGraph Agentic RAG
-
-This workflow follows the LangGraph custom RAG agent tutorial: the graph decides
-whether to retrieve, grades retrieved context, rewrites the query when retrieval
-is not relevant, and generates a grounded answer.
-
-```bash
-MODEL_PROVIDER=qwen uv run python src/workflows/langgraph_rag_agent.py
-```
-
-Inspect retrieved context:
-
-```bash
-SHOW_RETRIEVED_CONTEXT=true MODEL_PROVIDER=qwen uv run python src/workflows/langgraph_rag_agent.py
-```
-
-Inspect the LangGraph message history:
-
-```bash
-SHOW_GRAPH_MESSAGES=true MODEL_PROVIDER=qwen uv run python src/workflows/langgraph_rag_agent.py
-```
-
-The workflow separates token budgets for tool decisions, document grading, and
-final answers:
-
-```env
-MAX_CHUNKS=60
-RAG_GRAPH_CHUNK_SIZE=300
-RAG_GRAPH_CHUNK_OVERLAP=75
-RAG_GRAPH_RETRIEVAL_K=4
-RAG_GRAPH_USE_VECTOR_CACHE=true
-RAG_GRAPH_DECISION_MAX_TOKENS=1024
-RAG_GRAPH_GRADER_MAX_TOKENS=512
-RAG_GRAPH_ANSWER_MAX_TOKENS=1024
-```
-
-Temporary vector cache:
-
-```text
-sandbox/vector_cache/
-```
-
-The first run creates document embeddings and saves the in-memory vector store
-there. Later runs with the same `MAX_CHUNKS`, `RAG_GRAPH_CHUNK_SIZE`, and
-`RAG_GRAPH_CHUNK_OVERLAP` load the cache and skip document re-embedding. The
-cache is only for local testing and is ignored by Git. Delete the matching cache
-file to force embeddings to regenerate.
-
-### Tool-Calling Agents
-
-```bash
-MODEL_PROVIDER=qwen uv run python src/agents/sql_agent.py
-uv run python src/agents/arithmetic_tool_agent.py
-uv run python src/agents/weather_tool_graph.py
-```
-
-The SQL agent downloads the Chinook SQLite sample database into `data/` on first
-run. Query execution is read-only, restricted to `SELECT` statements, and limited
-to one successful SQL query by default through `MAX_SQL_QUERIES=1`. To pause
-before query execution for human review:
-
-```bash
-SQL_HUMAN_REVIEW=true MODEL_PROVIDER=qwen uv run python src/agents/sql_agent.py
-```
-
-### LangGraph SQL Agent
-
-This workflow follows the LangGraph SQL agent tutorial. Unlike the high-level
-LangChain SQL agent, it makes the control flow explicit: list tables, select
-schema, generate SQL, check SQL, execute SQL, then produce a final answer.
-
-```bash
-MODEL_PROVIDER=qwen uv run python src/workflows/langgraph_sql_agent.py
-```
-
-Show token and cost estimates for OpenAI runs:
-
-```env
-SHOW_TOKEN_USAGE=true
-LANGGRAPH_SQL_MAX_TOKENS=4096
-LANGGRAPH_SQL_RECURSION_LIMIT=8
-```
-
-### Voice Agent
-
-This workflow follows the LangChain voice-agent tutorial architecture: audio
-bytes stream into speech-to-text, final transcripts trigger a LangChain agent,
-and streamed agent text is sent to text-to-speech.
-
-The LangChain docs use AssemblyAI for STT and Cartesia for TTS over WebSockets.
-This repo keeps that same sandwich pipeline and adapter shape. By default,
-`VOICE_AGENT_MODE=mock` feeds local mock audio through the same pipeline so the
-code can run without microphone/browser setup or STT/TTS provider keys. Set
-`VOICE_AGENT_MODE=provider` only when you have provider credentials and optional
-WebSocket dependencies installed.
-
-What to observe:
-
-1. `stt_stream` emits `stt_chunk` partial transcripts and a final `stt_output`.
-2. `agent_stream` passes through STT events and emits `agent_chunk` text.
-3. `tts_stream` sends agent chunks to TTS and emits `tts_chunk` audio bytes.
-4. `build_pipeline` composes all stages with LangChain `RunnableGenerator`.
-
-```bash
-VOICE_AGENT_MODE=mock MODEL_PROVIDER=qwen uv run python src/agents/voice_agent.py
-```
-
-Provider mode requires real STT/TTS credentials:
-
-```env
-VOICE_AGENT_MODE=provider
-ASSEMBLYAI_API_KEY=your_assemblyai_api_key_here
-CARTESIA_API_KEY=your_cartesia_api_key_here
-```
-
-Provider mode also requires WebSocket provider dependencies such as
-`websockets`. They are not required for the default mock mode.
-
-For hosted-model testing:
-
-```bash
-VOICE_AGENT_MODE=mock MODEL_PROVIDER=openai ALLOW_PAID_API_CALLS=true uv run python src/agents/voice_agent.py
-```
-
-### Multi-Agent Personal Assistant
-
-This workflow follows the LangChain multi-agent subagents tutorial. A supervisor
-agent delegates to a calendar specialist and an email specialist. Calendar and
-email side effects are stubbed, so the demo is safe and does not call real
-calendar or email APIs.
+### Multi-Agent Patterns
 
 ```bash
 MODEL_PROVIDER=qwen uv run python src/multi_agent/personal_assistant.py
-```
-
-Inspect the final supervisor message history:
-
-```bash
-SHOW_MULTI_AGENT_MESSAGES=true MODEL_PROVIDER=qwen uv run python src/multi_agent/personal_assistant.py
-```
-
-OpenAI runs also report combined supervisor and subagent token usage when
-`SHOW_TOKEN_USAGE=true`.
-
-### Multi-Agent Customer Support Handoffs
-
-This workflow follows the LangChain multi-agent handoffs tutorial. A single
-support agent changes behavior across warranty collection, issue classification,
-and resolution steps. Tools return `Command` updates that move the workflow to
-the next support state.
-
-This example demonstrates a state-machine style support flow:
-
-1. Collect warranty status.
-2. Classify the issue as hardware or software.
-3. Route to repair guidance, troubleshooting, or human escalation.
-
-The state-transition tools use `return_direct=True` so each stage stops after it
-updates state. That makes the handoff boundary visible: the next user turn
-continues from the updated `current_step` instead of letting the model solve the
-entire case in one response.
-
-```bash
 MODEL_PROVIDER=qwen uv run python src/multi_agent/customer_support_handoffs.py
 ```
 
-Inspect the state-machine message history:
+Some multi-agent and research examples use hosted services because they require
+multiple capable tool-calling steps. Review the relevant source file and
+`.env.example` before enabling paid execution.
 
-```bash
-SHOW_MULTI_AGENT_MESSAGES=true MODEL_PROVIDER=qwen uv run python src/multi_agent/customer_support_handoffs.py
-```
+## Customer Operations Lite Capstone
 
-### Multi-Agent Knowledge Base Router
+The final phase combines the curriculum into a production-oriented customer
+operations system. Its public scope uses fictional customers, synthetic tickets,
+invented policies, and generic business rules.
 
-This workflow follows the LangChain multi-agent router tutorial. A router
-classifies a question, fans out source-specific sub-questions to GitHub, Notion,
-and Slack specialists with LangGraph `Send`, then synthesizes the specialist
-results into one answer.
+The capstone includes:
 
-The demo uses local simulated knowledge sources, so it does not call real
-GitHub, Notion, or Slack APIs. This workflow is intended for OpenAI because it
-makes several model calls: routing, source specialists, and final synthesis.
-The router asks the model for JSON and falls back to deterministic routing if
-JSON parsing fails; a production version should use structured output for the
-routing decision.
+- Knowledge retrieval with citations
+- Read-only customer and account queries
+- Narrow, permission-controlled tools
+- Explicit workflow state and human review
+- Evaluation datasets and failure analysis
+- Tracing, token accounting, latency, and cost reporting
+- Prompt-injection, privacy, and authorization tests
 
-What to observe:
+The public implementation demonstrates reusable architecture while excluding
+proprietary workflows, private data, and company-specific business logic.
 
-1. The router selects relevant sources and creates source-specific sub-questions.
-2. LangGraph `Send` fans out work to multiple specialist nodes.
-3. `operator.add` merges parallel specialist results into one state field.
-4. The synthesis node combines routed evidence into a final answer.
+## Safety and Operational Controls
 
-```bash
-MODEL_PROVIDER=openai ALLOW_PAID_API_CALLS=true uv run python src/multi_agent/knowledge_base_router.py
-```
+- Secrets and local environment files are excluded from version control.
+- Hosted model calls require an explicit paid-call flag.
+- SQL examples enforce read-only query boundaries.
+- Side-effecting integrations use simulations or approval points.
+- Local model, embedding, and cache files remain outside the repository.
+- Evaluation and observability are treated as part of the implementation.
 
-Inspect the routed specialist messages:
+Never commit API keys. Rotate a key immediately if it appears in chat, logs, an
+issue, or a committed file.
 
-```bash
-SHOW_MULTI_AGENT_MESSAGES=true MODEL_PROVIDER=openai ALLOW_PAID_API_CALLS=true uv run python src/multi_agent/knowledge_base_router.py
-```
+## Contributing
 
-### Multi-Agent Skills SQL Assistant
+Contributions that improve curriculum clarity, add evaluation evidence, correct
+technical issues, or provide publishable engineering patterns are welcome.
 
-This workflow follows the LangChain multi-agent skills tutorial. The assistant
-uses `SkillMiddleware` to inject lightweight skill descriptions into the model
-request, then calls `load_skill` only when it needs full schema and business-rule
-context.
+Before opening a pull request:
 
-This example demonstrates progressive disclosure:
+1. Keep the change focused.
+2. Explain the engineering reason for the change.
+3. Add or update tests when behavior changes.
+4. Document required services, credentials, and expected cost.
+5. Use synthetic or publicly licensed data.
+6. Verify that no secrets or proprietary information are included.
 
-1. `SkillMiddleware` injects available skill descriptions without loading full schemas.
-2. The model calls `load_skill("sales_analytics")` for a sales query.
-3. The tool returns domain-specific tables, columns, and business logic.
-4. The final answer writes SQL using only the loaded skill context.
+You can also open an
+[issue](https://github.com/chaitanya-y/agentic-ai-lab/issues) to report an error
+or propose a curriculum improvement.
 
-Unlike the SQL agents in `src/agents/` and `src/workflows/`, this demo does not
-execute SQL. It focuses on on-demand context loading.
+## Support the Project
 
-```bash
-MODEL_PROVIDER=openai ALLOW_PAID_API_CALLS=true uv run python src/multi_agent/skills_sql_assistant.py
-```
+If Agentic AI Lab is useful to you:
 
-Inspect the skill-loading message history:
+- [Star the repository](https://github.com/chaitanya-y/agentic-ai-lab)
+- [Follow Chaitanya](https://github.com/chaitanya-y)
+- Share feedback or contribute an improvement
 
-```bash
-SHOW_MULTI_AGENT_MESSAGES=true MODEL_PROVIDER=openai ALLOW_PAID_API_CALLS=true uv run python src/multi_agent/skills_sql_assistant.py
-```
+## License
 
-### Deep Agents Research Agent
-
-This workflow follows the Deep Agents quickstart. It creates a research agent
-with `create_deep_agent`, a Tavily-backed `internet_search` tool, and research
-instructions that ask the harness to gather evidence and synthesize a polished
-report.
-
-Deep Agents is a higher-level agent harness built on LangChain and LangGraph. It
-adds built-in planning, virtual filesystem tools, context management, subagent
-delegation, streaming, and human-in-the-loop hooks. This demo intentionally
-follows the docs and requires a real `TAVILY_API_KEY`.
-
-Because the Deep Agents harness injects planning, filesystem, subagent, and
-context-management middleware, hosted tool-calling models are recommended for
-this demo.
-
-What to observe:
-
-1. `agent = create_deep_agent(...)` builds the Deep Agents harness.
-2. `internet_search` calls Tavily exactly like the docs quickstart pattern.
-3. The harness may use built-in planning/file/context tools depending on the model.
-4. `SHOW_DEEP_AGENT_MESSAGES=true` prints the final message and tool history.
-
-Required environment:
-
-```env
-ALLOW_PAID_API_CALLS=true
-DEEP_AGENT_MODEL=openai:gpt-5-nano
-TAVILY_API_KEY=your_tavily_api_key_here
-```
-
-```bash
-uv run python src/deep_agents/research_agent.py
-```
-
-## Hosted Model Safety
-
-Agent modules may call a chat model. Use local Qwen through Ollama for free local chat inference:
-
-```bash
-MODEL_PROVIDER=qwen uv run python src/agents/rag_agent.py
-```
-
-To use hosted OpenAI models, opt in explicitly:
-
-```bash
-MODEL_PROVIDER=openai ALLOW_PAID_API_CALLS=true uv run python src/agents/rag_agent.py
-```
-
-This explicit flag prevents accidental paid API calls.
-
-The SQL agent prints an OpenAI token and cost estimate when `MODEL_PROVIDER=openai`.
-Pricing can change, so override rates in `.env` when needed:
-
-```env
-OPENAI_INPUT_COST_PER_1M=0.05
-OPENAI_OUTPUT_COST_PER_1M=0.40
-```
-
-## Token Budget Tuning
-
-The `*_MAX_TOKENS` settings in `.env` are practical defaults, not fixed rules.
-Increase them if a model returns an empty message, fails to emit a tool call,
-cuts off a structured response, or answers before a tool result appears.
-
-This is especially important for hosted reasoning models because their output
-budget can include hidden reasoning tokens plus visible text or tool-call JSON.
-For example, if a SQL workflow does not produce a `sql_db_query` tool result,
-try raising:
-
-```env
-LANGGRAPH_SQL_MAX_TOKENS=4096
-```
-
-For the LangGraph RAG workflow, tune these independently:
-
-```env
-RAG_GRAPH_DECISION_MAX_TOKENS=1024
-RAG_GRAPH_GRADER_MAX_TOKENS=512
-RAG_GRAPH_ANSWER_MAX_TOKENS=1024
-```
-
-For the multi-agent router workflow, tune routing, specialist answers, and final
-synthesis independently:
-
-```env
-ROUTER_MAX_TOKENS=2048
-ROUTER_SPECIALIST_MAX_TOKENS=2048
-ROUTER_SYNTHESIS_MAX_TOKENS=2048
-SKILLS_SQL_MAX_TOKENS=2048
-DEEP_AGENT_MODEL=openai:gpt-5-nano
-DEEP_AGENT_RECURSION_LIMIT=8
-```
-
-Rule of thumb: if the model is choosing tools or producing structured output,
-give it more budget before assuming the workflow logic is wrong.
-
-## Operational Notes
-
-- `.env` is ignored because it may contain API keys.
-- `.venv` is ignored because environments should be rebuilt with `uv sync`.
-- `data/*.pdf` is ignored to avoid committing large source documents.
-- `data/*.db` is ignored to avoid committing local SQLite databases.
-- Hugging Face model weights are cached outside this repo by default.
-- `InMemoryVectorStore` stores vectors only in RAM; vectors disappear when a script exits.
-- `sandbox/vector_cache/` may contain temporary LangGraph RAG vector-store caches for faster local testing.
-- `sandbox/` is ignored because it contains rough local experiments.
-
-## Roadmap
-
-Planned additions:
-
-- Persistent vector store example
-- Multi-agent patterns for routing, handoffs, and subagents
-
-## Positioning
-
-This repository is intentionally small, executable, and inspectable. It shows the
-mechanics behind agentic AI systems instead of hiding everything behind a single
-high-level API call.
+This project is available under the [MIT License](LICENSE).

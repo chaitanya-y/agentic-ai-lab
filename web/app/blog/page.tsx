@@ -10,17 +10,17 @@ export const metadata = {
 
 const boundaries = [
   {
-    title: "We start with role-relevant systems",
+    title: "Role-relevant systems",
     included: "LLM application boundaries, RAG, tools, MCP, state, memory, workflows, multi-agent design, evaluations, security, cost, and deployment.",
     deferred: "Broad surveys of every ML algorithm, training foundation models, and advanced mathematics without an immediate engineering use."
   },
   {
-    title: "We make behavior inspectable",
+    title: "Inspectable behavior",
     included: "Retrieved chunks, tool arguments, SQL, graph state, checkpoints, approval decisions, traces, evaluation results, and token cost.",
     deferred: "Demos that appear intelligent but hide why they worked, what failed, or which system performed the action."
   },
   {
-    title: "We treat reliability as curriculum",
+    title: "Reliability and operations",
     included: "Failure injection, bounded retries, idempotency, prompt-injection defenses, privacy boundaries, release gates, and human escalation.",
     deferred: "Assuming a polished response is correct because it sounds confident."
   }
@@ -31,8 +31,8 @@ const proof = [
   "Runnable local and hosted examples for the main agent patterns.",
   "A plain-language explanation and real-world example for every lesson.",
   "Evaluation tasks that measure retrieval, routing, tool choice, safety, latency, and cost.",
-  "A public-safe Customer Operations Lite capstone built with synthetic data.",
-  "Architecture and failure notes you can discuss honestly in an interview."
+  "A publishable Customer Operations Lite capstone built with synthetic data.",
+  "Architecture and failure analysis suitable for technical interviews."
 ];
 
 export default function BlogPage() {
@@ -42,33 +42,33 @@ export default function BlogPage() {
         <div className="article-meta">
           <span>Project note</span>
           <span>8–10 minute read</span>
-          <span>Updated curriculum: {totalHours} guided hours</span>
+          <span>Approximately {totalHours} guided hours</span>
         </div>
         <h1>What Agentic AI Lab is trying to achieve</h1>
         <p>
-          A practical transition path for software engineers who want to design, build, evaluate, and operate agentic
-          systems—not simply learn how to call a model.
+          A structured transition path for software engineers who want to design, build, evaluate, and operate
+          production agent systems.
         </p>
       </header>
 
       <article className="article-body">
         <section className="article-lead">
           <p>
-            Software engineers entering this field face two unhelpful extremes. One path says to learn all of AI and
-            machine learning before building anything. The other jumps directly to an autonomous demo and skips the
-            engineering needed to make it trustworthy. Agentic AI Lab is the bridge between those extremes.
+            Software engineers entering this field need enough model knowledge to make sound system decisions, along
+            with practical experience in retrieval, tools, orchestration, evaluation, and production operations.
+            Agentic AI Lab organizes those requirements into an applied engineering curriculum.
           </p>
           <p>
             The project begins with the skills that appear repeatedly in real agentic engineering work: model
             boundaries, context design, retrieval, tool use, explicit state, evaluation, observability, security, and
-            cost. Deeper AI/ML remains important, but it becomes the next layer—not a gate that prevents an experienced
-            developer from shipping useful systems now.
+            cost. Deeper AI/ML remains important and follows after the core agent engineering capabilities are in
+            place.
           </p>
         </section>
 
         <section>
           <p className="section-label">The target learner</p>
-          <h2>This is for engineers who already know how software behaves.</h2>
+          <h2>The curriculum assumes professional software-development experience.</h2>
           <p>
             The roadmap assumes you can read Python, work with APIs and JSON, understand a database query, write tests,
             and debug a service. We build on that foundation. Your existing engineering judgment is not replaced by a
@@ -99,17 +99,17 @@ export default function BlogPage() {
 
         <section className="article-boundaries">
           <p className="section-label">Our curriculum choices</p>
-          <h2>Focused first. Broader later.</h2>
+          <h2>Curriculum scope and sequencing</h2>
           {boundaries.map((item) => (
             <article key={item.title}>
               <h3>{item.title}</h3>
               <div>
                 <p>
-                  <strong>Included now</strong>
+                  <strong>Included in the core roadmap</strong>
                   {item.included}
                 </p>
                 <p>
-                  <strong>Deferred on purpose</strong>
+                  <strong>Deferred topics</strong>
                   {item.deferred}
                 </p>
               </div>
@@ -119,7 +119,7 @@ export default function BlogPage() {
 
         <section>
           <p className="section-label">The learning path</p>
-          <h2>Each phase removes one class of hidden risk.</h2>
+          <h2>The phases progress from model foundations to production operation.</h2>
           <ol className="article-phase-list">
             {curriculum.map((phase) => (
               <li key={phase.id}>
@@ -141,16 +141,15 @@ export default function BlogPage() {
 
         <section className="article-callout">
           <p className="section-label">The capstone</p>
-          <h2>Customer Operations Lite proves the pieces work together.</h2>
+          <h2>Customer Operations Lite integrates the curriculum into one system.</h2>
           <p>
             The final project uses fictional customers, synthetic tickets, invented policies, and generic business
             rules. It combines knowledge retrieval, read-only SQL, narrow tools, LangGraph state, human review,
             evaluations, tracing, cost accounting, and security tests.
           </p>
           <p>
-            It is intentionally “Lite.” The goal is not to publish a proprietary product or reproduce private company
-            logic. The goal is to demonstrate reusable architecture and the judgment to know what should stay private,
-            deterministic, approval-gated, or out of scope.
+            The limited scope keeps the project suitable for a public repository. It demonstrates reusable
+            architecture while excluding proprietary workflows, private data, and company-specific business logic.
           </p>
           <Link className="button button-coral" href="/learn/capstone-scope-and-architecture">
             Read the capstone plan
@@ -158,23 +157,23 @@ export default function BlogPage() {
         </section>
 
         <section>
-          <p className="section-label">How progress becomes credible</p>
-          <h2>Every major claim should have proof.</h2>
+          <p className="section-label">Portfolio evidence</p>
+          <h2>Portfolio claims should be supported by evidence.</h2>
           <ul className="proof-list">
             {proof.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
           <p>
-            A portfolio should not say “built an intelligent agent” and stop there. It should show the task, baseline,
-            architecture, evaluation set, measured results, failure categories, safety boundaries, latency, cost, and
-            the next improvement. That evidence is what turns a tutorial into engineering work.
+            A technical portfolio should document the task, baseline, architecture, evaluation set, measured results,
+            failure categories, safety boundaries, latency, cost, and planned improvements. This evidence demonstrates
+            the engineering decisions behind the implementation.
           </p>
         </section>
 
         <section className="article-finish">
-          <p className="section-label">What success looks like</p>
-          <h2>You can make and defend the tradeoffs.</h2>
+          <p className="section-label">Expected outcomes</p>
+          <h2>Graduates can explain and support their architecture decisions.</h2>
           <p>
             By the end, you should be able to explain why one feature is a deterministic workflow and another is an
             agent; why a RAG chain may be better than agentic retrieval; why a tool needs approval and idempotency; why

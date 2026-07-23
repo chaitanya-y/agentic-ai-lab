@@ -21,7 +21,7 @@ const proofPoints = [
     note: "Local Qwen and hosted OpenAI paths where each is useful."
   },
   {
-    value: `${totalHours}h`,
+    value: `~${totalHours}h`,
     label: "guided curriculum",
     note: "Plan 150–200 hours after review, exercises, and portfolio polish."
   }
@@ -40,13 +40,13 @@ const learningLoop = [
   },
   {
     number: "03",
-    title: "Break",
-    body: "Try weak context, bad tool results, retries, prompt injection, and expensive paths before users do."
+    title: "Test",
+    body: "Evaluate weak context, incorrect tool results, retries, prompt injection, and high-cost execution paths."
   },
   {
     number: "04",
-    title: "Prove",
-    body: "Add evaluations, traces, cost measurements, and a clear explanation of the remaining tradeoffs."
+    title: "Evaluate",
+    body: "Measure quality, trace execution, calculate cost, and document the remaining technical tradeoffs."
   }
 ];
 
@@ -72,7 +72,7 @@ export default function Home() {
           </p>
           <div className="hero-actions">
             <Link className="button button-dark" href="/blog">
-              What we&apos;re trying to achieve →
+              Read the project objectives →
             </Link>
           </div>
         </div>
@@ -88,32 +88,11 @@ export default function Home() {
         ))}
       </section>
 
-      <section className="mission-section">
-        <div className="section-intro">
-          <p className="eyebrow">What this is</p>
-          <h2>A job-focused bridge, not an encyclopedia of AI.</h2>
-        </div>
-        <div className="mission-copy">
-          <p>
-            Agentic engineering is software engineering with new boundaries: nondeterministic models, dynamic context,
-            tool permissions, long-running state, and quality that must be measured. This lab teaches those boundaries
-            through systems you can run, inspect, test, and explain.
-          </p>
-          <p>
-            We intentionally postpone broad model-training and advanced ML topics. After you can ship a grounded,
-            observable, secure agent workflow, you will know which deeper AI/ML subjects are worth adding next.
-          </p>
-          <Link className="text-link" href="/blog">
-            Read what we are building and why →
-          </Link>
-        </div>
-      </section>
-
       <section className="learning-loop-section">
         <div className="section-intro inverse">
-          <p className="eyebrow">How every topic works</p>
-          <h2>Learn with an engineering loop.</h2>
-          <p>Reading creates vocabulary. Building, breaking, and measuring creates judgment.</p>
+          <p className="eyebrow">Learning methodology</p>
+          <h2>A structured engineering workflow.</h2>
+          <p>Each topic combines conceptual study, implementation, failure analysis, and measurable evaluation.</p>
         </div>
         <div className="learning-loop-grid">
           {learningLoop.map((item) => (
@@ -128,11 +107,11 @@ export default function Home() {
 
       <section className="contents-section" id="contents">
         <div className="section-intro">
-          <p className="eyebrow">Complete contents</p>
-          <h2>Nine phases. One production-minded path.</h2>
+          <p className="eyebrow">Curriculum contents</p>
+          <h2>A nine-phase curriculum for production agent engineering.</h2>
           <p>
-            Follow the phases in order if this is your first agentic system. Experienced engineers can use the catalog
-            to jump directly to a missing skill.
+            Engineers new to agentic systems should follow the phases in order. Experienced engineers can use the
+            catalog to select topics that address specific knowledge or implementation gaps.
           </p>
           <div className="section-actions">
             <Link className="button button-dark" href="/catalog">
@@ -149,7 +128,7 @@ export default function Home() {
       <section className="outcome-section">
         <div>
           <p className="eyebrow">What you should be able to do</p>
-          <h2>Interview-ready outcomes, not checked boxes.</h2>
+          <h2>Practical skills for agentic engineering roles.</h2>
           <p>
             The roadmap is complete when you can defend the architecture, show evidence of quality, and discuss where
             the system should still defer to deterministic code or a person.
@@ -165,30 +144,12 @@ export default function Home() {
         </ol>
       </section>
 
-      <section className="capstone-teaser">
-        <div className="capstone-label">
-          <span>Final build</span>
-          <strong>35–50 hours</strong>
-        </div>
-        <div>
-          <p className="eyebrow">Customer Operations Lite</p>
-          <h2>Bring retrieval, SQL, tools, state, review, and production proof into one portfolio system.</h2>
-          <p>
-            Use fictional customers, synthetic conversations, and generic business rules. The capstone demonstrates
-            the engineering patterns without publishing proprietary product logic, data, or prompts.
-          </p>
-          <Link className="button button-coral" href="/learn/capstone-scope-and-architecture">
-            Explore the capstone
-          </Link>
-        </div>
-      </section>
-
       <AgentExplorer />
 
       <section className="community-section">
         <div className="section-intro">
-          <p className="eyebrow">Keep the lab useful</p>
-          <h2>If this helps you, help it reach the next engineer.</h2>
+          <p className="eyebrow">Project community</p>
+          <h2>Support and contribute to Agentic AI Lab.</h2>
         </div>
         <div className="community-grid">
           <article>
@@ -202,7 +163,7 @@ export default function Home() {
           <article>
             <span className="community-icon">02</span>
             <h3>Star</h3>
-            <p>If the roadmap is useful, star the repository so you can find it later and others can discover it.</p>
+            <p>Star the repository to save the roadmap and improve its visibility for other software engineers.</p>
             <a href={repoUrl} rel="noreferrer" target="_blank">
               Star the repository ↗
             </a>

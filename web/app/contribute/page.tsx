@@ -7,7 +7,7 @@ export const metadata = {
 
 const contributionIdeas = [
   {
-    title: "Fix a learning gap",
+    title: "Improve curriculum clarity",
     body: "Clarify a confusing explanation, add a smaller example, correct a broken link, or point out a missing prerequisite."
   },
   {
@@ -15,11 +15,11 @@ const contributionIdeas = [
     body: "Reproduce an issue, improve an error message, add a local-model path, or make setup more reliable across machines."
   },
   {
-    title: "Add proof, not hype",
+    title: "Add evaluation evidence",
     body: "Contribute evaluation cases, failure scenarios, security tests, latency measurements, or cost comparisons."
   },
   {
-    title: "Share a public-safe pattern",
+    title: "Contribute a publishable engineering pattern",
     body: "Propose a small agentic engineering example using synthetic data and generic business rules."
   }
 ];
@@ -31,8 +31,8 @@ export default function ContributePage() {
         <p className="eyebrow">Community guide · 5 minute read</p>
         <h1>Help make the transition path clearer and more practical.</h1>
         <p>
-          Contributions do not need to be large. A precise bug report, a better failure case, or a clearer paragraph
-          can save the next engineer hours.
+          Contributions may include focused documentation improvements, reproducible bug reports, evaluation cases,
+          or targeted enhancements to a runnable lab.
         </p>
         <div className="hero-actions">
           <a className="button button-dark" href={issuesUrl} rel="noreferrer" target="_blank">
@@ -70,7 +70,8 @@ export default function ContributePage() {
 
       <section className="community-endcap">
         <p>
-          Not ready to contribute code? A repository star and thoughtful feedback are valuable too.
+          Other ways to support the project include sharing feedback, following future updates, and starring the
+          repository.
         </p>
         <div>
           <a href={repoUrl} rel="noreferrer" target="_blank">

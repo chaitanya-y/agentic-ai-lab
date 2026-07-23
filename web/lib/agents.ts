@@ -137,7 +137,7 @@ export const agents: Agent[] = [
     category: "Voice",
     status: "Hybrid",
     sourcePath: "src/agents/voice_agent.py",
-    summary: "Docs-aligned STT -> LangChain agent -> TTS sandwich pipeline.",
+    summary: "Documentation-aligned speech-to-text, agent, and text-to-speech pipeline.",
     problem: "Shows how spoken input can be transformed into agent text and streamed back as audio chunks.",
     architecture: ["Audio bytes", "STT events", "Agent chunks", "TTS audio", "WebSocket-ready endpoint"],
     concepts: ["Async generators", "RunnableGenerator", "streaming", "provider adapters"],

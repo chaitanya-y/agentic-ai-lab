@@ -14,7 +14,7 @@ export function SiteFooter() {
         <Link href="/catalog">Lesson catalog</Link>
         <Link href="/roadmap">Roadmap</Link>
         <Link href="/glossary">Glossary</Link>
-        <Link href="/blog">Why this exists</Link>
+        <Link href="/blog">Project objectives</Link>
         <Link href="/contribute">Contribute</Link>
         <a href={repoUrl} rel="noreferrer" target="_blank">
           Star on GitHub ↗
@@ -23,7 +23,7 @@ export function SiteFooter() {
           Follow Chaitanya ↗
         </a>
       </div>
-      <p className="footer-note">Built in public for engineers who learn by building.</p>
+      <p className="footer-note">An open learning resource for software engineers transitioning into agentic engineering.</p>
     </footer>
   );
 }

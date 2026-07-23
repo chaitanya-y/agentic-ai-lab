@@ -11,14 +11,14 @@ export default function CatalogPage() {
     <main className="inner-page">
       <section className="page-hero">
         <p className="eyebrow">Searchable curriculum</p>
-        <h1>Find the exact skill you need next.</h1>
+        <h1>Browse lessons by skill, phase, and format.</h1>
         <p>
           Browse {allLessons.length} lessons across {curriculum.length} phases. The full guided path is about {totalHours}{" "}
           hours; experienced engineers can filter directly to a missing concept or implementation pattern.
         </p>
         <div className="page-meta">
           <span>{allLessons.length} lessons</span>
-          <span>{totalHours} guided hours</span>
+          <span>Approximately {totalHours} guided hours</span>
           <span>Concepts + builds + capstone</span>
         </div>
       </section>
