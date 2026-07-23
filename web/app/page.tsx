@@ -1,157 +1,220 @@
+import Link from "next/link";
 import { AgentExplorer } from "./components/AgentExplorer";
-import { agents, repoUrl } from "../lib/agents";
+import { CurriculumContents } from "./components/CurriculumContents";
+import { allLessons, curriculum, totalHours } from "../lib/curriculum";
+import { agents, profileUrl, repoUrl } from "../lib/agents";
 
-const stats = [
-  { label: "Agent systems", value: agents.length.toString() },
-  { label: "Patterns", value: "RAG / SQL / Graph / Multi-agent / Voice" },
-  { label: "Model modes", value: "Local Qwen + OpenAI" }
-];
-
-const roadmap = [
+const proofPoints = [
   {
-    stage: "01",
-    milestone: "25%",
-    title: "Transformer Basics",
-    summary: "Learn only the practical pieces first: vectors, attention, and feed-forward layers.",
-    topics: ["Vectors", "Attention", "FFNN", "tokens"],
-    quote: "You do not need every proof before you can build useful AI systems."
+    value: `${curriculum.length}`,
+    label: "focused phases",
+    note: "From practical LLM intuition to a production capstone."
   },
   {
-    stage: "02",
-    milestone: "50%",
-    title: "Retrieval And RAG",
-    summary: "Build useful systems with documents before going deep into math.",
-    topics: ["Chunking", "embeddings", "vector databases", "reranking"],
-    quote: "This is where many software engineers become immediately dangerous."
+    value: `${allLessons.length}`,
+    label: "plain-language lessons",
+    note: "Every lesson includes a time estimate, example, and build outcome."
   },
   {
-    stage: "03",
-    milestone: "75%",
-    title: "Agent Foundations",
-    summary: "Move from one model call to agents that can use tools, memory, and external context.",
-    topics: ["Tools", "MCP", "memory", "structured outputs"],
-    quote: "Now you are not just prompting. You are engineering behavior."
+    value: `${agents.length}`,
+    label: "runnable systems",
+    note: "Local Qwen and hosted OpenAI paths where each is useful."
   },
   {
-    stage: "04",
-    milestone: "100%",
-    title: "Agentic Workflows",
-    summary: "Make agents reliable with graphs, routing, human review, evals, and cost visibility.",
-    topics: ["LangGraph", "multi-agent", "guardrails", "token costs"],
-    quote: "Ship systems people can inspect, trust, and improve."
+    value: `${totalHours}h`,
+    label: "guided curriculum",
+    note: "Plan 150–200 hours after review, exercises, and portfolio polish."
   }
 ];
 
-const visualCards = [
+const learningLoop = [
   {
-    title: "Transformers",
-    className: "visual-card amber",
-    caption: "Useful intuition before deep theory."
+    number: "01",
+    title: "Understand",
+    body: "Start with the problem and a simple mental model. Learn enough theory to explain the design choice."
   },
   {
-    title: "RAG",
-    className: "visual-card red",
-    caption: "Context, retrieval, and grounded answers."
+    number: "02",
+    title: "Build",
+    body: "Implement the smallest useful version and inspect prompts, state, retrieval, tools, and outputs."
   },
   {
-    title: "Agents",
-    className: "visual-card green",
-    caption: "Tools, memory, routing, and action."
+    number: "03",
+    title: "Break",
+    body: "Try weak context, bad tool results, retries, prompt injection, and expensive paths before users do."
+  },
+  {
+    number: "04",
+    title: "Prove",
+    body: "Add evaluations, traces, cost measurements, and a clear explanation of the remaining tradeoffs."
   }
+];
+
+const roleOutcomes = [
+  "Design reliable model-backed features with structured inputs and outputs.",
+  "Build and evaluate semantic search, deterministic RAG, and agentic RAG.",
+  "Create safe tool-calling and MCP integrations with explicit permissions.",
+  "Model stateful workflows, memory, routing, checkpoints, and human review.",
+  "Decide when multi-agent architecture is useful—and when it is unnecessary.",
+  "Operate agent systems with evaluations, traces, security controls, budgets, and release gates."
 ];
 
 export default function Home() {
   return (
     <main>
-      <section className="hero">
-        <div className="hero-copy centered">
-          <span className="eyebrow">Hands-on AI engineering roadmap</span>
-          <h1>Agentic AI Lab</h1>
+      <section className="home-hero home-hero-simple">
+        <div className="hero-intro">
+          <h1>Agentic AI engineering Lab for software engineers</h1>
           <p>
-            A practical lab for software engineers transitioning into agentic engineering and applied AI/ML. The goal
-            is not to spend months wandering through every math topic first. Start with the in-demand skills that ship
-            real systems: transformers at a useful level, RAG, tools, memory, MCP, LangGraph, SQL agents, multi-agent
-            workflows, evaluations, and cost-aware model operations.
+            Learn to design, build, and operate reliable agent systems using your existing software engineering
+            skills. Follow a focused path through RAG, tools, MCP, workflows, evaluation, security, and production
+            deployment.
           </p>
           <div className="hero-actions">
-            <a className="secondary-action" href="#agents">
-              Explore the lab
-            </a>
-            <a className="primary-action" href={repoUrl} rel="noreferrer" target="_blank">
-              View GitHub
-            </a>
+            <Link className="button button-dark" href="/blog">
+              What we&apos;re trying to achieve →
+            </Link>
           </div>
         </div>
       </section>
 
-      <section className="visual-stories" aria-label="Core learning pillars">
-        {visualCards.map((card) => (
-          <article className={card.className} key={card.title}>
-            <div className="visual-noise" />
-            <h2>{card.title}</h2>
-            <p>{card.caption}</p>
+      <section className="proof-strip" aria-label="Curriculum overview">
+        {proofPoints.map((item) => (
+          <article key={item.label}>
+            <strong>{item.value}</strong>
+            <span>{item.label}</span>
+            <p>{item.note}</p>
           </article>
         ))}
       </section>
 
-      <section className="roadmap" id="roadmap">
-        <div className="section-heading compact">
-          <span className="eyebrow">Realistic roadmap</span>
-          <h2>Learn what helps you build agentic systems first.</h2>
-          <p>
-            This sequence keeps the path minimal and practical: enough foundations to understand the systems, then
-            hands-on agent engineering patterns used in production-style applications.
-          </p>
+      <section className="mission-section">
+        <div className="section-intro">
+          <p className="eyebrow">What this is</p>
+          <h2>A job-focused bridge, not an encyclopedia of AI.</h2>
         </div>
+        <div className="mission-copy">
+          <p>
+            Agentic engineering is software engineering with new boundaries: nondeterministic models, dynamic context,
+            tool permissions, long-running state, and quality that must be measured. This lab teaches those boundaries
+            through systems you can run, inspect, test, and explain.
+          </p>
+          <p>
+            We intentionally postpone broad model-training and advanced ML topics. After you can ship a grounded,
+            observable, secure agent workflow, you will know which deeper AI/ML subjects are worth adding next.
+          </p>
+          <Link className="text-link" href="/blog">
+            Read what we are building and why →
+          </Link>
+        </div>
+      </section>
 
-        <div className="roadmap-grid">
-          {roadmap.map((item) => (
-            <article className="roadmap-card" key={item.stage}>
-              <div className="roadmap-topline">
-                <span className="roadmap-stage">{item.stage}</span>
-                <span className="roadmap-milestone">{item.milestone}</span>
-              </div>
+      <section className="learning-loop-section">
+        <div className="section-intro inverse">
+          <p className="eyebrow">How every topic works</p>
+          <h2>Learn with an engineering loop.</h2>
+          <p>Reading creates vocabulary. Building, breaking, and measuring creates judgment.</p>
+        </div>
+        <div className="learning-loop-grid">
+          {learningLoop.map((item) => (
+            <article key={item.number}>
+              <span>{item.number}</span>
               <h3>{item.title}</h3>
-              <p>{item.summary}</p>
-              <div className="concept-list">
-                {item.topics.map((topic) => (
-                  <span key={topic}>{topic}</span>
-                ))}
-              </div>
-              <blockquote>{item.quote}</blockquote>
+              <p>{item.body}</p>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="principles" id="systems">
-        <article>
-          <span>01</span>
-          <h2>Docs-backed implementations</h2>
-          <p>Examples track LangChain, LangGraph, and Deep Agents documentation while staying runnable locally.</p>
-        </article>
-        <article>
-          <span>02</span>
-          <h2>Visible architecture</h2>
-          <p>Each agent page explains state, tools, model calls, retrieval, routing, and guardrails.</p>
-        </article>
-        <article>
-          <span>03</span>
-          <h2>Operational safety</h2>
-          <p>Hosted calls require explicit opt-in, local caches stay ignored, and costs are estimated when available.</p>
-        </article>
+      <section className="contents-section" id="contents">
+        <div className="section-intro">
+          <p className="eyebrow">Complete contents</p>
+          <h2>Nine phases. One production-minded path.</h2>
+          <p>
+            Follow the phases in order if this is your first agentic system. Experienced engineers can use the catalog
+            to jump directly to a missing skill.
+          </p>
+          <div className="section-actions">
+            <Link className="button button-dark" href="/catalog">
+              Search all lessons
+            </Link>
+            <Link className="button button-light" href="/roadmap">
+              View prerequisites
+            </Link>
+          </div>
+        </div>
+        <CurriculumContents />
       </section>
 
-      <section className="portfolio-strip" aria-label="Repository overview">
-        {stats.map((stat) => (
-          <div className="stat-row" key={stat.label}>
-            <span>{stat.label}</span>
-            <strong>{stat.value}</strong>
-          </div>
-        ))}
+      <section className="outcome-section">
+        <div>
+          <p className="eyebrow">What you should be able to do</p>
+          <h2>Interview-ready outcomes, not checked boxes.</h2>
+          <p>
+            The roadmap is complete when you can defend the architecture, show evidence of quality, and discuss where
+            the system should still defer to deterministic code or a person.
+          </p>
+        </div>
+        <ol>
+          {roleOutcomes.map((item, index) => (
+            <li key={item}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              {item}
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="capstone-teaser">
+        <div className="capstone-label">
+          <span>Final build</span>
+          <strong>35–50 hours</strong>
+        </div>
+        <div>
+          <p className="eyebrow">Customer Operations Lite</p>
+          <h2>Bring retrieval, SQL, tools, state, review, and production proof into one portfolio system.</h2>
+          <p>
+            Use fictional customers, synthetic conversations, and generic business rules. The capstone demonstrates
+            the engineering patterns without publishing proprietary product logic, data, or prompts.
+          </p>
+          <Link className="button button-coral" href="/learn/capstone-scope-and-architecture">
+            Explore the capstone
+          </Link>
+        </div>
       </section>
 
       <AgentExplorer />
+
+      <section className="community-section">
+        <div className="section-intro">
+          <p className="eyebrow">Keep the lab useful</p>
+          <h2>If this helps you, help it reach the next engineer.</h2>
+        </div>
+        <div className="community-grid">
+          <article>
+            <span className="community-icon">01</span>
+            <h3>Follow</h3>
+            <p>Follow the maintainer for new lessons, project notes, and practical agent engineering experiments.</p>
+            <a href={profileUrl} rel="noreferrer" target="_blank">
+              Follow Chaitanya ↗
+            </a>
+          </article>
+          <article>
+            <span className="community-icon">02</span>
+            <h3>Star</h3>
+            <p>If the roadmap is useful, star the repository so you can find it later and others can discover it.</p>
+            <a href={repoUrl} rel="noreferrer" target="_blank">
+              Star the repository ↗
+            </a>
+          </article>
+          <article>
+            <span className="community-icon">03</span>
+            <h3>Contribute</h3>
+            <p>Improve an explanation, report a broken lab, add an evaluation case, or suggest a missing topic.</p>
+            <Link href="/contribute">See contribution ideas →</Link>
+          </article>
+        </div>
+      </section>
     </main>
   );
 }

@@ -9,6 +9,7 @@ venv/
 node_modules/
 .next/
 out/
+web/dist/
 __pycache__/
 *.py[cod]
 .pytest_cache/

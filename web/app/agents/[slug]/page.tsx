@@ -46,6 +46,11 @@ export default async function AgentPage({ params }: AgentPageProps) {
           <span className="eyebrow">{agent.category}</span>
           <h1>{agent.name}</h1>
           <p>{agent.summary}</p>
+          <div className="page-meta agent-meta">
+            <span>60–90 minute lab</span>
+            <span>{agent.status} model path</span>
+            <span>Runnable source included</span>
+          </div>
         </div>
         <div className="agent-links">
           <a className="primary-action" href={agent.githubUrl} rel="noreferrer" target="_blank">
@@ -58,6 +63,16 @@ export default async function AgentPage({ params }: AgentPageProps) {
       </section>
 
       <section className="detail-layout">
+        <article className="detail-card wide">
+          <span className="eyebrow">How to use this page</span>
+          <h2>Read, run, inspect, then change one constraint.</h2>
+          <p>
+            Spend about 15 minutes on the architecture, 20–30 minutes running and tracing the command, and the
+            remaining time changing a prompt, tool, model, or failure path. The lesson is complete when you can explain
+            the tradeoff from evidence rather than from the happy-path output.
+          </p>
+        </article>
+
         <article className="detail-card wide">
           <span className="eyebrow">Problem</span>
           <h2>What this agent demonstrates</h2>

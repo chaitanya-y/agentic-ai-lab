@@ -16,8 +16,12 @@ export function AgentExplorer() {
   return (
     <section className="explorer" id="agents">
       <div className="section-heading">
-        <span className="eyebrow">Agent catalog</span>
-        <h2>Pick a system, inspect its architecture, then jump to the source.</h2>
+        <span className="eyebrow">Runnable repository labs</span>
+        <h2>Read the concept, then inspect a system that makes it concrete.</h2>
+        <p>
+          These are implementation pages, not additional curriculum phases. Most labs take 60–90 minutes to read,
+          configure, run, and compare with the written lesson.
+        </p>
       </div>
 
       <div className="tabs" role="tablist" aria-label="Agent categories">
@@ -42,6 +46,7 @@ export function AgentExplorer() {
             </div>
             <h3>{agent.name}</h3>
             <p>{agent.summary}</p>
+            <p className="agent-time">Estimated lab time · 60–90 minutes</p>
             <div className="concept-list">
               {agent.concepts.slice(0, 3).map((concept) => (
                 <span key={concept}>{concept}</span>

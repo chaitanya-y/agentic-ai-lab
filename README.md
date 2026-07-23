@@ -113,6 +113,7 @@ src/
 docs/
   langgraph_orchestration_notes.md  # Notes on graph orchestration concepts
   publishing.md                     # Public repo checklist
+  session_context.md                # Sanitized project/session context notes
 
 data/
   README.md                         # Sample data instructions

@@ -22,6 +22,8 @@ export type Agent = {
 };
 
 export const repoUrl = "https://github.com/chaitanya-y/agentic-ai-lab";
+export const profileUrl = "https://github.com/chaitanya-y";
+export const issuesUrl = `${repoUrl}/issues`;
 const mainBranchUrl = `${repoUrl}/blob/main`;
 
 export const agents: Agent[] = [

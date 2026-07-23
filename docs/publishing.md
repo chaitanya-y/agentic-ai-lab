@@ -38,6 +38,7 @@ web/lib/agents.ts
 data/README.md
 docs/langgraph_orchestration_notes.md
 docs/publishing.md
+docs/session_context.md
 src/utils/token_usage.py
 src/utils/demo_io.py
 src/retrieval/semantic_search.py

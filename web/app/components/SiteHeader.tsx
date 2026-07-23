@@ -1,18 +1,20 @@
+import Link from "next/link";
 import { repoUrl } from "../../lib/agents";
 
 export function SiteHeader() {
   return (
     <header className="site-header">
-      <a className="brand" href="/">
+      <Link className="brand" href="/" aria-label="Agentic AI Lab home">
         Agentic AI Lab
-      </a>
+      </Link>
       <nav aria-label="Primary navigation">
-        <a href="/#roadmap">Roadmap</a>
-        <a href="/#agents">Agents</a>
-        <a href="/#systems">Systems</a>
-        <a href="/blog">Blog</a>
-        <a href={repoUrl} rel="noreferrer" target="_blank">
-          GitHub
+        <Link href="/#contents">Contents</Link>
+        <Link href="/catalog">Catalog</Link>
+        <Link href="/roadmap">Roadmap</Link>
+        <Link href="/glossary">Glossary</Link>
+        <Link href="/blog">About</Link>
+        <a className="header-github" href={repoUrl} rel="noreferrer" target="_blank">
+          GitHub ↗
         </a>
       </nav>
     </header>
