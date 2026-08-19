@@ -1,5 +1,6 @@
 import { curriculum, totalHours } from "../../lib/curriculum";
 import { RoadmapLessonList } from "../components/RoadmapLessonList";
+import { VisitMarker } from "../components/VisitMarker";
 
 export const metadata = {
   title: "Agentic Engineering Roadmap",
@@ -10,6 +11,7 @@ export const metadata = {
 export default function RoadmapPage() {
   return (
     <main className="inner-page">
+      <VisitMarker page="roadmap" />
       <section className="page-hero roadmap-hero">
         <p className="eyebrow">120 hour roadmap</p>
         <h1>Agentic AI engineering roadmap.</h1>
