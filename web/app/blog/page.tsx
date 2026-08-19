@@ -1,5 +1,6 @@
-import Link from "next/link";
 import { linkedinUrl } from "../../lib/agents";
+import { RoadmapLink } from "../components/GuidedLinks";
+import { VisitMarker } from "../components/VisitMarker";
 
 export const metadata = {
   title: "Why I Started Agentic AI Lab",
@@ -10,6 +11,7 @@ export const metadata = {
 export default function BlogPage() {
   return (
     <main className="article-page">
+      <VisitMarker page="whyLab" />
       <header className="article-hero">
         <p className="article-reading-time">About 3 minutes</p>
         <h1>Why I started Agentic AI Lab</h1>
@@ -51,9 +53,9 @@ export default function BlogPage() {
             to see how a frontend, backend, API, and database work together, then return here.
           </p>
           <div className="hero-actions">
-            <Link className="button button-dark" href="/roadmap">
+            <RoadmapLink className="button button-dark">
               View the roadmap
-            </Link>
+            </RoadmapLink>
           </div>
         </section>
       </article>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { curriculum } from "../lib/curriculum";
+import { RoadmapLink, WhyLabLink } from "./components/GuidedLinks";
 
 export default function Home() {
   return (
@@ -12,12 +13,12 @@ export default function Home() {
             about two months. Work through short lessons, runnable examples, and one capstone project.
           </p>
           <div className="hero-actions">
-            <Link className="button button-dark" href="/roadmap">
+            <RoadmapLink className="button button-dark">
               View the roadmap
-            </Link>
-            <Link className="button button-light" href="/blog">
+            </RoadmapLink>
+            <WhyLabLink className="button button-light">
               Why this lab
-            </Link>
+            </WhyLabLink>
           </div>
         </div>
       </section>
@@ -40,9 +41,9 @@ export default function Home() {
           ))}
         </div>
 
-        <Link className="button button-dark home-roadmap-link" href="/roadmap">
+        <RoadmapLink className="button button-dark home-roadmap-link">
           View the full roadmap →
-        </Link>
+        </RoadmapLink>
       </section>
     </main>
   );

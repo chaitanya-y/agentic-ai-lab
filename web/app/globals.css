@@ -3549,6 +3549,63 @@ button {
   margin-top: 32px;
 }
 
+.first-visit-nudge {
+  animation: first-visit-nudge 1s ease-in-out 8;
+}
+
+.roadmap-guidance-shimmer {
+  isolation: isolate;
+  overflow: hidden;
+  position: relative;
+}
+
+.roadmap-guidance-shimmer::after {
+  animation: roadmap-guidance-shimmer 3.6s ease-in-out 5;
+  background: linear-gradient(
+    104deg,
+    transparent 33%,
+    rgba(255, 250, 240, 0.12) 43%,
+    rgba(255, 250, 240, 0.3) 50%,
+    rgba(255, 250, 240, 0.12) 57%,
+    transparent 67%
+  );
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  transform: translateX(-135%) skewX(-14deg);
+  z-index: 1;
+}
+
+@keyframes first-visit-nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  45% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes roadmap-guidance-shimmer {
+  0%,
+  35% {
+    opacity: 0;
+    transform: translateX(-135%) skewX(-14deg);
+  }
+
+  48% {
+    opacity: 1;
+  }
+
+  70%,
+  100% {
+    opacity: 0;
+    transform: translateX(135%) skewX(-14deg);
+  }
+}
+
 .hero-estimate {
   background: rgba(255, 250, 240, 0.44);
   border: var(--line);
