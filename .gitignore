@@ -1,0 +1,16 @@
+# Local configuration
+.env
+.env.*
+
+# Website dependencies and build output
+node_modules/
+web/node_modules/
+web/.next/
+web/out/
+web/dist/
+.vercel/
+
+# OS/editor files
+.DS_Store
+.idea/
+.vscode/
