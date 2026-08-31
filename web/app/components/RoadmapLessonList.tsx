@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 type RoadmapLesson = {
   slug: string;
@@ -8,10 +9,11 @@ type RoadmapLesson = {
 };
 
 type RoadmapLessonListProps = {
+  isPublished: boolean;
   lessons: RoadmapLesson[];
 };
 
-export function RoadmapLessonList({ lessons }: RoadmapLessonListProps) {
+export function RoadmapLessonList({ isPublished, lessons }: RoadmapLessonListProps) {
   const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
@@ -26,12 +28,19 @@ export function RoadmapLessonList({ lessons }: RoadmapLessonListProps) {
   return (
     <>
       <div className="timeline-lessons">
-        {lessons.map((item) => (
-          <button className="roadmap-lesson-disabled" key={item.slug} onClick={() => setShowToast(true)} type="button">
-            <span>{item.title}</span>
-            <small>{item.time}</small>
-          </button>
-        ))}
+        {lessons.map((item) =>
+          isPublished ? (
+            <Link href={`/learn/${item.slug}`} key={item.slug}>
+              <span>{item.title}</span>
+              <small>{item.time}</small>
+            </Link>
+          ) : (
+            <button className="roadmap-lesson-disabled" key={item.slug} onClick={() => setShowToast(true)} type="button">
+              <span>{item.title}</span>
+              <small>{item.time}</small>
+            </button>
+          )
+        )}
       </div>
       {showToast ? (
         <p aria-live="polite" className="lesson-toast" role="status">

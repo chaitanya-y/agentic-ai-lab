@@ -1,4 +1,5 @@
 import { curriculum, totalHours } from "../../lib/curriculum";
+import { isPhasePublished } from "../../lib/siteStatus";
 import { RoadmapLessonList } from "../components/RoadmapLessonList";
 import { VisitMarker } from "../components/VisitMarker";
 
@@ -44,6 +45,7 @@ export default function RoadmapPage() {
               </div>
               <p>{phase.summary}</p>
               <RoadmapLessonList
+                isPublished={isPhasePublished(phase.id)}
                 lessons={phase.lessons.map(({ slug, time, title }) => ({ slug, time, title }))}
               />
             </div>
