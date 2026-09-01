@@ -3516,8 +3516,252 @@ a:not(.button):not(.primary-action):not(.secondary-action):visited {
 }
 
 .lesson-example {
-  border-left: 4px solid var(--coral);
-  padding-left: clamp(20px, 4vw, 32px);
+  background: rgba(215, 123, 77, 0.12);
+  border: 1px solid rgba(20, 33, 29, 0.22);
+  border-left: 5px solid var(--coral);
+  padding: clamp(24px, 5vw, 38px);
+}
+
+.lesson-concept-example {
+  background: rgba(185, 216, 223, 0.28);
+  border: 1px solid rgba(20, 33, 29, 0.22);
+  border-left: 5px solid var(--blue);
+  margin-top: 30px;
+  padding: clamp(22px, 4vw, 32px);
+}
+
+.lesson-reading-content .lesson-example-label {
+  color: var(--blue);
+  font-family: var(--site-font);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+}
+
+.lesson-concept-example h3 {
+  font-family: var(--site-font);
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+  margin: 0 0 18px;
+}
+
+.lesson-concept-example > p:not(.lesson-example-label) {
+  font-size: clamp(1rem, 1.6vw, 1.12rem);
+  line-height: 1.62;
+}
+
+.lesson-concept-example > p + p {
+  margin-top: 1em;
+}
+
+.content-review-page {
+  margin: 0 auto;
+  max-width: 1280px;
+  padding: 150px clamp(24px, 6vw, 88px) 100px;
+}
+
+.content-review-hero {
+  background:
+    radial-gradient(circle at 92% 8%, rgba(185, 216, 223, 0.52), transparent 22rem),
+    var(--reading-surface);
+  border: var(--line);
+  border-radius: 36px;
+  box-shadow: 0 20px 64px rgba(20, 33, 29, 0.08);
+  margin-top: 34px;
+  padding: clamp(34px, 7vw, 76px);
+}
+
+.content-review-hero h1 {
+  font-family: var(--site-font);
+  font-size: clamp(2.8rem, 7vw, 6.6rem);
+  font-weight: 500;
+  letter-spacing: -0.065em;
+  line-height: 0.95;
+  margin: 18px 0 26px;
+  max-width: 980px;
+}
+
+.content-review-hero > p:not(.eyebrow) {
+  color: var(--muted);
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  line-height: 1.65;
+  margin: 0;
+  max-width: 780px;
+}
+
+.content-review-facts {
+  border-top: 1px solid rgba(20, 33, 29, 0.25);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px 44px;
+  margin-top: 42px;
+  padding-top: 22px;
+}
+
+.content-review-facts span {
+  align-items: baseline;
+  color: var(--muted);
+  display: flex;
+  font-family: var(--site-font);
+  font-size: 13px;
+  gap: 8px;
+}
+
+.content-review-facts strong {
+  color: var(--ink);
+  font-size: 22px;
+}
+
+.content-review-lessons {
+  display: grid;
+  gap: 90px;
+  margin-top: 90px;
+}
+
+.content-review-lesson {
+  display: grid;
+  gap: clamp(32px, 5vw, 70px);
+  grid-template-columns: minmax(220px, 0.35fr) minmax(0, 1fr);
+}
+
+.content-review-lesson-heading {
+  align-self: start;
+  position: sticky;
+  top: 110px;
+}
+
+.content-review-lesson-heading > span {
+  color: var(--blue);
+  display: block;
+  font-family: var(--site-font);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: 14px;
+}
+
+.content-review-lesson-heading h2 {
+  font-family: var(--site-font);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.content-review-changes {
+  border-top: 1px solid var(--ink);
+}
+
+.content-review-change {
+  border-bottom: 1px solid rgba(20, 33, 29, 0.28);
+  padding: 28px 0 34px;
+}
+
+.content-review-change-heading {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  margin-bottom: 22px;
+}
+
+.content-review-change-heading h3 {
+  font-family: var(--site-font);
+  font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.content-review-badge {
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-family: var(--site-font);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 6px 9px;
+  text-transform: uppercase;
+}
+
+.content-review-badge-added {
+  color: #3b653f;
+}
+
+.content-review-badge-renamed {
+  color: var(--coral);
+}
+
+.content-review-badge-revised {
+  color: var(--blue);
+}
+
+.content-review-comparison {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.content-review-comparison-single {
+  grid-template-columns: 1fr;
+}
+
+.content-review-comparison > div {
+  background: rgba(255, 250, 240, 0.72);
+  border: 1px solid rgba(20, 33, 29, 0.2);
+  padding: clamp(20px, 3vw, 28px);
+}
+
+.content-review-comparison > div:last-child {
+  background: rgba(185, 216, 223, 0.24);
+  border-color: rgba(37, 75, 98, 0.34);
+}
+
+.content-review-comparison p {
+  color: var(--muted);
+  font-family: var(--site-font);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin: 0 0 14px;
+  text-transform: uppercase;
+}
+
+.content-review-comparison blockquote {
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.65;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .content-review-page {
+    padding-top: 120px;
+  }
+
+  .content-review-lesson {
+    grid-template-columns: 1fr;
+  }
+
+  .content-review-lesson-heading {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .content-review-hero {
+    border-radius: 24px;
+  }
+
+  .content-review-comparison {
+    grid-template-columns: 1fr;
+  }
 }
 
 .lesson-pagination {

@@ -88,8 +88,8 @@ export default async function LessonPage({ params }: LessonPageProps) {
       </header>
 
       <div className="lesson-content-layout">
-        <aside className="lesson-table-of-contents" aria-label="On this page">
-          <p>On this page</p>
+        <aside className="lesson-table-of-contents" aria-label="Lesson topics">
+          <p>Lesson topics</p>
           <nav>
             {sections.map((section) => (
               <a href={`#${section.id}`} key={section.id}>
@@ -109,11 +109,23 @@ export default async function LessonPage({ params }: LessonPageProps) {
                   <GlossaryText text={paragraph} />
                 </p>
               ))}
+              {section.example ? (
+                <aside className="lesson-concept-example" aria-label={`${section.title} example`}>
+                  <p className="lesson-example-label">Example</p>
+                  <h3>{section.example.title}</h3>
+                  {section.example.content.map((paragraph, paragraphIndex) => (
+                    <p data-note-anchor={`${section.id}-example-${paragraphIndex}`} key={paragraph} tabIndex={-1}>
+                      <GlossaryText text={paragraph} />
+                    </p>
+                  ))}
+                </aside>
+              ) : null}
             </section>
           ))}
 
           <section className="lesson-example" id="customer-service-example">
-            <h2>Example: Customer Service Agent</h2>
+            <p className="lesson-example-label">Lesson example</p>
+            <h2>Customer Service Agent</h2>
             <p data-note-anchor="customer-service-example-0" tabIndex={-1}>
               <GlossaryText text={item.example} />
             </p>

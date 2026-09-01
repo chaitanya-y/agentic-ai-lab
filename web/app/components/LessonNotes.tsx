@@ -2,21 +2,26 @@
 
 import { useEffect, useState } from "react";
 
+type NoteFragment = {
+  anchorId: string;
+  endOffset: number;
+  startOffset: number;
+};
+
 type SavedNote = {
   id: string;
-  anchorId: string;
+  anchorId?: string;
   endOffset?: number;
+  fragments?: NoteFragment[];
   note: string;
   startOffset?: number;
   selectedText: string;
 };
 
 type PendingSelection = {
-  anchorId: string;
-  endOffset: number;
+  fragments: NoteFragment[];
   left: number;
   selectedText: string;
-  startOffset: number;
   top: number;
 };
 
@@ -40,19 +45,42 @@ function getTextOffset(container: HTMLElement, node: Node, offset: number) {
   const range = document.createRange();
   range.selectNodeContents(container);
   range.setEnd(node, offset);
-  return range.toString().length;
+  const fragment = range.cloneContents();
+  fragment.querySelectorAll(".term-tooltip-definition").forEach((definition) => definition.remove());
+  return fragment.textContent?.length ?? 0;
+}
+
+function getVisibleTextNodes(container: HTMLElement) {
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      return node.parentElement?.closest(".term-tooltip-definition")
+        ? NodeFilter.FILTER_REJECT
+        : NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const textNodes: Text[] = [];
+  let textNode = walker.nextNode() as Text | null;
+
+  while (textNode) {
+    textNodes.push(textNode);
+    textNode = walker.nextNode() as Text | null;
+  }
+
+  return textNodes;
+}
+
+function getVisibleText(container: HTMLElement) {
+  return getVisibleTextNodes(container).map((node) => node.data).join("");
 }
 
 function getRangeForOffsets(container: HTMLElement, startOffset: number, endOffset: number) {
-  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
   let endNode: Text | null = null;
   let endNodeOffset = 0;
   let startNode: Text | null = null;
   let startNodeOffset = 0;
   let totalLength = 0;
-  let textNode = walker.nextNode() as Text | null;
 
-  while (textNode) {
+  for (const textNode of getVisibleTextNodes(container)) {
     const nextLength = totalLength + textNode.data.length;
 
     if (!startNode && startOffset >= totalLength && startOffset <= nextLength) {
@@ -67,7 +95,6 @@ function getRangeForOffsets(container: HTMLElement, startOffset: number, endOffs
     }
 
     totalLength = nextLength;
-    textNode = walker.nextNode() as Text | null;
   }
 
   if (!startNode || !endNode || startOffset >= endOffset) {
@@ -78,6 +105,23 @@ function getRangeForOffsets(container: HTMLElement, startOffset: number, endOffs
   range.setStart(startNode, startNodeOffset);
   range.setEnd(endNode, endNodeOffset);
   return range;
+}
+
+function getNoteFragments(note: SavedNote): NoteFragment[] {
+  if (note.fragments?.length) {
+    return note.fragments;
+  }
+
+  if (
+    note.anchorId &&
+    note.startOffset !== undefined &&
+    note.endOffset !== undefined &&
+    note.startOffset < note.endOffset
+  ) {
+    return [{ anchorId: note.anchorId, startOffset: note.startOffset, endOffset: note.endOffset }];
+  }
+
+  return [];
 }
 
 function clearFallbackHighlights() {
@@ -97,26 +141,19 @@ function clearFallbackHighlights() {
   });
 }
 
-function addFallbackHighlight(container: HTMLElement, note: SavedNote) {
-  if (note.startOffset === undefined || note.endOffset === undefined || note.startOffset >= note.endOffset) {
+function addFallbackHighlight(container: HTMLElement, fragment: NoteFragment, noteId: string) {
+  if (fragment.startOffset >= fragment.endOffset) {
     return;
   }
 
-  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
-  const textNodes: Text[] = [];
-  let textNode = walker.nextNode() as Text | null;
-
-  while (textNode) {
-    textNodes.push(textNode);
-    textNode = walker.nextNode() as Text | null;
-  }
+  const textNodes = getVisibleTextNodes(container);
 
   let totalLength = 0;
 
   textNodes.forEach((node) => {
     const nextLength = totalLength + node.data.length;
-    const start = Math.max(note.startOffset ?? 0, totalLength);
-    const end = Math.min(note.endOffset ?? 0, nextLength);
+    const start = Math.max(fragment.startOffset, totalLength);
+    const end = Math.min(fragment.endOffset, nextLength);
 
     if (start < end && node.parentNode) {
       const from = start - totalLength;
@@ -129,7 +166,7 @@ function addFallbackHighlight(container: HTMLElement, note: SavedNote) {
 
       const highlight = document.createElement("mark");
       highlight.className = "saved-note-highlight";
-      highlight.dataset.savedNoteHighlight = note.id;
+      highlight.dataset.savedNoteHighlight = noteId;
       highlight.textContent = node.data.slice(from, to);
       fragment.appendChild(highlight);
 
@@ -178,7 +215,12 @@ export function LessonNotes({ lessonSlug }: LessonNotesProps) {
       const parsedNotes = JSON.parse(savedNotes);
 
       if (Array.isArray(parsedNotes)) {
-        setNotes(parsedNotes);
+        setNotes(parsedNotes.filter((note): note is SavedNote => (
+          Boolean(note) &&
+          typeof note.id === "string" &&
+          typeof note.selectedText === "string" &&
+          typeof note.note === "string"
+        )));
       }
     } catch {
       window.localStorage.removeItem(storageKey);
@@ -197,26 +239,24 @@ export function LessonNotes({ lessonSlug }: LessonNotesProps) {
       clearFallbackHighlights();
 
       notes.forEach((note) => {
-        const anchor = document.querySelector<HTMLElement>(`[data-note-anchor="${note.anchorId}"]`);
+        getNoteFragments(note).forEach((fragment) => {
+          const anchor = document.querySelector<HTMLElement>(`[data-note-anchor="${fragment.anchorId}"]`);
 
-        if (anchor) {
-          addFallbackHighlight(anchor, note);
-        }
+          if (anchor) {
+            addFallbackHighlight(anchor, fragment, note.id);
+          }
+        });
       });
 
       return () => clearFallbackHighlights();
     }
 
     clearFallbackHighlights();
-    const ranges = notes.flatMap((note) => {
-      if (note.startOffset === undefined || note.endOffset === undefined) {
-        return [];
-      }
-
-      const anchor = document.querySelector<HTMLElement>(`[data-note-anchor="${note.anchorId}"]`);
-      const range = anchor ? getRangeForOffsets(anchor, note.startOffset, note.endOffset) : null;
+    const ranges = notes.flatMap((note) => getNoteFragments(note).flatMap((fragment) => {
+      const anchor = document.querySelector<HTMLElement>(`[data-note-anchor="${fragment.anchorId}"]`);
+      const range = anchor ? getRangeForOffsets(anchor, fragment.startOffset, fragment.endOffset) : null;
       return range ? [range] : [];
-    });
+    }));
 
     highlights.set("agentic-ai-lab-notes", new HighlightConstructor(...ranges));
     return () => {
@@ -231,32 +271,61 @@ export function LessonNotes({ lessonSlug }: LessonNotesProps) {
       }
 
       const selection = window.getSelection();
-      const selectedText = selection?.toString().replace(/\s+/g, " ").trim();
       const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
       const lessonContent = document.querySelector<HTMLElement>(`[data-lesson-slug="${lessonSlug}"]`);
       const selectionStart = getSelectionElement(range?.startContainer ?? null);
       const selectionEnd = getSelectionElement(range?.endContainer ?? null);
 
-      if (!selectedText || !range || !lessonContent || !selectionStart || !selectionEnd || !lessonContent.contains(selectionStart) || !lessonContent.contains(selectionEnd)) {
+      if (!selection?.toString().trim() || !range || !lessonContent || !selectionStart || !selectionEnd || !lessonContent.contains(selectionStart) || !lessonContent.contains(selectionEnd)) {
         setPendingSelection(null);
         return;
       }
 
-      const anchor = selectionStart.closest<HTMLElement>("[data-note-anchor]");
-      const endAnchor = selectionEnd.closest<HTMLElement>("[data-note-anchor]");
+      const fragments = Array.from(lessonContent.querySelectorAll<HTMLElement>("[data-note-anchor]"))
+        .filter((anchor) => {
+          try {
+            return range.intersectsNode(anchor);
+          } catch {
+            return false;
+          }
+        })
+        .map((anchor) => {
+          const visibleText = getVisibleText(anchor);
+          const startOffset = anchor.contains(range.startContainer)
+            ? getTextOffset(anchor, range.startContainer, range.startOffset)
+            : 0;
+          const endOffset = anchor.contains(range.endContainer)
+            ? getTextOffset(anchor, range.endContainer, range.endOffset)
+            : visibleText.length;
+
+          return {
+            anchorId: anchor.dataset.noteAnchor ?? "",
+            endOffset: Math.min(endOffset, visibleText.length),
+            startOffset: Math.max(startOffset, 0)
+          };
+        })
+        .filter((fragment) => fragment.anchorId && fragment.startOffset < fragment.endOffset);
       const selectionRect = range.getBoundingClientRect();
 
-      if (!anchor || anchor !== endAnchor || !selectionRect.width) {
+      if (!fragments.length || !selectionRect.width) {
         setPendingSelection(null);
         return;
       }
 
+      const selectedText = fragments
+        .map((fragment) => {
+          const anchor = document.querySelector<HTMLElement>(`[data-note-anchor="${fragment.anchorId}"]`);
+          return anchor
+            ? getVisibleText(anchor).slice(fragment.startOffset, fragment.endOffset).replace(/\s+/g, " ").trim()
+            : "";
+        })
+        .filter(Boolean)
+        .join("\n\n");
+
       setPendingSelection({
-        anchorId: anchor.dataset.noteAnchor ?? "",
-        endOffset: getTextOffset(anchor, range.endContainer, range.endOffset),
+        fragments,
         left: Math.min(Math.max(selectionRect.left, 12), window.innerWidth - 152),
         selectedText,
-        startOffset: getTextOffset(anchor, range.startContainer, range.startOffset),
         top: Math.max(selectionRect.top - 48, 12)
       });
     };
@@ -291,11 +360,10 @@ export function LessonNotes({ lessonSlug }: LessonNotesProps) {
     }
 
     const savedNote: SavedNote = {
-      anchorId: pendingSelection.anchorId,
-      endOffset: pendingSelection.endOffset,
+      anchorId: pendingSelection.fragments[0]?.anchorId,
+      fragments: pendingSelection.fragments,
       id: window.crypto.randomUUID(),
       note: noteText.trim(),
-      startOffset: pendingSelection.startOffset,
       selectedText: pendingSelection.selectedText
     };
 
@@ -319,7 +387,10 @@ export function LessonNotes({ lessonSlug }: LessonNotesProps) {
   };
 
   const jumpToNote = (note: SavedNote) => {
-    const target = document.querySelector<HTMLElement>(`[data-note-anchor="${note.anchorId}"]`);
+    const firstAnchorId = getNoteFragments(note)[0]?.anchorId ?? note.anchorId;
+    const target = firstAnchorId
+      ? document.querySelector<HTMLElement>(`[data-note-anchor="${firstAnchorId}"]`)
+      : null;
 
     setIsNotesOpen(false);
 

@@ -5,6 +5,10 @@ export type GlossaryTerm = {
 
 export const glossaryTerms: GlossaryTerm[] = [
   {
+    term: "generative AI",
+    definition: "A category of artificial intelligence that produces new content such as text, code, images, audio, or video from learned patterns and the input it receives."
+  },
+  {
     term: "neural network",
     definition: "A mathematical model made of many learned numerical transformations. It changes input data into a prediction by applying its learned parameters."
   },
@@ -61,8 +65,20 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition: "Training with comparisons between candidate answers so a model learns which response better meets a quality or policy standard."
   },
   {
+    term: "generalization",
+    definition: "The ability to apply learned patterns to inputs that were not reproduced exactly in the training data. It does not give a model access to current facts."
+  },
+  {
     term: "RLHF",
     definition: "Reinforcement Learning from Human Feedback. A family of methods that uses human preference signals to shape a model's responses after pretraining."
+  },
+  {
+    term: "reward model",
+    definition: "A learned model that scores candidate responses according to preference data and a review rubric. Its score is not proof that a response is correct."
+  },
+  {
+    term: "PPO",
+    definition: "Proximal Policy Optimization. A reinforcement learning algorithm that can update a language model toward responses receiving higher reward while limiting how far each update moves from a reference model."
   },
   {
     term: "DPO",
@@ -101,6 +117,18 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition: "A numerical technique that keeps values in a stable range so a deep network can train and run predictably."
   },
   {
+    term: "Mixture of Experts",
+    definition: "A transformer design with several expert feed forward networks and a learned router that selects a limited subset to process each token."
+  },
+  {
+    term: "router",
+    definition: "The learned component in a Mixture of Experts model that selects which experts process each token representation."
+  },
+  {
+    term: "active parameters",
+    definition: "The subset of a model's parameters used to process a particular token. In a Mixture of Experts model, this includes shared components and the selected experts."
+  },
+  {
     term: "loss function",
     definition: "A numerical measure of how far a model prediction is from the expected answer. Training tries to reduce it."
   },
@@ -129,6 +157,34 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition: "A provider optimization that can reuse processing for an identical stable prompt prefix across requests. It is separate from the model's internal KV cache."
   },
   {
+    term: "serving system",
+    definition: "The runtime software and infrastructure that loads a trained model, schedules requests, manages memory, performs inference, and returns results to applications."
+  },
+  {
+    term: "temperature",
+    definition: "A decoding setting that reshapes the next token probability distribution. Lower values usually concentrate probability on likely tokens, while higher values spread it more broadly."
+  },
+  {
+    term: "top p",
+    definition: "A sampling control that limits candidate tokens to the smallest set whose combined probability reaches a chosen threshold."
+  },
+  {
+    term: "quantization",
+    definition: "Representing model weights or activations with fewer bits to reduce memory use and sometimes improve inference speed, with a possible effect on model quality."
+  },
+  {
+    term: "TTFT",
+    definition: "Time to first token. The elapsed time between sending a request and receiving the first generated token."
+  },
+  {
+    term: "ITL",
+    definition: "Inter token latency. The time between consecutive generated tokens after a response has started."
+  },
+  {
+    term: "TTLT",
+    definition: "Time to last token. The total elapsed time between sending a request and receiving the completed generated response."
+  },
+  {
     term: "LLM API",
     definition: "A network interface that lets an application send a model request and receive generated output, usage, and operational metadata from a model provider."
   },
@@ -143,6 +199,14 @@ export const glossaryTerms: GlossaryTerm[] = [
   {
     term: "idempotency",
     definition: "A property of an operation where repeating the same approved request does not create an additional side effect."
+  },
+  {
+    term: "provenance",
+    definition: "Information about where data came from, how it was produced, and which version or source supplied it."
+  },
+  {
+    term: "agent",
+    definition: "An LLM application in which a model can propose the next action from a bounded set while application code controls permissions, execution, state, and stopping conditions."
   },
   {
     term: "grounding",

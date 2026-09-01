@@ -4,6 +4,12 @@ export type LessonSection = {
   id: string;
   title: string;
   content: string[];
+  example?: LessonSectionExample;
+};
+
+export type LessonSectionExample = {
+  content: string[];
+  title: string;
 };
 
 export type LessonSectionOutline = {
@@ -11,6 +17,7 @@ export type LessonSectionOutline = {
   title: string;
   start: number;
   end?: number;
+  example?: LessonSectionExample;
 };
 
 export type Lesson = {
@@ -51,7 +58,18 @@ const lesson = (
   format: LessonFormat = "Concept",
   sectionOutline?: LessonSectionOutline[],
   sections?: LessonSection[]
-): Lesson => ({ slug, title, time, format, summary, content, sectionOutline, sections, example, concepts });
+): Lesson => ({
+  slug,
+  title,
+  time,
+  format,
+  summary,
+  content: sections ? sections.flatMap((section) => section.content) : content,
+  sectionOutline,
+  sections,
+  example,
+  concepts
+});
 
 export function getLessonSections(item: Lesson): LessonSection[] {
   if (item.sections) {
@@ -59,10 +77,11 @@ export function getLessonSections(item: Lesson): LessonSection[] {
   }
 
   if (item.sectionOutline) {
-    return item.sectionOutline.map(({ id, title, start, end }) => ({
+    return item.sectionOutline.map(({ id, title, start, end, example }) => ({
       id,
       title,
-      content: item.content.slice(start, end)
+      content: item.content.slice(start, end),
+      example
     }));
   }
 
@@ -86,7 +105,7 @@ export const curriculum: CurriculumPhase[] = [
         "what-is-a-large-language-model",
         "What Is a Large Language Model?",
         "3 hours",
-        "Understand how an LLM generates language, what it can and cannot know, and where it belongs in a software system.",
+        "Learn what generative AI and large language models are, how LLMs represent and generate language, and how they should be used within a software application.",
         [
           "A large language model, or LLM, is a neural network trained to continue a sequence of language. Given the text that came before, it estimates which small piece of text is most likely to come next. It then uses the new piece as part of its input and repeats the process. A response that appears to be a single, coherent thought is therefore produced incrementally, one token after another.",
           "A token is not always a word. It may be a whole word, part of a word, punctuation, a number, or a fragment of source code. Before a model can process a request, a tokenizer converts the text into token IDs. The model operates on those IDs rather than on human readable characters. This detail matters to engineers because tokens determine the size of a request, the usable context window, the cost of a call, and part of the latency a user experiences. The next lesson studies those tradeoffs in depth.",
@@ -103,18 +122,40 @@ export const curriculum: CurriculumPhase[] = [
           "By the end of this phase, you should be able to look at an AI feature and identify three things. The first is the language task assigned to the model. The second is the trusted information the model needs for that task. The third is the decision or action that must stay in application code. That mental model is the foundation for prompts, retrieval, tool use, agent workflows, and evaluation. We will add implementation examples once the course reaches the API and application integration lesson. This lesson deliberately establishes the system model before introducing a framework."
         ],
         "In the Customer Service Agent, the model receives a customer message and produces a structured proposal with the likely issue, requested outcome, and missing details. The application retrieves the authenticated customer’s order, applies the refund rules, and records any approved action. If the policy is unclear or the evidence is missing, the application asks a follow up question or routes the case to a person instead of asking the model to guess.",
-        ["tokens", "next token prediction", "autoregressive generation", "runtime context", "grounding", "application boundaries"],
+        ["generative AI", "tokens", "next token prediction", "autoregressive generation", "runtime context", "grounding", "application boundaries"],
         "Concept",
         undefined,
         [
           {
-            id: "the-working-model",
-            title: "LLM Systems",
+            id: "generative-ai",
+            title: "Generative AI",
             content: [
-              "Start with a concrete picture. An LLM is a trained neural network that receives text, produces a probability distribution for what could come next, and then repeatedly turns that distribution into more text. ChatGPT, Claude, Gemini, and a local model runner are products built around this core capability. A chat interface adds messages, account controls, file handling, tools, safety layers, and a user experience. The language model is an important component inside that product, but it is not the whole product.",
-              "A helpful simplification is to imagine a model artifact as learned parameters plus software that knows how to run them. The parameters are a large collection of numbers obtained through training. The runtime loads those numbers, applies the model architecture, and returns a prediction. In a real deployment there are additional pieces such as a tokenizer, a model configuration, model versions, serving infrastructure, and access controls. The simplification is still useful because it separates the difficult part, learning the parameters, from the repeatable part, using them for inference.",
-              "This distinction explains why a model can be expensive to create but comparatively convenient to call. Training may require a large curated dataset, specialized hardware, distributed systems, and many optimization steps. Inference uses the already learned parameters to handle a new request. An application engineer usually works on the inference side. You select a model, decide what context it receives, inspect the result, and connect it safely to the rest of the system. You do not need to train a frontier model to understand its operating model."
-            ]
+              "Generative AI is a category of artificial intelligence that produces new content in response to an input. The generated content may be text, source code, images, audio, video, or another data form. A generative model learns patterns from training data and uses those patterns to produce an output that fits the request and the context it receives.",
+              "Generative systems differ from models that only classify or predict a fixed label. A spam classifier might choose between spam and not spam. A generative model can draft a reply, summarize a message, produce a structured record, or create an image. The output is newly constructed from learned patterns, although parts of it may resemble material encountered during training. Generated content is not automatically original, factual, current, or safe to use without review.",
+              "Large language models are one important family of generative models. They work primarily with language and code by generating sequences of tokens. Other generative models work with images, speech, music, or video, and some models accept and produce several data types. Agentic AI Lab concentrates on language models because LLM applications and agents use language to interpret requests, work with documents, call software tools, and communicate results."
+            ],
+            example: {
+              title: "Generating a support response",
+              content: [
+                "A customer writes that a replacement arrived damaged. A generative language model can produce a concise issue summary and draft a response in the company’s preferred tone. The application must still retrieve the authenticated order, check the current policy, and approve any action. Generating an explanation and establishing the facts are separate responsibilities."
+              ]
+            }
+          },
+          {
+            id: "the-working-model",
+            title: "Large Language Models",
+            content: [
+              "A large language model, or LLM, is a neural network trained to estimate probability distributions over sequences of tokens. Given the tokens that already appear in a sequence, it calculates which tokens are plausible next steps. During generation, one token is selected, added to the sequence, and used to calculate the following distribution. Repeating this process produces a complete response.",
+              "The word large refers to the scale of the model, its training data, and the computation used to train it. A model can contain billions of learned parameters. These parameters are numerical weights that capture patterns found across language, code, and other training data. They are not rows in a knowledge database, and they do not provide a guaranteed or current record of the world.",
+              "A language model is different from a product built around one. A chat product can include conversation history, file handling, search, tools, account controls, safety checks, and a user interface. The LLM provides language interpretation and generation within that system. Application code remains responsible for data access, permissions, validation, state changes, and audit records.",
+              "A deployed model consists of learned parameters, a model architecture, a tokenizer, a configuration, and software that performs inference. Training creates the parameters. Inference uses those parameters to process a new request. Most application engineers work primarily with inference. They select a model, provide the appropriate context, inspect its output, and connect it to the rest of the system."
+            ],
+            example: {
+              title: "Customer request classification",
+              content: [
+                "A customer writes, ‘The replacement arrived with a cracked screen.’ The model can propose that the issue is a damaged replacement and identify that the order number is missing. It cannot determine eligibility from that sentence alone. The application must retrieve the authenticated order and apply the current policy before any action is approved."
+              ]
+            }
           },
           {
             id: "text-is-tokens",
@@ -123,7 +164,13 @@ export const curriculum: CurriculumPhase[] = [
               "People read words and sentences. A model reads token IDs. A token is a unit produced by a tokenizer, and it is not always a complete word. It can be a whole common word, part of a word, punctuation, whitespace, a number, or a fragment of code. The phrase ‘refund approved’ might become two tokens in one tokenizer and several in another. Before the model sees a prompt, the tokenizer converts text into a sequence of integer IDs. After generation, it converts the generated IDs back into text.",
               "Why not use whole words? A vocabulary made of complete words handles typos, names, product codes, new vocabulary, and languages that do not use spaces in the same way as English poorly. Why not use individual characters? Processing individual characters works in principle but creates very long sequences. Modern tokenizers typically use subword units, which balance a manageable vocabulary with a manageable sequence length. Byte Pair Encoding is one commonly used family of methods. It starts from small units and repeatedly merges frequently occurring pairs into larger units.",
               "Tokenization has practical consequences. It influences how much context fits in a request, how a provider meters usage, how quickly a model can process a prompt, and how well a model handles source code, numbers, or less common languages. It also means that a ‘word count’ is not a reliable engineering budget. When you build an application, use the tokenizer or usage fields associated with the model you actually call. The fourth lesson returns to tokens when we discuss cost, latency, and context limits."
-            ]
+            ],
+            example: {
+              title: "Product identifiers and token counts",
+              content: [
+                "The text ‘Order AX10492 needs review’ may be split differently by two tokenizers. One model may represent the identifier using a few tokens while another may divide it into several fragments. The meaning appears unchanged to the user, but the token count affects request size, cost, and the context available to the application."
+              ]
+            }
           },
           {
             id: "a-probability-model",
@@ -132,7 +179,13 @@ export const curriculum: CurriculumPhase[] = [
               "At a more precise level, a language model assigns probabilities to sequences of tokens. A well formed sentence such as ‘The customer received a damaged item’ is more likely under a good model of English and support conversations than a random sequence of the same tokens. The model is not checking a grammar rulebook or a database of every sentence. It has learned numerical patterns that make some continuations more likely than others in a given context.",
               "Autoregressive language models express this with the chain rule of probability. Instead of attempting to predict an entire sentence in one step, the model represents a sequence as a series of next token predictions. P(x_1, ..., x_n) = P(x_1) × P(x_2 | x_1) × ... × P(x_n | x_1, ..., x_{n-1}). There is no approximation in this decomposition. The engineering choice is to model each conditional distribution with a neural network and then generate one token after another.",
               "For a prompt ending with ‘The customer wants a’, the model may assign higher probability to ‘refund’, ‘replacement’, or ‘manager’ than to unrelated tokens. Those values form a probability distribution. The probabilities add to one across the vocabulary, but the distribution is not a statement of truth. It represents the model’s learned expectation of plausible continuation given its current input. A fluent answer is therefore evidence that a continuation fit the model’s patterns, not evidence that it was verified against your company’s current data."
-            ]
+            ],
+            example: {
+              title: "A next token distribution",
+              content: [
+                "For the unfinished text ‘The customer requested a’, an illustrative distribution might assign 48 percent to ‘refund’, 22 percent to ‘replacement’, and 8 percent to ‘callback’, with the remaining probability distributed across other tokens. These values describe plausible continuations. They do not prove what the customer is entitled to receive."
+              ]
+            }
           },
           {
             id: "generation-is-a-loop",
@@ -141,7 +194,13 @@ export const curriculum: CurriculumPhase[] = [
               "Generation is a loop. The application provides a prompt. The model produces scores for possible next tokens. A decoding method selects one token, adds it to the sequence, and asks the model to predict again. The loop ends when the model emits a stop token, reaches a configured output limit, or the application decides it has enough output. What users see as one answer is the visible result of many small prediction and selection steps.",
               "The most likely token is not always selected. If generation always chose the single highest probability continuation, outputs could become repetitive or overly rigid. Sampling controls decide how much variation is allowed. Lower temperature settings place more weight on highly likely tokens and are often appropriate for extraction or classification. Higher variation can be useful for ideation or draft writing, but it also increases behavioral variance. These controls shape the model’s wording. They do not turn uncertain source material into reliable fact.",
               "Autoregressive generation also explains two product behaviors. First, answers can stream. The provider can return text as each new token is produced instead of waiting for the whole answer. Second, generation is inherently sequential. The model cannot generate the tenth new token until the ninth exists. A longer response therefore tends to take longer than a short structured result. The inference lesson examines the prefill and decoding work behind this in more detail."
-            ]
+            ],
+            example: {
+              title: "Generating one token at a time",
+              content: [
+                "The model first receives ‘Your refund has’. It selects ‘been’, then evaluates ‘Your refund has been’ and selects ‘approved’. The response grows one token at a time. This is why output can be streamed and why longer responses generally require more generation time."
+              ]
+            }
           },
           {
             id: "parameters-and-training",
@@ -150,16 +209,28 @@ export const curriculum: CurriculumPhase[] = [
               "A neural network is a mathematical function with adjustable parameters. During training, it receives an input sequence, predicts a next token, compares that prediction with the token that actually followed in the training data, and adjusts the parameters to make similar mistakes less likely in future. A loss function measures the difference between the prediction and the expected token. For language modelling, cross entropy is the standard loss. It penalises the model when it assigns too little probability to the token that actually occurred.",
               "The parameters are not rows in a database. No single number is ‘the refund policy,’ ‘the Python syntax rule,’ or ‘the answer to a history question.’ Information is distributed across many values and layers of the network. This is why models can generalise from related examples, but it is also why they can fail in surprising ways. The model may answer a fact in one wording and fail to retrieve the same relationship when asked from the opposite direction. We can inspect behaviour and measure it, but we do not have a complete human readable map of how every learned pattern is represented internally.",
               "Thinking of a model as a lossy compression of a large body of text is a useful intuition with an important limitation. A model compresses statistical structure, relationships, styles, and fragments of knowledge into its parameters, but it is not a lossless archive and it does not perform a live lookup of its training data. It can reproduce a memorized fragment, synthesize a correct explanation from learned patterns, or generate a plausible but wrong detail. The same mechanism produces both the capability and the uncertainty."
-            ]
+            ],
+            example: {
+              title: "Learning from a prediction error",
+              content: [
+                "Suppose a training sequence ends with ‘The return requires manager approval’. If the model assigns little probability to ‘approval’, the loss is high. Training calculates how the model parameters contributed to that error and adjusts them slightly. Repeating this process across many sequences gradually improves next token prediction."
+              ]
+            }
           },
           {
             id: "why-capability-emerges",
-            title: "Emergent Capabilities",
+            title: "Capabilities and Limitations",
             content: [
-              "Next token prediction appears modest until you look at what good prediction requires. To continue a code sample, a model must learn patterns of syntax, APIs, names, and program structure. To continue a scientific article, it benefits from learning terminology, relationships, and common explanations. To continue a support conversation, it must distinguish a request, a complaint, a product reference, and an expected response format. Training on diverse language and code forces the model to build reusable internal representations for many such patterns.",
-              "This helps explain why one foundation model can summarise a document, classify a support message, draft a response, extract fields, translate text, or write a function. The tasks differ at the product level, but they can all be framed as continuing a sequence in an appropriate form. The prompt gives the model a temporary role and context. The model then uses patterns learned during training to make a continuation that resembles the requested task.",
-              "Capability is not the same as competence in every setting. A model may write a convincing explanation of a policy while using stale information. It may produce valid JSON with a wrong item identifier. It may suggest correct code that is unsuitable for the version of a library in your application. The question for an engineer is never only ‘Can this model produce language like this?’ It is also ‘What evidence does it need, what can go wrong, and what must verify the result?’"
-            ]
+              "Predicting the next token appears narrow, but accurate prediction across diverse language and code requires the model to learn many reusable patterns. Continuing a program requires patterns involving syntax, APIs, names, and program structure. Continuing a support conversation requires patterns involving intent, product references, missing information, and expected response formats.",
+              "This is why one general purpose model can summarize documents, classify messages, extract structured fields, translate text, draft responses, and assist with code. Each task can be expressed as producing an appropriate continuation from instructions, context, and examples.",
+              "These capabilities do not guarantee competence in every situation. A model may produce valid JSON containing an incorrect identifier, explain a policy using outdated information, or generate code for the wrong library version. Engineers must therefore define the required evidence, identify likely failure modes, and validate outputs according to the risk of the task."
+            ],
+            example: {
+              title: "Capability depends on evidence",
+              content: [
+                "A model can recognize that ‘the replacement arrived broken’ describes a damaged item request and produce a clear explanation. It cannot infer the authenticated order, delivery date, or current policy exception from language alone. Those facts must come from the application."
+              ]
+            }
           },
           {
             id: "base-models-and-assistants",
@@ -168,7 +239,13 @@ export const curriculum: CurriculumPhase[] = [
               "Pretraining creates a base model. It is a strong statistical continuation engine trained on broad data. A base model does not automatically behave like a cooperative assistant. Given a request, it may continue the text in the style of a web page, a transcript, or a document rather than answer directly. This is expected. Its objective was to continue sequences that resemble its training data, not to place a user’s instruction above all other text in a conversation.",
               "Post training changes this behaviour. In supervised fine tuning, models are trained on examples of instructions and desirable responses. Preference training then uses comparisons or feedback to make some responses more likely than others. These stages help a model follow a response format, ask a useful clarification question, refuse some requests, use structured output, or select an approved tool. The exact methods differ between model providers, but the product distinction is clear. An assistant model is a base capability shaped to participate in an interaction.",
               "This lesson introduces the distinction because it matters when you choose a model. The next lesson explains pretraining, instruction tuning, preference learning, and fine tuning in depth. For now, retain one boundary. Post training can improve how a model behaves, but it cannot make an untrusted prompt authoritative or replace your application’s permission checks, data validation, and policy logic."
-            ]
+            ],
+            example: {
+              title: "Continuation and instruction following",
+              content: [
+                "Given ‘Write one sentence asking for the order number’, a base model may continue the surrounding text as though it were part of a document or transcript. An assistant model is more likely to respond directly with ‘Could you provide your order number so I can review the request?’ Post training creates this difference in interaction style."
+              ]
+            }
           },
           {
             id: "context-is-runtime-data",
@@ -177,7 +254,13 @@ export const curriculum: CurriculumPhase[] = [
               "Training gives a model broad learned capability. The prompt gives it the information and task for one particular request. In a production application, that prompt can contain system instructions, a user message, recent conversation, retrieved documents, tool results, and a response schema. Together, these inputs form the runtime context. The model has no memory of a customer, order, or earlier request unless your application deliberately includes or retrieves the relevant information.",
               "This is why a model can appear to learn during a chat while its parameters remain unchanged. It conditions the next response on the text in the current context window. If a conversation is long, the application may need to keep recent turns, create a summary, or retrieve the specific prior fact needed for the next task. In context learning means a model can often follow a pattern demonstrated in the prompt without parameter updates. It is powerful for a small number of examples, but it is still temporary context, not permanent training.",
               "Runtime context has different trust levels. A customer message is relevant but can contain false claims or malicious instructions. A database record may be authoritative for an order’s status. A policy document may be current, expired, for internal use only, or intended for a different audience. A good application labels and selects these sources deliberately. Later lessons call this context engineering and retrieval augmented generation. At this stage, the important idea is that sending more text is not the same as sending better context."
-            ]
+            ],
+            example: {
+              title: "The same message with different evidence",
+              content: [
+                "Two customers may both write, ‘Can I return this?’ One order may have been delivered yesterday and another ninety days ago. The language is identical, but the correct response depends on runtime context from the authenticated order record and current return policy."
+              ]
+            }
           },
           {
             id: "hallucinations-and-evidence",
@@ -186,16 +269,28 @@ export const curriculum: CurriculumPhase[] = [
               "A hallucination is a model output that is unsupported, invented, or incorrect. It is not necessarily a strange failure. It follows naturally from the objective. The model is rewarded during training for assigning probability to likely continuations, not for querying a live authoritative system every time it speaks. When the prompt lacks a required fact, the model may generate a detail that fits the surrounding pattern better than it generates an admission that information is missing.",
               "Suppose a customer asks whether order 10492 is eligible for a refund. The order number may look like thousands of other order numbers the model has encountered, and the policy language may sound familiar. None of that grants access to the real order, current policy version, delivery date, or customer identity. If the model says ‘yes, it is eligible’ without verified context, it has produced a plausible continuation, not a business decision. The more polished the wording, the easier it is to mistake that distinction.",
               "Grounding changes the system design, not the model’s nature. The application retrieves current policy evidence, queries approved sources for order facts, and gives the model only the information needed to interpret or explain the result. It then validates important outputs before displaying, storing, or acting on them. The goal is not to eliminate every uncertainty in language. It is to make factual claims traceable to a source and to give the system a safe path when sufficient evidence is unavailable."
-            ]
+            ],
+            example: {
+              title: "Refund eligibility",
+              content: [
+                "A customer asks whether order 10492 is eligible for a refund. The order number resembles identifiers seen during training, but the model has no access to the real record unless the application provides it. The system must retrieve the order and policy evidence before the model explains the result."
+              ]
+            }
           },
           {
             id: "models-tools-and-action",
-            title: "Tool Enabled Systems",
+            title: "Tool Use",
             content: [
-              "An LLM is excellent at interpreting ambiguous language and producing a useful next response. It is not inherently a calculator, a database client, a browser, or a payments system. Modern applications extend a model with tools. The model may propose a search query, request an order lookup that only reads data, ask a calculator to evaluate an expression, or generate parameters for a function call. The application decides which tools exist, what inputs they accept, and whether an action is permitted.",
+              "A tool is a function or external capability that an application makes available to a model. Tools allow an LLM to request operations that language generation alone cannot perform, such as retrieving an order, searching approved documents, calculating a value, or submitting a structured query. The model proposes a tool and its arguments. Application code decides whether the request is valid and permitted before executing it.",
               "This division follows how people solve problems. A support representative does not calculate a refund policy in their head from memory. They consult the current policy and use the order system. The model should be treated similarly. It can determine that an order lookup is relevant, summarise the returned evidence, or draft the explanation. It should not invent tool results, decide its own privileges, or execute an irreversible action because the generated text sounds confident.",
               "Tool use makes an AI application more capable, but it creates a trust boundary. Tool descriptions and results become part of the model context. Arguments must be validated. Authorization must be enforced outside the model. Expensive, irreversible, or high risk actions may require human approval. We will cover tool calling and the Model Context Protocol later in the roadmap. This basic lesson establishes why the application, not the LLM, remains in control of execution."
-            ]
+            ],
+            example: {
+              title: "Order lookup",
+              content: [
+                "The model proposes an order lookup with order 10492. The application verifies that the signed in customer owns the order, validates the identifier, calls the approved read only service, and returns a limited result. The model can summarize that result, but it cannot assign itself permission or change the order."
+              ]
+            }
           },
           {
             id: "evaluating-empirical-systems",
@@ -204,7 +299,13 @@ export const curriculum: CurriculumPhase[] = [
               "Traditional software lets you often prove that a function returns a particular output for a particular input. LLM behaviour is different. The same task can have many acceptable wordings, model providers can release new versions, and sampling can introduce variation. Rather than relying on a single impressive demo, teams define representative cases and inspect the behaviour over the full set. They measure task success, factual support, schema validity, latency, cost, and failure handling according to the feature they are building.",
               "A benchmark score can be informative, but it is not a guarantee for your product. The benchmark may use a different prompt format, a different tokenizer, data that overlaps with training, or a task unlike your users’ work. For a customer service feature, a useful evaluation set includes ordinary requests, incomplete messages, policy conflicts, ambiguous wording, unavailable data, and attempts to make the system ignore its rules. The cases define what ‘good’ means in context.",
               "Record the conditions of an important run. Include the model identifier, system instructions, supplied context, tool results, output schema, decoding settings, token usage, and latency. This makes a bad outcome diagnosable. Without this record, a team can only say that the model ‘acted strangely.’ With it, the team can identify whether the source was missing, the prompt was ambiguous, the tool returned bad data, the validation failed, or the model itself made a poor interpretation."
-            ]
+            ],
+            example: {
+              title: "Testing beyond the successful case",
+              content: [
+                "An evaluation set for refund requests should include eligible orders, expired return windows, missing order numbers, policy conflicts, unavailable tools, ambiguous requests, and attempts to override system instructions. A model that succeeds only on a straightforward demonstration is not ready for the full workflow."
+              ]
+            }
           },
           {
             id: "what-to-carry-forward",
@@ -221,136 +322,496 @@ export const curriculum: CurriculumPhase[] = [
         "transformer-architecture-and-attention",
         "Transformer Architecture and Attention",
         "3 hours",
-        "Build a practical understanding of how transformers use attention to turn a sequence of tokens into context aware predictions.",
+        "Understand how transformers represent tokens, preserve their order, use attention, and scale model capacity for language generation.",
         [
-          "A transformer is the neural network architecture behind most modern language models. Before transformers, many sequence models processed text one position at a time. That makes it difficult to connect distant parts of a long sequence and limits how much of the training computation can run in parallel. The transformer introduced a different approach. Each token can directly compare itself with relevant tokens in the same sequence through an operation called self attention. This made language model training at large scale substantially more practical and became the foundation of current GPT style models.",
-          "A transformer begins with tokens, not words. Each token ID is mapped to a learned vector called an embedding. An embedding is a compact set of numbers that represents features the model has learned about that token from training. The initial embedding for the token ‘refund’ may eventually support associations with language about returns, payments, customer support, and code fields, but it does not yet reflect the specific meaning of the word in the current request. Context is added by the layers that follow.",
-          "Unlike a recurrent model, a transformer does not inherently know whether a token appeared first, last, or in the middle of a request. Position must therefore be represented explicitly. Early transformers added positional encodings to token embeddings. Modern architectures use several approaches, including learned positions and rotation based methods such as RoPE. The implementation varies, but the engineering implication is constant. Order matters. ‘Refund after delivery’ and ‘delivery after refund’ contain the same words but describe different events.",
-          "Self attention is the mechanism that lets a token update its representation using other tokens in the sequence. For each token, the model creates three learned projections called a query, a key, and a value. The query represents what that position is looking for, the key represents what each candidate position offers, and the value is the information that can be gathered from that position. These names are useful intuition, not fixed semantic labels. They are vectors learned differently in every layer and head of the model.",
-          "The model compares a token’s query with the keys of other tokens. Higher compatibility produces a larger attention score. After normalization, those scores become weights used to combine the corresponding value vectors. In compact form, the operation is Attention(Q, K, V) = softmax(QKᵀ / √dₖ)V. You do not need to derive this equation for application work. What matters is that every token can form a context aware representation by selectively incorporating information from other tokens, rather than carrying forward only a compressed summary of everything that came before.",
-          "Imagine the phrase, ‘The customer says the replacement arrived damaged, but the original order was delivered last month.’ When the model represents the word ‘damaged,’ attention can connect it with ‘replacement’ rather than treating the issue as a complaint about the original order. In a different sentence, the same word could be connected to a policy condition, an item identifier, or a previous conversation turn. The representation of a token is therefore conditional on its surroundings. This is one reason language models can handle ambiguity that would be awkward to enumerate as ordinary string matching rules.",
-          "A single attention calculation cannot be expected to capture every relevant relationship. Transformers use multiple attention heads in parallel. One head may help model local grammatical relationships, another may connect a reference to an earlier entity, and another may help distinguish an instruction from quoted content. The model learns these roles from data. Engineers should not expect a particular head to have a stable, human readable job. Multiple heads simply give the architecture several different ways to relate the same sequence of tokens.",
-          "A transformer layer does more than attention. After attention mixes information across positions, a position wise feed forward network transforms each token representation further. Residual connections preserve useful prior information, and normalization layers stabilize training. Many such blocks are stacked. Early layers may capture simpler lexical and positional relationships. Later layers can combine them into richer patterns relevant to the task. This depth is part of why a model can turn a customer message, a policy excerpt, and a response contract into a coherent next token distribution.",
-          "The original transformer was designed as an encoder decoder architecture for translation. An encoder read the input sequence and a decoder generated the output while attending to the encoder’s representation. Many modern generative LLMs use a decoder only architecture instead. The prompt and generated answer live in one token sequence, and each position uses masked self attention to look only at permitted earlier positions. This is the architecture most relevant when you call a chat or text generation API.",
-          "The mask is essential to causal language modelling. While training on a sequence, the model is asked to predict every next token. It must not be allowed to inspect the true future token, or it could solve the task by copying. A causal mask blocks those future connections. Training can still process the positions of a known sequence efficiently in parallel because the mask defines what each position may see. During inference, however, the model must generate new tokens one at a time because the next token does not exist until the previous step has selected it. A later lesson explores the latency consequences of that difference.",
-          "Attention weights are not a complete explanation of a model decision. They show one operation inside one layer of a large network, not a verified chain of reasoning or a proof that a source was used correctly. A high attention score does not make a document authoritative, and a low score does not prove a token was unimportant elsewhere in the network. For production systems, evidence should be made visible through retrieval results, tool logs, citations, and validation records, rather than inferred from internal attention maps.",
-          "For application engineers, the most useful consequence is that the model’s context is a working set with competing signals. System instructions, user text, retrieved documents, tool output, examples, and previous conversation all occupy the same sequence. Adding more text does not guarantee better behavior. Irrelevant documents can introduce competing language, an excerpt without its heading can lose a crucial condition, and untrusted text can be mistaken for an instruction if its role is not made clear. Context engineering is the discipline of making those inputs deliberate.",
-          "Consider a Customer Service Agent answering a damaged item request. The application should send a short task instruction, the latest customer message, a narrow order projection, and the relevant current policy passage with its heading and source label. It should not paste the entire customer history, every policy document, or internal staff notes into the request. The transformer may be capable of relating information across a long sequence, but the application still has to decide what information is correct, permitted, and necessary for this particular task.",
-          "You do not need to implement a transformer from scratch to build useful LLM applications. You do need to understand why token order, context selection, source labeling, and output boundaries affect the model’s behavior. A transformer is powerful because it can form rich relationships across a sequence. A well engineered application helps it form the right relationships by supplying concise, trusted context and by keeping decisions that require correctness outside the model."
+          "A transformer is a neural network architecture that processes a sequence of token representations through repeated attention and feed forward operations. Its central advantage is the ability to relate tokens across a sequence while processing the known input positions efficiently during training.",
+          "Before transformers, recurrent neural networks commonly processed language one token at a time. Each step combined the current token with a hidden state carried from earlier steps. Information from the beginning of a long sequence had to pass through every intermediate step before influencing a later token. Gated architectures improved this process, but the sequential dependency still limited training parallelism and made distant relationships difficult to preserve.",
+          "A token embedding is a learned vector that converts a token ID into a numerical representation the network can process. The initial embedding represents the token before its current context has been incorporated. The token ‘charge’ begins from the same learned embedding whether a request concerns a credit card charge or charging a device. Transformer layers update that representation using surrounding tokens so that its meaning becomes specific to the current sequence.",
+          "Positional information tells a transformer where each token appears in a sequence. Self attention can compare token content, but token content alone does not express whether one event happened before another. Models may add learned position vectors or use rotation based methods such as RoPE. The implementation varies, but every approach gives the network information about token identity and sequence order.",
+          "Self attention is the operation that lets each token representation incorporate information from other permitted tokens in the same sequence. For every token, the model creates three learned projections called a query, a key, and a value. The query is compared with keys to determine which positions are relevant. The corresponding values provide the information used to update the token representation.",
+          "An attention score measures compatibility between one token’s query and another token’s key. The model scales the scores and applies softmax to convert them into attention weights. The output is a weighted combination of the value vectors. A larger weight means that a position contributes more through that particular attention operation. Every layer and head calculates separate weights, so there is no single attention map that completely describes how the model interpreted a request.",
+          "In compact form, the operation is Attention(Q, K, V) = softmax(QKᵀ / √dₖ)V. Application engineers do not need to derive the equation. The important data flow is that queries and keys determine the weights, and the weights determine how values are combined.",
+          "Transformers use multiple attention heads in parallel. Each head provides another way to relate positions in the same sequence. The roles of individual heads are learned and may overlap, so engineers should not assign permanent human descriptions to them.",
+          "A transformer block combines attention with a feed forward network. Attention moves information between token positions. The feed forward network transforms each position using the contextual information attention produced. Residual connections preserve earlier representations, and normalization helps keep activations stable as information passes through many stacked blocks.",
+          "A Mixture of Experts transformer replaces a single dense feed forward network with a collection of expert feed forward networks. A learned router examines each token representation and selects a limited number of experts to process it. Attention still connects information across the sequence. Expert routing changes how feed forward computation inside selected blocks is allocated.",
+          "Total parameters describe all parameters available across the model. Active parameters describe the subset used for a particular token, including shared components and the experts selected by the router. A model can therefore have a large total capacity while using only part of that capacity for each token.",
+          "Mixture of Experts can increase capacity without running every expert for every token, but it does not remove serving costs. All expert parameters must be stored, routing adds computation, and distributed serving may move token representations between accelerators. Uneven routing can overload some experts. Quality and latency depend on training, routing, hardware, batching, and serving implementation rather than parameter count alone.",
+          "Application engineers do not normally configure expert routing through an API. The practical lesson is that total parameter count does not reveal the compute required for one request. Model selection should rely on measured quality, latency, throughput, and cost for the actual workload.",
+          "A decoder only transformer predicts the next token using the tokens that precede it. The prompt and generated response occupy one sequence. The original transformer used an encoder and decoder for translation, while many generative LLMs use the decoder only arrangement most relevant to chat and text generation APIs.",
+          "Causal masking prevents a token position from inspecting future tokens during training. If the model could see the token it was expected to predict, it could copy the answer. The mask lets training calculate predictions for many known positions in parallel while preserving the causal rule. During inference, future tokens do not exist, so the model must generate them one at a time.",
+          "Attention weights describe information flow within one operation. They are not confidence scores, source citations, or a complete account of the computations that produced an output. A high attention score does not make a document authoritative. Production evidence should come from retrieval results, tool logs, citations, and validation records.",
+          "For application engineers, the model context is a working set with competing signals. System instructions, user text, retrieved documents, tool output, examples, and previous conversation occupy the same sequence. Irrelevant documents can introduce competing language, and an excerpt without its heading can lose an important condition. Context engineering makes those inputs deliberate.",
+          "For a damaged item request, the application should send a short task instruction, the latest customer message, a limited order projection, and the relevant current policy passage with its heading and source label. It should exclude unrelated history, expired policies, and internal notes.",
+          "Transformer architecture explains why token order, context placement, irrelevant text, source labels, and output length affect model behavior. It does not remove the need for trusted data, validation, authorization, or application controlled execution."
         ],
         "For a damaged item request, the Customer Service Agent will send the model the customer’s latest message, a limited set of verified order facts, and the current public policy section. The policy heading stays attached to the relevant paragraph so its conditions are not separated from the rule. The application will keep internal notes and stale policies outside the model context, then validate any proposed action using deterministic code.",
-        ["transformer", "token embeddings", "positional information", "self attention", "queries keys values", "multiple attention heads", "causal masking", "decoder only models"],
+        ["transformer", "token embeddings", "positional information", "self attention", "queries keys values", "multiple attention heads", "Mixture of Experts", "causal masking", "decoder only models"],
         "Concept",
         [
-          { id: "tokens-and-representations", title: "Input Representations", start: 0, end: 3 },
-          { id: "self-attention", title: "Self Attention", start: 3, end: 6 },
-          { id: "transformer-blocks", title: "Transformer Blocks", start: 6, end: 8 },
-          { id: "decoder-only-models", title: "Decoder Only Architecture", start: 8, end: 10 },
-          { id: "attention-and-evidence", title: "Attention and Interpretability", start: 10, end: 12 },
-          { id: "context-as-input", title: "Context Design", start: 12 }
+          {
+            id: "transformer-architecture",
+            title: "Transformer Architecture",
+            start: 0,
+            end: 4,
+            example: {
+              title: "Sequence order changes meaning",
+              content: [
+                "‘Refund after delivery’ and ‘delivery after refund’ contain the same words but describe different events. Token embeddings represent the words, while positional information lets the transformer represent their order."
+              ]
+            }
+          },
+          {
+            id: "self-attention",
+            title: "Self Attention",
+            start: 4,
+            end: 7,
+            example: {
+              title: "Connecting damaged to replacement",
+              content: [
+                "In ‘The replacement arrived damaged’, one attention head may assign a larger weight from ‘damaged’ to ‘replacement’ than to unrelated positions. That contribution helps connect the condition to the correct item. It does not prove that the replacement is eligible for a refund."
+              ]
+            }
+          },
+          { id: "transformer-blocks", title: "Transformer Blocks", start: 7, end: 9 },
+          {
+            id: "mixture-of-experts",
+            title: "Mixture of Experts",
+            start: 9,
+            end: 13,
+            example: {
+              title: "Active and total experts",
+              content: [
+                "Consider a simplified layer containing eight experts where the router selects two for each token. All eight experts contribute to the total parameter count, but only the selected two perform expert computation for that token. The experts are learned numerical functions, not fixed human categories such as a refund expert or a code expert."
+              ]
+            }
+          },
+          {
+            id: "decoder-only-models",
+            title: "Decoder Only Architecture",
+            start: 13,
+            end: 15,
+            example: {
+              title: "Predicting the hidden token",
+              content: [
+                "For ‘The refund was approved’, the position processing ‘was’ may use ‘The refund’ but cannot inspect ‘approved’ when learning to predict it. The causal mask blocks that future token even though the complete training sentence is available."
+              ]
+            }
+          },
+          { id: "attention-and-evidence", title: "Attention and Interpretability", start: 15, end: 16 },
+          {
+            id: "context-as-input",
+            title: "Context Design",
+            start: 16,
+            example: {
+              title: "Selecting useful context",
+              content: [
+                "For a damaged item request, the application sends the current message, verified order facts, and the relevant policy passage with its heading. It excludes unrelated conversation, expired policies, and internal notes. The transformer relates information across the supplied sequence while the application decides what is trusted and necessary."
+              ]
+            }
+          }
         ]
       ),
       lesson(
         "how-llms-are-trained-and-improved",
         "How LLMs Are Trained and Improved",
         "3 hours",
-        "Understand how pretraining and post training shape model behavior, and what those stages mean for an application engineer.",
+        "Learn how pretraining creates general capability, how post training shapes assistant behavior, and how engineers evaluate or adapt a model for a specific application.",
         [
-          "The model you call through an API is the result of several training stages, not one event. The broad pattern is pretraining followed by post training. Pretraining gives a model general language and code capability. Post training teaches it to behave more usefully in conversation, follow instructions, return particular formats, use tools, and avoid some undesirable responses. An application engineer does not need to reproduce these training runs, but needs a working model of them to choose a model, diagnose its behavior, and decide what belongs in the application rather than in the model.",
-          "Pretraining is the long, expensive stage in which a model learns from a very large collection of text, code, and other permitted data. The training objective is closely related to the next token prediction introduced in the first lesson. The model sees a sequence, predicts a token, compares its prediction with the actual next token, and adjusts its parameters to reduce that error over many examples. This repeated process is typically optimized using gradient based learning. The result is a base model that has learned regularities in grammar, programming languages, factual associations, writing styles, and common problem patterns.",
-          "A base model is capable, but it is not necessarily a helpful assistant. If prompted with ‘Write a refund response,’ a plain continuation model may produce a continuation that resembles training text rather than a direct, well scoped answer. It may complete a conversation transcript, imitate a document, or continue an instruction in an unexpected form. That behavior is not a defect in the objective. The base model learned to predict likely text, not to place a user’s request above every other pattern in the prompt.",
-          "Training data strongly affects what the model learns. Quality, diversity, recency, language coverage, code coverage, duplicates, and harmful or incorrect material all influence later behavior. Training pipelines at large scale therefore include data collection, filtering, deduplication, formatting, and quality work. Engineers should understand the implication rather than assume the dataset is a perfect library. A model can recognize a pattern without knowing whether it is current, complete, applicable to a particular customer, or appropriate to repeat in a product.",
-          "Pretraining also explains why a model can generalize to a request it has not seen verbatim. It does not need a training example for every possible customer message. Through many related examples, it learns representations that connect phrases such as ‘the package was broken,’ ‘my delivery arrived damaged,’ and ‘the item is unusable.’ Generalization is valuable, but it has limits. Rare domains, new company policy, unusual identifiers, and exact transactional facts require evidence at runtime rather than an assumption that the model learned them during training.",
-          "The first common post training step is supervised fine tuning, often called instruction tuning. A model is given examples of an instruction paired with a desirable answer and is trained to produce responses in that style. These examples teach conventions that users expect. They answer the question, follow a requested format, respect system instructions, ask for clarification when appropriate, and avoid exposing an internal chain of text. Instruction tuning is why assistant models usually feel much more direct and cooperative than raw base models, even though they share the same underlying architecture.",
-          "Instruction examples alone do not capture every quality judgment. Two responses can both be factually plausible, yet one may be clearer, safer, more complete, or better aligned with a user’s request. Preference training uses comparisons such as ‘response A is better than response B’ to shape the model toward the preferred behavior. Reinforcement learning from human feedback, usually shortened to RLHF, is one family of methods for doing this. Direct Preference Optimization, or DPO, is another widely used approach that learns from preference pairs without requiring the same reinforcement learning loop. You should know the purpose of these terms, not memorize their training equations for an application role.",
-          "Human feedback is not the only source of a preference signal. Teams can use expert feedback, policy guided feedback, model assisted feedback, and automated checks alongside human evaluation. Different frontier labs use different data sources and optimization methods, and their exact training recipes are usually not public. The practical conclusion is that labels such as ‘instruction tuned,’ ‘reasoning,’ or ‘tool capable’ indicate intended behavior, not a universal guarantee. The model still needs to be tested against the actual prompts, context, documents, and error cases in your product.",
-          "Some models receive additional post training for structured outputs and tool use. They learn to recognize when a function is appropriate, select from an allowed set of tools, and generate arguments in a constrained format. This makes them more useful for applications, but it does not make their proposed calls inherently safe. A model can select an unsuitable tool, omit a required field, or be influenced by untrusted text. The application must validate arguments, enforce authorization, and control execution. Training can improve the interface. It cannot replace the security boundary.",
-          "Reasoning models are trained and served to spend more computation on difficult tasks before producing a final answer. They can be useful for multistep analysis, code investigation, planning, or resolving ambiguity. Their strength should not be confused with omniscience. A reasoning model can still begin with incomplete evidence, misinterpret a policy, or propose an invalid action. It may be the right choice for a complex interpretation task after the application has supplied verified context, but it is not a substitute for retrieval, validation, or evaluation.",
-          "Fine tuning is a separate decision from choosing a model that has received post training. A product team fine tunes when it has a stable, recurring task, a meaningful volume of high quality examples, a way to evaluate improvement, and a clear reason why prompting, structured output, retrieval, or deterministic code is insufficient. It is usually not the first response to a weak prototype. If the model lacks current policy information, use retrieval. If it needs exact order data, use a tool. If the output must follow a schema, enforce a schema. If the task itself is poorly defined, write a better task contract before collecting a fine tuning dataset.",
-          "For the Customer Service Agent, the initial version should not fine tune a model. It can use a capable instruction following model to interpret a customer message, retrieve current policy evidence, call an order tool that only reads data, and return a validated structured proposal. This design is quicker to inspect and improve. If, after evaluating many representative cases, the team finds a stable classification task that is still too inconsistent or expensive, it can consider fine tuning a smaller model for that narrow step. The decision should follow evidence, not the assumption that every serious AI product needs custom training.",
-          "Model quality is ultimately an application property. The same model may perform well when asked to summarize one short document and poorly when asked to route an ambiguous request using stale context. When comparing models, record the model identifier, prompt version, available tools, context supplied, output schema, latency, cost, and results on representative cases. This turns a vague statement such as ‘the newer model feels better’ into an engineering comparison that can be reproduced and reviewed.",
-          "The key idea is simple. Training determines a model’s general behavior, but it does not determine the correctness of your application. Pretraining gives broad capability. Post training makes that capability more useful. Your system still defines the task, supplies the relevant facts, chooses what actions are permitted, and measures whether the result is acceptable. With that boundary in place, model improvements become something you can evaluate and adopt deliberately rather than something you have to trust blindly."
+          "Training a large language model is the process of adjusting its parameters so it becomes better at a defined prediction task. During training, the model processes examples, produces predictions, measures the difference between its predictions and the expected results, and updates its parameters to reduce that error. Repeating this process across very large datasets produces the language and reasoning capabilities that application engineers later access through an API.",
+          "The model available through an API is usually the result of several training stages rather than one training run. The broad sequence is pretraining followed by post training. Pretraining develops general capability with language, code, and common patterns. Post training shapes that capability into behavior that is more useful for conversation, instruction following, structured output, tool use, and safety. Application engineers do not need to reproduce these training runs, but they need to understand what each stage can change and what must still be handled by application code.",
+          "Pretraining is the large scale training stage in which a model learns from extensive collections of text, code, and other permitted data. The training objective is usually next token prediction. The model receives a sequence, predicts the next token, compares that prediction with the actual token, and adjusts its parameters through gradient based optimization. Over many examples, it learns patterns involving grammar, programming languages, factual associations, document structures, writing styles, and common problem solving approaches.",
+          "Training data strongly affects the resulting model. Data quality, diversity, recency, language coverage, code coverage, duplication, and incorrect material all influence later behavior. Large training pipelines therefore include collection, filtering, deduplication, formatting, and quality assessment. These processes improve the dataset, but they do not turn it into a complete or perfectly current source of knowledge.",
+          "A base model is the model produced by pretraining before it has been extensively shaped to behave as an assistant. It can continue text, complete code, imitate document structures, and reproduce many patterns learned during training. It does not automatically treat a user request as an instruction that must be answered directly. Its original objective was to predict likely continuations rather than to become a cooperative product interface.",
+          "Generalization is the ability to apply learned patterns to inputs that were not reproduced verbatim during training. A model does not need to have seen every possible customer message. It can learn that phrases such as ‘the package was broken,’ ‘my delivery arrived damaged,’ and ‘the item is unusable’ describe related situations. This capability allows one model to work with the variety of language found in real applications.",
+          "Generalization is not the same as access to current evidence. A model may recognize that a message concerns a damaged delivery while still lacking the customer’s order details, the current refund policy, or a recent policy exception. Rare domains, changing rules, unusual identifiers, and exact transactional facts require runtime evidence from retrieval or tools.",
+          "Supervised fine tuning is a post training method that teaches a model from examples containing an input and a desirable output. When the examples are instructions paired with strong responses, the process is also called instruction tuning. The model learns patterns such as answering the requested question, respecting an output format, asking for missing information, following system instructions, and returning structured data.",
+          "Supervised fine tuning helps explain the difference between a base model and an assistant model. A base model may continue a customer conversation as if it were completing a transcript. An assistant model has been trained on examples that demonstrate how to respond to the customer. The architecture may remain the same, but the expected interaction has changed.",
+          "Supervised fine tuning shapes behavior. It does not guarantee that a response is correct. If the training examples contain outdated policies, inconsistent labels, or weak answers, the model can learn those weaknesses. Current facts should still come from runtime context, and important output should still be evaluated or validated.",
+          "Preference optimization trains a model to favor responses that people or evaluators judge to be better. Instruction examples can demonstrate a desirable answer, but many quality decisions involve comparisons. Two answers may both address the request while differing in accuracy, clarity, safety, completeness, or adherence to policy.",
+          "Reinforcement learning from human feedback, commonly called RLHF, is a family of methods that uses human preferences to improve model behavior. A common workflow begins by generating several responses to the same prompt. Human reviewers compare or rank those responses using a defined rubric. The resulting preference data is then used to guide further model training.",
+          "A reward model is a learned model that estimates which response a reviewer would prefer. It receives a prompt and a candidate response, then produces a score based on patterns learned from the comparison data. The reward model is not a source of truth. It represents the preferences and rubric present in its training data.",
+          "Proximal Policy Optimization, commonly called PPO, is one reinforcement learning algorithm used in traditional RLHF pipelines. In reinforcement learning terminology, the language model being improved is called the policy. The policy generates a response, the reward model scores it, and PPO adjusts the policy toward responses that receive higher scores. The update is constrained so the model does not move too far from a reference model in one step. PPO is one method used within RLHF rather than another name for RLHF.",
+          "Direct Preference Optimization, commonly called DPO, is a different method for learning from preferred and rejected response pairs. It directly increases the relative probability of the preferred response without training a separate reward model or running the same reinforcement learning loop used by PPO. DPO simplifies part of the training pipeline, but the quality of the result still depends on the examples, preference rubric, and evaluation process.",
+          "Preference data can come from human reviewers, domain experts, policy guided evaluation, model assisted evaluation, or automated checks. Every source has limitations. Reviewers can disagree, rubrics can omit important qualities, and automated judges can favor superficial patterns. A model can also learn responses that score well under the preference process without becoming more truthful. Teams therefore evaluate the resulting model on separate cases rather than treating preference optimization as proof of quality.",
+          "Specialized post training can prepare models for structured outputs and tool calling. The model may learn when a tool is relevant, how to select from an allowed tool set, and how to produce arguments that match a schema. This behavior makes the model easier to integrate into applications.",
+          "Tool training does not make a proposed tool call safe. A model can choose the wrong tool, provide invalid arguments, or respond to instructions contained in untrusted text. Application code must validate the arguments, enforce authorization, control execution, and record the outcome. Training improves the model interface. It does not replace the application security boundary.",
+          "Reasoning models are models trained and served to spend additional computation on difficult tasks before returning a final answer. They can improve performance on multistep analysis, code investigation, planning, and ambiguous decisions. They can still begin with incomplete evidence, misunderstand policy, or propose an invalid action. Retrieval, validation, and evaluation remain necessary.",
+          "Application fine tuning is additional training performed for a specific product, domain, or recurring task. It changes model parameters using a curated dataset. It is different from adding documents to a prompt or retrieving current information at runtime.",
+          "A product team should consider fine tuning when the task is stable, a substantial collection of high quality examples exists, success can be measured, and simpler approaches have been evaluated. Fine tuning may help a smaller model perform a narrow classification task more consistently or reduce the amount of instruction needed for a repeated output style.",
+          "Fine tuning is usually not the first solution to a weak prototype. Retrieval is appropriate when the model lacks current documents. A tool is appropriate when it needs exact account or order data. A schema is appropriate when the response must follow a precise structure. Deterministic code is appropriate when a business rule must be applied exactly. A clearer task definition is appropriate when the expected behavior is still ambiguous.",
+          "Model evaluation is the systematic process of measuring model behavior on defined tasks. It allows engineers to compare models, prompts, training methods, and application configurations using evidence rather than general impressions.",
+          "Public benchmarks measure broad categories of capability. MMLU and GPQA are examples of knowledge and reasoning benchmarks. GSM8K and MATH assess mathematical reasoning. HumanEval measures code generation, while SWE-bench evaluates work on software engineering issues. IFEval measures instruction following. BFCL evaluates aspects of tool selection and function calling. LongBench covers several long context tasks. These benchmarks help describe general capability, but no single score represents overall model quality.",
+          "Benchmark results have important limitations. Test data may overlap with training data, models may be optimized for well known benchmarks, and scoring methods may hide meaningful failure modes. Results can also change with the prompt, tool access, reasoning budget, and evaluation configuration. Most importantly, a public benchmark may have little resemblance to the task in a specific product.",
+          "Application evaluation should use representative inputs, trusted expected behavior, and failure cases from the intended workflow. When comparing models, engineers should record the model identifier, prompt version, available tools, supplied context, output schema, latency, cost, and evaluation results. This makes the comparison reproducible and exposes whether an improvement came from the model or from another part of the system.",
+          "Training determines a model’s general capabilities and tendencies. It does not determine whether an application is correct. Pretraining supplies broad capability. Post training makes that capability easier to use. The application still defines the task, supplies current evidence, controls access to tools, validates important output, and measures whether the result is acceptable."
         ],
-        "The Customer Service Agent will begin with an instruction following model and a small evaluation set of refund messages. It may use a lower cost model for straightforward issue classification and a stronger model for a complex policy explanation, but only after testing both with the same trusted context and output contract. No model will approve a refund or access customer data without application controlled checks.",
-        ["pretraining", "training data", "instruction tuning", "preference training", "RLHF", "DPO", "fine tuning", "model evaluation"],
+        "The Customer Service Agent will begin with an instruction following model and a versioned evaluation set containing damaged items, unclear requests, policy exceptions, missing order information, and unsafe refund instructions. Every candidate model will receive the same trusted context, tool definitions, and output contract. A lower cost model may handle issue classification if it meets the required quality threshold, while a stronger model may explain complex policy. Application code will continue to control customer data access, eligibility checks, and refund approval.",
+        ["large language model training", "pretraining", "training data", "base model", "generalization", "supervised fine tuning", "preference optimization", "RLHF", "reward model", "PPO", "DPO", "reasoning models", "application fine tuning", "model evaluation", "benchmarks"],
         "Concept",
         [
-          { id: "training-stages", title: "Training Pipeline", start: 0, end: 3 },
-          { id: "pretraining-data", title: "Pretraining Data", start: 3, end: 5 },
-          { id: "instruction-tuning", title: "Instruction Tuning", start: 5, end: 6 },
-          { id: "preference-training", title: "Preference Optimization", start: 6, end: 8 },
-          { id: "reasoning-and-fine-tuning", title: "Reasoning Models and Fine Tuning", start: 8, end: 10 },
-          { id: "model-choices", title: "Model Evaluation", start: 10 }
+          { id: "training-large-language-models", title: "Training Large Language Models", start: 0, end: 2 },
+          {
+            id: "pretraining-and-generalization",
+            title: "Pretraining and Generalization",
+            start: 2,
+            end: 7,
+            example: {
+              title: "Base models and generalization",
+              content: [
+                "A base model given ‘Write a response to a customer requesting a refund’ may continue with another instruction or imitate a transcript. An assistant model is more likely to answer directly because post training has taught it the expected interaction.",
+                "The messages ‘my parcel is cracked’, ‘the product arrived broken’, and ‘the item was damaged during delivery’ use different wording. A model can classify all three as damaged item requests through generalization. It still needs verified order data and the current policy before any refund decision can be made."
+              ]
+            }
+          },
+          {
+            id: "supervised-fine-tuning",
+            title: "Supervised Fine Tuning",
+            start: 7,
+            end: 10,
+            example: {
+              title: "Learning an application response format",
+              content: [
+                "A training example asks the model to identify the intent, urgency, and missing information in a customer message. The desirable output identifies a damaged item request, assigns normal urgency, and reports that the order identity is missing. Repeated examples teach the task and output pattern without giving the model access to live order records."
+              ]
+            }
+          },
+          {
+            id: "preference-optimization",
+            title: "Preference Optimization",
+            start: 10,
+            end: 16,
+            example: {
+              title: "RLHF, PPO, and DPO",
+              content: [
+                "Reviewers compare two responses to a damaged item request using a policy rubric. One promises an immediate refund without checking eligibility. The other explains that the order and policy conditions must be verified first. Reviewers prefer the second response. A reward model can learn to score responses with those qualities, and PPO can update the language model toward similar behavior.",
+                "DPO can learn from the same preferred and rejected pair by increasing the relative probability of the preferred response without first training a separate reward model. Both approaches still depend on the quality of the examples and the evaluation rubric."
+              ]
+            }
+          },
+          { id: "specialized-post-training", title: "Specialized Post Training", start: 16, end: 19 },
+          {
+            id: "fine-tuning-decisions",
+            title: "Fine Tuning Decisions",
+            start: 19,
+            end: 22,
+            example: {
+              title: "When fine tuning becomes reasonable",
+              content: [
+                "A team evaluates thousands of support messages and finds that a smaller model repeatedly confuses two stable issue categories despite a precise prompt and consistent labels. The team may fine tune that model for the narrow classification step. If the failures instead come from missing or outdated refund policy, retrieval is the appropriate solution."
+              ]
+            }
+          },
+          {
+            id: "model-evaluation",
+            title: "Model Evaluation",
+            start: 22,
+            end: 26,
+            example: {
+              title: "Comparing models for customer support",
+              content: [
+                "Two candidate models receive the same customer messages, system instructions, policy passages, tool definitions, and output schema. The evaluation measures intent classification, use of policy evidence, missing information detection, invalid tool proposals, latency, and cost. The stronger choice is the model that meets the product requirements across representative cases, not necessarily the model with the highest general benchmark score."
+              ]
+            }
+          },
+          { id: "application-responsibility", title: "Application Responsibility", start: 26 }
         ]
       ),
       lesson(
         "inference-tokens-context-and-latency",
-        "Inference, Tokens, Context Windows, and Latency",
+        "LLM Inference, Tokens, Context Windows, and Latency",
         "3 hours",
-        "Learn how an LLM request is processed and how tokens, context, decoding, and caching affect speed, cost, and product behavior.",
+        "Understand how a trained LLM serves a request from prefill through decoding, then measure and control the token, memory, latency, and cost tradeoffs that shape an application.",
         [
-          "Inference is the runtime process of using a trained model to answer one request. The application sends input tokens, the model processes them, and then the model generates output tokens one at a time until it reaches a stop condition or the configured output limit. Inference is distinct from training. The model’s parameters do not change because a customer asked a question. A conversation can influence the next answer only because its relevant history is included in the current request or is retrieved by the application.",
-          "A useful mental model divides LLM inference into two stages. During prefill, the model reads the input prompt and computes the internal state needed to use its tokens as context. During decoding, the model produces one new token, uses that token as additional context, and repeats. Prefill work grows with the amount of input. Decode work grows with the number of generated tokens. A response with a very long policy prompt can have a slow first token. A long explanation can continue for many seconds after the first token has appeared.",
-          "Tokens are the units that both stages operate on. The number of characters in a message is only a rough proxy because tokenization varies by language, punctuation, numbers, code, and model family. The string ‘ORDER 10492’ may use several tokens, while a common word may use one. Engineers should use the tokenizer and usage data for the model they actually call when estimating a feature’s size, rather than using a fixed number of characters for each token in a budget or cost calculation.",
-          "Every model has a context window. It is the maximum combined number of input and output tokens it can handle for a request. It is not a separate allowance for documents alone. System instructions, user messages, examples, conversation history, retrieved passages, tool definitions, tool results, and the response all compete for the same budget. If the input is close to the limit, the application may have no room for a useful answer. If it exceeds the limit, the provider may reject the request or the application may have to trim, summarize, or retrieve less context.",
-          "The output limit is an engineering control, not merely a way to save money. It bounds how long a model is allowed to generate and helps keep response times predictable. Set it according to the task. A label, routing decision, or structured proposal may need a small output budget. A customer facing explanation may need more room. An answer that regularly reaches its limit is not automatically wrong, but it should be inspected. It may indicate an unclear task, excessive reasoning, an unsuitable response format, or a need to break the work into smaller steps.",
-          "Streaming changes the experience of waiting. Instead of holding the complete answer until generation ends, the provider sends partial output as tokens become available. A user can begin reading a response earlier, which improves perceived responsiveness, but streaming does not eliminate the underlying generation time. The application still needs to handle interruption, disconnected clients, partial output that should not yet be persisted, and tool calls that may occur before a final answer is available. A streamed response should remain subject to the same validation and safety boundaries as a response that is not streamed.",
-          "Decoding settings determine how the serving system selects from the model’s next token distribution. Temperature changes how sharply the distribution favors the most likely tokens. Lower temperature usually makes output more consistent, while higher temperature introduces more variation. Other controls, such as top p sampling, restrict selection to a probability mass of likely candidates. There is no universally correct setting. A deterministic extraction or classification task usually benefits from lower variation. Brainstorming or creative writing may need more. Evaluate the setting on representative cases rather than treating a single value as a best practice for every model.",
-          "Lower variation is not identical to perfect reproducibility. Providers can update model versions, use distributed infrastructure, and change serving behavior. If a provider supports a seed or a version specific model identifier, use it when comparison matters, but still record the request and response. For an important test case, capture the model identifier, prompt version, input context, decoding settings, output schema, and timestamp. That record gives a team a chance to investigate a change in behavior instead of relying on memory of what the model ‘usually’ did.",
-          "The transformer lesson introduced keys and values inside attention. During decoding, recomputing those representations for every earlier token at every new step would be wasteful. A KV cache stores the previously computed key and value states so the model can reuse them while generating the continuation. This substantially reduces repeated work, but it consumes memory and does not remove the sequential nature of autoregressive decoding. Application engineers usually receive this optimization from a provider, yet understanding it explains why long conversations and many concurrent generations can have performance and capacity implications.",
-          "Provider prompt caching is related but not identical. Some providers can reuse a stable prompt prefix, such as a long system instruction or a shared reference document, across requests. This can lower latency or the cost of input tokens when the exact prefix is reused under the provider’s rules. It is an optimization to consider after measuring a repeated workload, not a reason to put unnecessary material into every prompt. Design the correct minimal context first. Then assess whether stable prefixes justify caching.",
-          "Latency across the full request is wider than model latency. A user’s request may spend time in authentication, database reads, retrieval, reranking, safety checks, provider queueing, prefill, decoding, tool execution, and network delivery. Measure at least time to first token, time to final response, input tokens, output tokens, and the duration of each external dependency. A slow customer experience cannot be fixed by switching models if the actual bottleneck is a slow order lookup or a retrieval pipeline that returns too many documents.",
-          "Cost is also a property of the whole request. Providers typically meter input and output tokens differently, and the exact prices and caching rules change over time. A long output can cost more and take longer even when the input is small. A large retrieved context can dominate input usage even if only one sentence appears in the final answer. The right practice is to log usage from the provider response, attribute it to the feature and request type, and set budgets or alerts around real traffic. Do not optimize from assumptions when the API already reports the usage.",
-          "A context budget turns these ideas into a design decision. Suppose a feature has room for 16,000 tokens. It might reserve 1,000 for system instructions and output schema, 2,000 for recent conversation, 1,500 for verified order facts and tool results, 6,000 for retrieved policy evidence, and 2,000 for a customer facing response. This leaves headroom for variation. Those numbers are illustrative, not a universal template. The important habit is to allocate space intentionally and define what is shortened or dropped first when the request would exceed the budget.",
-          "For a damaged item request, the Customer Service Agent should not send the entire chat transcript or all return policy documents. It can send the current request, a compact summary of any necessary prior turn, a limited projection of the verified order, and the few current policy passages selected for the case. The model can stream a short explanation after the application has completed its checks. The trace should show how many tokens each component used and whether latency came from retrieval, the order tool, or model generation.",
-          "This is the operational view of an LLM feature. A model call is not a black box that either feels fast or feels slow. It has inputs, a defined output budget, a decoding policy, measurable stages, and resource use that can be improved. In the next lesson, you will make this visible in code by sending an API request directly, streaming the response, and recording the information needed to debug and evaluate a run."
+          "LLM inference is the runtime process of using a trained language model to generate a response. The application sends a request, the serving system converts its text into tokens, the model processes those tokens, and the serving system generates output tokens until it reaches a stopping condition or the configured output limit. Inference is different from training because the model parameters do not change when a user sends a request. Conversation history affects an answer only when the application includes that history in the current context.",
+          "A useful mental model divides inference into two stages. During prefill, the model processes the input tokens and computes the internal states needed to use them as context. During decoding, it produces one new token, adds that token to the sequence, and repeats. Prefill work grows with the amount of input. Decode work grows with the number of generated tokens. A response with a long policy prompt can have a slow first token, while a long explanation can continue for several seconds after the first token appears.",
+          "An LLM serving system is the runtime infrastructure that accepts requests and executes a model. It commonly includes an API layer, a request queue, a scheduler, the model runtime, accelerator hardware, memory for active requests, token streaming, and operational monitoring. The model supplies learned parameters and computes token probabilities. The serving system decides when and where the model runs, manages concurrent requests, stores temporary caches, and returns generated tokens to the application.",
+          "This distinction matters because application behavior is influenced by more than the model. A request may wait in a provider queue before computation begins. A long prompt may require substantial prefill work. Several active conversations may compete for accelerator memory. A provider may batch compatible requests to improve throughput. When latency changes, engineers should investigate the complete serving path instead of assuming that the model itself became slower.",
+          "Tokens are the units that prefill and decoding operate on. Character count is only a rough proxy because tokenization varies by language, punctuation, numbers, code, and model family. The text ORDER 10492 may use several tokens, while a common word may use one. Engineers should use the tokenizer and usage data for the model they actually call when estimating context size and cost. A fixed characters per token estimate is useful for early planning but is not precise enough for production limits.",
+          "Every model has a context window. It is the maximum combined number of input and output tokens the model can handle for one request. It is not a separate allowance for documents. System instructions, user messages, examples, conversation history, retrieved passages, tool definitions, tool results, and the response all compete for the same budget. If the input is close to the limit, the application may leave too little room for a useful answer. If the request exceeds the limit, the provider may reject it or the application may need to trim, summarize, or retrieve less context.",
+          "The output limit is an engineering control as well as a cost control. It bounds how long the model may generate and helps keep response times predictable. A label, routing decision, or structured proposal may need only a small output budget. A customer explanation may need more room. A response that regularly reaches its limit should be inspected because it may indicate an unclear task, an unsuitable response format, excessive reasoning, or a need to divide the work into smaller steps.",
+          "Streaming changes the experience of waiting. Instead of holding the complete answer until generation ends, the provider sends partial output as tokens become available. The user can begin reading earlier, but streaming does not reduce the underlying generation work. The application still needs to handle interruption, disconnected clients, partial output that should not yet be persisted, and tool calls that may occur before a final answer is available. A streamed response remains subject to the same validation and safety boundaries as a response delivered at once.",
+          "Decoding settings control how the serving system selects output from the model's next token probabilities. Temperature changes the shape of the probability distribution. A lower temperature concentrates more probability on the strongest candidates and usually produces more consistent output. A higher temperature spreads probability across more candidates and allows more variation. Temperature does not add knowledge or make uncertain information correct.",
+          "Top p sampling limits selection to the smallest group of likely tokens whose combined probability reaches a chosen threshold. It is a candidate selection rule rather than another form of factual validation. Temperature and top p can be used together, although provider implementations and recommended ranges differ. Engineers should test decoding settings on representative tasks because the right choice depends on whether the application is extracting data, classifying a request, writing an explanation, or generating creative alternatives.",
+          "Lower variation is not identical to perfect reproducibility. Providers can update model versions, use distributed infrastructure, and change serving behavior. If a provider supports a seed or a version specific model identifier, use it when comparison matters, but still record the request and response. For an important test case, capture the model identifier, prompt version, input context, decoding settings, output schema, and timestamp. That record allows a team to investigate a behavior change instead of relying on memory of what the model usually produced.",
+          "During decoding, recomputing the key and value representations for every earlier token at every new step would be wasteful. A KV cache stores previously computed key and value states so the model can reuse them while generating the continuation. This reduces repeated work, but it consumes memory and does not remove the sequential nature of autoregressive decoding. Application engineers usually receive this optimization from a provider, yet understanding it explains why long conversations and many concurrent generations affect performance and capacity.",
+          "Provider prompt caching is related to the KV cache but serves a different purpose. Some providers can reuse a stable prompt prefix, such as a long system instruction or a shared reference document, across separate requests. This can lower input processing time or cost when the exact prefix is reused under the provider's rules. It is an optimization to consider after measuring a repeated workload, not a reason to place unnecessary material in every prompt. Design the smallest complete context first, then assess whether a stable prefix justifies caching.",
+          "Quantization represents model weights, and sometimes activations or cache values, with lower numerical precision. A model commonly stored with sixteen bit values may be converted to eight bit or four bit values. Lower precision reduces the storage and memory bandwidth required to load and run the model. This can make local inference possible on hardware that could not hold the original representation and can improve throughput when the runtime and hardware support the selected format.",
+          "Quantization involves tradeoffs. More aggressive quantization can reduce output quality, particularly on tasks that depend on subtle numerical distinctions. Actual speed improvements depend on the hardware, runtime, quantization method, and model architecture. Quantization does not make the context window larger and does not remove the memory required for active requests and the KV cache. Teams should evaluate a quantized model on representative tasks instead of assuming that a smaller file behaves identically to the original model.",
+          "LLM latency should be measured with several metrics because a single total duration hides where the user waited. Time to first token, commonly written as TTFT, measures the time from dispatching the model request until the first generated token arrives. It includes provider queueing, input processing, and the start of decoding. TTFT is especially important for streamed interfaces because it determines how quickly the response begins to feel active.",
+          "Inter token latency, commonly written as ITL, measures the delay between generated tokens during streaming. Output tokens per second describes the average generation rate during decoding. These metrics describe similar behavior from different perspectives. A lower ITL and a higher token rate usually produce smoother streaming, although batching, network delivery, and client rendering can affect what the user sees.",
+          "Time to last token, commonly written as TTLT, measures the duration from dispatching the model request until the final generated token arrives. It includes TTFT and the remaining decoding time. The complete application response can take longer because authentication, retrieval, tool calls, validation, and browser delivery may occur before or after the model call. Record both model metrics and complete application timing so the team can locate the actual bottleneck.",
+          "Cost is also a property of the complete request. Providers commonly meter input and output tokens differently, while prices and caching rules change over time. A long output can cost more and take longer even when the input is small. A large retrieved context can dominate input usage even if only one sentence appears in the final answer. Log usage from the provider response, attribute it to the feature and request type, and set budgets or alerts around measured traffic.",
+          "A context budget turns these ideas into a design decision. Suppose a feature has room for 16,000 tokens. It might reserve 1,000 for system instructions and the output schema, 2,000 for recent conversation, 1,500 for verified order facts and tool results, 6,000 for retrieved policy evidence, and 2,000 for the customer response. The remaining space provides headroom for variation. These numbers are illustrative. The important habit is to allocate space intentionally and define what is shortened or removed first when a request would exceed the budget.",
+          "For a damaged item request, the Customer Service Agent should not send the complete conversation or every return policy document. It can send the current request, a compact summary of necessary prior turns, a limited projection of the verified order, and the few current policy passages selected for the case. The trace should show how many tokens each component used and whether latency came from retrieval, the order tool, provider queueing, prefill, or decoding.",
+          "LLM inference is an observable runtime process. It has a serving path, input and output budgets, decoding settings, caches, memory requirements, measurable latency stages, and operating costs. In the next lesson, learners make these boundaries visible in code through a direct API request, response streaming, structured output, and a small agent built with selected LangChain components."
         ],
-        "For a refund question, the Customer Service Agent will reserve context space for the task instruction, the latest customer message, a small verified order projection, and selected policy passages. It will reserve output space for a concise explanation, stream the final text to the user, and record input tokens, output tokens, time to first token, total latency, and the time spent in retrieval and order lookup.",
-        ["inference", "prefill", "decoding", "tokens", "context window", "output limits", "streaming", "sampling", "KV cache", "prompt caching", "latency", "cost"],
+        "For a refund question, the Customer Service Agent will reserve context space for the task instruction, the latest customer message, a small verified order projection, and selected policy passages. It will reserve output space for a concise explanation, stream the final text, and record input tokens, output tokens, TTFT, ITL, tokens per second, TTLT, and the time spent in retrieval and order lookup.",
+        [
+          "LLM inference",
+          "serving systems",
+          "prefill",
+          "decoding",
+          "tokens",
+          "context windows",
+          "output limits",
+          "streaming",
+          "temperature",
+          "top p",
+          "KV cache",
+          "prompt caching",
+          "quantization",
+          "local inference",
+          "TTFT",
+          "ITL",
+          "tokens per second",
+          "TTLT",
+          "cost"
+        ],
         "Concept",
         [
-          { id: "an-inference-request", title: "Inference Lifecycle", start: 0, end: 2 },
-          { id: "tokens-and-budget", title: "Token and Context Budgets", start: 2, end: 5 },
-          { id: "streaming-and-sampling", title: "Streaming and Sampling", start: 5, end: 7 },
-          { id: "reproducibility-and-caching", title: "Reproducibility and Caching", start: 7, end: 9 },
-          { id: "latency-and-cost", title: "Latency and Cost", start: 9, end: 11 },
-          { id: "designing-a-budget", title: "Capacity Planning", start: 11 }
+          {
+            "id": "llm-inference",
+            "title": "LLM Inference",
+            "start": 0,
+            "end": 2,
+            "example": {
+              "title": "Prefill and Decoding",
+              "content": [
+                "A support request includes a long policy passage and asks for a short explanation. The model must process the entire policy during prefill before the first output token can appear. Once decoding begins, it produces the short explanation one token at a time. Reducing unnecessary policy text can improve TTFT, while limiting the answer length reduces decoding work."
+              ]
+            }
+          },
+          {
+            "id": "serving-systems",
+            "title": "Serving Systems",
+            "start": 2,
+            "end": 4,
+            "example": {
+              "title": "A Request Moving Through a Serving System",
+              "content": [
+                "A customer asks why an order has not arrived. The application authenticates the customer, retrieves a limited order record, and sends the request to the model provider. The serving system queues the request, processes the prompt during prefill, generates the explanation during decoding, and streams tokens back to the application. The model produces the language, while the serving system controls scheduling, memory, streaming, and usage measurement."
+              ]
+            }
+          },
+          {
+            "id": "tokens-and-context-windows",
+            "title": "Tokens and Context Windows",
+            "start": 4,
+            "end": 7,
+            "example": {
+              "title": "Competing for the Context Window",
+              "content": [
+                "A request contains 2,000 tokens of instructions, 7,000 tokens of conversation, 10,000 tokens of retrieved documents, and an expected 2,000 token answer. A model with a 16,000 token context window cannot accept that complete plan. The application must select fewer documents, summarize older conversation, reduce the answer budget, or choose a model with a larger context window."
+              ]
+            }
+          },
+          {
+            "id": "streaming-and-sampling",
+            "title": "Streaming and Sampling",
+            "start": 7,
+            "end": 10,
+            "example": {
+              "title": "Temperature and Top P",
+              "content": [
+                "Suppose the prompt ends with 'The customer requested a' and the model assigns probability 0.58 to 'refund,' 0.21 to 'replacement,' 0.12 to 'return,' and 0.03 to 'review.' A low temperature makes 'refund' more dominant. A higher temperature gives the less likely choices more opportunity to be selected. With top p set to 0.90, the serving system can keep 'refund,' 'replacement,' and 'return' because their combined probability reaches 0.91. These controls affect variation in wording. They do not determine whether a refund is permitted."
+              ]
+            }
+          },
+          {
+            "id": "reproducibility-and-caching",
+            "title": "Reproducibility and Caching",
+            "start": 10,
+            "end": 13,
+            "example": {
+              "title": "Two Different Caches",
+              "content": [
+                "During one generated response, the KV cache lets the model reuse attention states for earlier tokens. Across several separate requests, provider prompt caching may reuse an identical policy prefix. The first cache accelerates continued decoding inside a request. The second can reduce repeated input processing across requests."
+              ]
+            }
+          },
+          {
+            "id": "quantization-and-local-inference",
+            "title": "Quantization and Local Inference",
+            "start": 13,
+            "end": 15,
+            "example": {
+              "title": "Running a Model Locally",
+              "content": [
+                "A model with seven billion parameters needs roughly fourteen gigabytes just for its weights when each parameter uses sixteen bits. Representing those weights with four bits reduces the raw weight size to roughly three and a half gigabytes. The complete process still needs additional memory for the runtime, metadata, activations, and KV cache. The smaller representation may allow the model to run on a developer laptop, but the team must compare response quality and latency before choosing it for an application."
+              ]
+            }
+          },
+          {
+            "id": "latency-metrics-and-cost",
+            "title": "Latency Metrics and Cost",
+            "start": 15,
+            "end": 19,
+            "example": {
+              "title": "Reading Latency Metrics",
+              "content": [
+                "A support response has a TTFT of 1.8 seconds and then generates 240 tokens at about 35 tokens per second. The response begins after 1.8 seconds but needs several more seconds to finish. If TTFT increases while the token rate remains stable, queueing or prefill may be responsible. If TTFT remains stable but generation becomes slow, model size, serving load, or decoding performance may be responsible. If both remain healthy while the page still feels slow, retrieval or tool execution may be the actual bottleneck."
+              ]
+            }
+          },
+          {
+            "id": "context-budgeting",
+            "title": "Context Budgeting",
+            "start": 19,
+            "end": 22,
+            "example": {
+              "title": "A Budget for a Support Request",
+              "content": [
+                "The Customer Service Agent reserves space for its task instruction, a compact conversation summary, verified order facts, selected policy evidence, and a concise answer. When the request grows, it removes older conversational detail before dropping the current order record or the policy passage needed for the decision. The priority follows the task rather than the order in which the text was collected."
+              ]
+            }
+          }
         ]
       ),
       lesson(
         "using-llm-apis-and-langchain",
         "Using LLM APIs and LangChain",
         "3 hours",
-        "Use a provider SDK or LangChain while keeping model behavior, versions, and application boundaries visible.",
+        "Build a basic agent through a direct provider integration and selected LangChain components while keeping requests, model versions, tools, outputs, and failures visible to application code.",
         [
-          "An LLM API is a network boundary between your application and a model provider. Your server creates a request containing a model identifier, instructions, the task input, configuration, and sometimes a response schema or tool definitions. The provider returns generated content plus operational data such as a request identifier and token usage. Treat this response as one dependency result inside a normal application request, not as a magical method call that completes the product feature by itself.",
-          "A minimal integration has a clear lifecycle. Authenticate the user, validate the incoming application request, assemble the permitted context, call the model, validate the result, and return an application response. This is deliberately familiar software engineering. The new part is that the model result is probabilistic and may be incomplete, so the boundary needs a little more design than a call to a deterministic internal service.",
-          "Provider SDKs are usually the best place to start. A direct SDK call exposes the actual model identifier, messages, output settings, streaming events, errors, and usage fields. That visibility is valuable when a feature is still small. It lets an engineer see precisely what is crossing the boundary and makes it easier to compare a prompt or model change later. A framework can be introduced once it removes real repetition, rather than as the first abstraction in the project.",
-          "Chat APIs commonly represent a request as an ordered list of messages. A system instruction establishes the application’s role and boundaries. A user message contains the person’s request. Tool results, retrieved documents, and prior conversation may be represented as additional messages or content blocks. The exact names vary by provider, but the important idea is stable. Roles and source labels tell the model how to interpret the text. Do not flatten every source into one anonymous string when trust and provenance matter.",
-          "The client should construct messages from typed application data, not concatenate an uncontrolled request directly into a long instruction. A customer message is necessary input, but it is untrusted content. An authenticated order projection is a verified source for order facts. A current policy excerpt is evidence for policy wording. Keep those roles visible in the request builder so you can reason about which data a model is allowed to see and why it received it.",
-          "The API contract should fit the task. A routing step might return a small structured proposal such as an issue category, missing details, and a recommended next step. A customer facing explanation might return text only after application code has already determined the outcome. Avoid asking one call to both interpret a request and execute a business decision. Separating those jobs gives each call a clearer input, a smaller output budget, and a better test surface.",
-          "Set explicit limits on output and time. An output token limit prevents an extraction call from producing an unnecessary essay and establishes a bound on generation work. A timeout prevents an upstream delay from holding an application request indefinitely. A cancellation path matters when the user leaves a page or changes a request. These are ordinary service concerns, but an LLM feature makes them visible because generation can take longer than a typical database read and often streams partial results.",
-          "Retries require care. A transient network failure may justify retrying a model request, but a retry can increase cost and create duplicate work. The safe policy depends on what happened before the failure and what side effects the request can cause. Retrying a classification request that only reads data is different from retrying a workflow that already sent an email or created a ticket. Give consequential actions their own idempotency and approval controls instead of assuming an API retry is harmless.",
-          "Streaming is a delivery choice, not a correctness feature. When a provider streams, your server receives incremental events and can forward suitable text to the browser before the final response is complete. This can improve perceived responsiveness for a long explanation. It also means the interface must handle interruption, reconnects, final metadata, and content that should not be treated as complete until the run finishes. For a structured decision, it is often simpler to wait for a complete validated result.",
-          "The model choice belongs to the task. A smaller model may be sufficient for classifying a short message, extracting a few fields, or selecting from a fixed set of routes. A stronger reasoning model can be useful when the task truly requires complex synthesis or planning. Start from representative cases and a measurable target. Compare accuracy, schema validity, latency, and cost under the same context rather than choosing by a provider’s broad marketing label.",
-          "Pin the model identifier when the provider allows it, and record the version you actually called. A model name can be an alias that changes over time. The same applies to prompts, schemas, tools, and framework versions. For an important request, a trace should be able to answer what model received approved context, which settings were used, and what the application accepted or rejected. This is the minimum evidence needed to investigate a behavior change.",
-          "LangChain is an application framework with integrations for model providers, message types, structured output, tools, document loaders, retrieval components, and workflow composition. Its value is not that it makes an application more intelligent. Its value is that it can give common components a consistent interface and reduce repeated adapter code as a system grows.",
-          "Use LangChain when its abstractions fit a genuine integration problem. For example, it can help when you are testing two providers behind one model interface, building a retrieval pipeline from reusable components, or binding a structured output schema to several model calls. Do not use it merely because an LLM tutorial uses it. A direct SDK is often easier to debug for one small endpoint, and any framework should leave the prompt, data flow, tool permissions, and errors understandable to a teammate who did not create the feature.",
-          "Framework code should not hide engineering decisions. Keep prompt templates versioned in your application, log the underlying provider model and usage, and make the request builder testable without a live model call. If a framework returns a rich object, reduce it to the fields your application actually needs. If it automatically retries, follows a tool call, or chooses a model, understand and configure that behavior explicitly. Convenience is useful only when the application remains inspectable.",
-          "A good first integration is intentionally narrow. Build a server side endpoint that accepts a validated support message, gives the model a bounded interpretation task, requests a small structured proposal, validates that proposal, and records the model version and usage. Do not add RAG, tools, memory, or multiple agents to this first call. Those later components are easier to learn when the base request lifecycle is already clear.",
-          "For the Customer Service Agent, the first model call will identify the request type, the customer’s stated goal, and any missing details. The server will keep the provider key outside the browser, limit the model to a small response schema, record latency and token usage, and reject incomplete output before it reaches business logic. LangChain may later manage the model integration, but the application will still own the request boundary and every decision after it."
+          "An LLM API is a network interface that allows an application to send input to a hosted language model and receive generated output. A request usually contains a model identifier, instructions, task input, configuration, and sometimes an output schema or tool definitions. The provider returns generated content and operational metadata such as a request identifier, token usage, and completion status. The application must treat that response as the result of an external dependency and decide whether it is valid for the product workflow.",
+          "A basic integration follows a familiar software lifecycle. The server authenticates the caller, validates the application request, assembles permitted context, calls the model, validates the returned result, and sends an application response. The model output is probabilistic and may be incomplete, malformed, or unsuitable for the requested task. Application code therefore remains responsible for permissions, validation, business rules, and side effects.",
+          "Provider SDKs are usually the best place to start. A direct SDK call exposes the actual model identifier, messages, output settings, streaming events, errors, and usage fields. This visibility is valuable while a feature is small because an engineer can see what crosses the boundary and compare prompt or model changes. A framework can be introduced when it removes real repetition rather than becoming the first abstraction in the project.",
+          "Chat APIs commonly represent a request as an ordered collection of messages or content blocks. A system instruction describes the task and application boundaries. A user message contains the person's request. Retrieved documents, tool results, and earlier conversation may appear as additional content. The exact message types differ across providers, but the application should preserve the identity and role of each source.",
+          "Source identity describes where information came from and what that source is allowed to establish. A customer message is authoritative for what the customer is asking, but it is not proof of an order status. An authenticated order record can establish selected order facts. A policy passage can support a policy explanation only when its version and scope are current. The traceable origin of this information is often called provenance. Recording it helps engineers understand why the model received a claim and whether the application was entitled to rely on it.",
+          "Labels alone do not create trust. Untrusted text can still contain false claims or instructions designed to influence the model. The application must enforce permissions, restrict data access, and decide which source can support each business decision. Keeping sources separate makes those boundaries easier to review, test, and debug.",
+          "The API contract should fit the task. A routing step might return a small structured proposal containing an issue category, missing details, and a recommended next step. A customer explanation might return text only after application code has determined the outcome. Avoid asking one model call to interpret a request and execute a business decision. Separating those jobs gives each call a clearer input, a smaller output budget, and a better test surface.",
+          "Set explicit limits on output and time. An output token limit prevents an extraction call from producing an unnecessary essay and establishes a bound on generation work. A timeout prevents an upstream delay from holding an application request indefinitely. A cancellation path matters when the user leaves the page or changes the request. These are familiar service concerns, but generation can take longer than a database read and may deliver partial output while it is still running.",
+          "Retries require care. A transient network failure may justify retrying a model request, but a retry can increase cost and create duplicate work. The safe policy depends on what completed before the failure and whether the workflow can produce side effects. Retrying a classification request that only reads data is different from retrying a workflow that already sent an email or created a ticket. Consequential actions need their own idempotency and approval controls instead of relying on a general API retry.",
+          "Streaming is a delivery choice rather than a correctness feature. When a provider streams, the server receives incremental events and can forward suitable text to the browser before the final response is complete. This can improve perceived responsiveness for a long explanation. It also means the interface must handle interruption, reconnects, final metadata, and content that should not be accepted until the run finishes. For a structured decision, it is often simpler to wait for a complete validated result.",
+          "The model choice belongs to the task. A smaller model may be sufficient for classifying a short message, extracting a few fields, or selecting from a fixed set of routes. A stronger reasoning model can be useful when the task requires complex synthesis or planning. Compare candidates on representative cases under the same context. Measure task quality, schema validity, latency, and cost rather than choosing from a provider's broad model description.",
+          "Pin the model identifier when the provider allows it and record the version actually called. A model name can be an alias that changes over time. The same principle applies to prompts, schemas, tools, and framework versions. For an important request, a trace should answer which model received which approved context, what settings were used, and what the application accepted or rejected. This is the minimum evidence needed to investigate a behavior change.",
+          "LangChain is an application framework with integrations for model providers, message types, structured output, tools, document loaders, retrieval components, and workflow composition. Its value is not that it makes the model more capable. It can give common components a consistent interface and reduce repeated adapter code as a system grows.",
+          "Use LangChain when its abstractions solve an integration problem. It can help when a team tests two providers behind one model interface, binds one structured output schema to several model calls, or composes reusable retrieval components. A direct SDK is often easier to debug for one small endpoint. Whichever approach is used, the prompt, input data, tool permissions, model choice, errors, and returned usage should remain understandable to a teammate who did not create the feature.",
+          "An agent is an LLM application in which the model can propose the next action from a bounded set of choices while application code controls execution. The model may decide to answer directly, request more information, or call an available tool. The application validates the proposal, executes an allowed action, returns the result to the model when needed, and stops the process when it reaches a final response or a configured step limit.",
+          "In this lesson, learners build a basic customer service agent using selected LangChain concepts. The implementation uses a chat model interface, typed messages, one read only lookup tool, tool binding, structured output, and a bounded execution loop. The application validates tool arguments, controls access to customer data, limits the number of steps, records each model and tool event, and validates the final response.",
+          "This example is intentionally small. It teaches the boundary between model choice and application execution without introducing planning systems, long term memory, graph workflows, specialist agents, or multi agent coordination. Those topics appear in later agent workflow lessons after learners understand the model request lifecycle.",
+          "A framework should reduce repeated integration work without hiding the underlying model call. Engineers should still be able to inspect the provider model, generated messages, prompt version, output schema, available tools, retry policy, token usage, latency, errors, and completion status. If a framework automatically retries a request, follows a tool call, or selects a model, that behavior should be explicitly configured and visible in traces.",
+          "Keep prompt templates and schemas versioned in the application. Make request construction testable without a live model call. Convert framework response objects into the narrow types the product uses. A teammate should be able to follow the complete data flow without depending on undocumented framework behavior.",
+          "The lesson begins with a direct provider SDK so learners can see the complete request and response boundary. It then rebuilds the same narrow workflow with selected LangChain components and extends it into the bounded support agent. Comparing both implementations shows what the framework simplifies and what the application must continue to own.",
+          "For the Customer Service Agent, the model first identifies the request type and decides whether verified order data is needed. When it proposes the order lookup tool, the server validates the arguments and confirms that the authenticated customer can access the requested order. The tool returns a limited order projection. The model then explains that verified result. The trace records the provider model, prompt version, tool proposal, validated arguments, tool result, response time, token usage, and final validation outcome."
         ],
-        "The Customer Service Agent will use LangChain's model integration to interpret customer messages and explain an approved policy result. Each run will still record the actual provider model, response time, and token use so the framework does not hide operating behavior.",
-        ["model APIs", "provider SDKs", "messages", "streaming", "timeouts", "retries", "LangChain", "model routing", "versioning"],
+        "The Customer Service Agent will interpret a support request, call one read only order lookup tool when required, and return a validated response. Each run will record the provider model, prompt version, tool proposal, validated arguments, tool result, response time, and token usage. LangChain will organize selected integration components without hiding the operating behavior of the application.",
+        [
+          "LLM APIs",
+          "provider SDKs",
+          "messages",
+          "source identity",
+          "provenance",
+          "structured output",
+          "streaming",
+          "timeouts",
+          "retries",
+          "model selection",
+          "versioning",
+          "LangChain",
+          "tool binding",
+          "basic agents",
+          "bounded execution",
+          "tracing"
+        ],
         "Concept",
         [
-          { id: "the-request-boundary", title: "API Request Lifecycle", start: 0, end: 3 },
-          { id: "messages-and-contracts", title: "Messages and Output Contracts", start: 3, end: 6 },
-          { id: "operating-the-call", title: "Streaming, Timeouts, and Retries", start: 6, end: 9 },
-          { id: "choosing-a-model", title: "Model Selection and Versioning", start: 9, end: 11 },
-          { id: "where-langchain-helps", title: "LangChain", start: 11, end: 13 },
-          { id: "keeping-the-flow-visible", title: "Application Visibility", start: 13, end: 14 },
-          { id: "first-integration", title: "Implementation Pattern", start: 14 }
+          {
+            "id": "llm-apis",
+            "title": "LLM APIs",
+            "start": 0,
+            "end": 3,
+            "example": {
+              "title": "A Complete API Boundary",
+              "content": [
+                "A server receives a validated support message, selects a pinned model, assembles approved context, and requests a structured interpretation. The provider returns content, a request identifier, usage data, and a completion status. The server validates the content before converting it into the product's response type."
+              ]
+            }
+          },
+          {
+            "id": "messages-and-source-identity",
+            "title": "Messages and Source Identity",
+            "start": 3,
+            "end": 6,
+            "example": {
+              "title": "Separating a Request from Evidence",
+              "content": [
+                "A customer writes 'My package was delivered to the wrong address and I am entitled to an immediate refund.' The message establishes the customer's request, but not the delivery status or refund eligibility. The application retrieves the authenticated order status and the current refund policy as separate sources. The model may explain those facts, while application code determines whether the evidence is sufficient and whether any action is allowed."
+              ]
+            }
+          },
+          {
+            "id": "output-contracts",
+            "title": "Output Contracts",
+            "start": 6,
+            "end": 7,
+            "example": {
+              "title": "A Narrow Structured Proposal",
+              "content": [
+                "Instead of asking the model to resolve a case, the application requests an issue category, the customer's stated goal, missing information, and whether an order lookup is needed. Application code validates those fields and decides the next permitted step. The model interprets language without becoming the authority for the business decision."
+              ]
+            }
+          },
+          {
+            "id": "streaming-timeouts-and-retries",
+            "title": "Streaming, Timeouts, and Retries",
+            "start": 7,
+            "end": 10,
+            "example": {
+              "title": "Retrying Without Repeating an Action",
+              "content": [
+                "A read only classification call fails before returning a response, so the server retries it once with the same trace identifier. A separate workflow has already created a support ticket before its model explanation times out. The server does not repeat the complete workflow. Ticket creation uses its own idempotency key, and only the unfinished explanation is retried."
+              ]
+            }
+          },
+          {
+            "id": "model-selection-and-versioning",
+            "title": "Model Selection and Versioning",
+            "start": 10,
+            "end": 12,
+            "example": {
+              "title": "Choosing a Model for the Task",
+              "content": [
+                "A small model and a stronger model are evaluated on the same 200 support messages. The team compares category accuracy, structured output validity, TTFT, total latency, and cost. If the small model meets the acceptance target for routing, it serves that step. The stronger model is reserved for policy explanations that show a measured benefit."
+              ]
+            }
+          },
+          {
+            "id": "langchain",
+            "title": "LangChain",
+            "start": 12,
+            "end": 14,
+            "example": {
+              "title": "Using an Abstraction Without Losing Visibility",
+              "content": [
+                "A support application uses a LangChain chat model interface so it can test two providers with the same message structure. The trace still records the actual provider, model identifier, rendered messages, token usage, latency, structured output result, and any tool call. LangChain reduces adapter code, while the application retains the evidence needed to compare behavior and investigate failures."
+              ]
+            }
+          },
+          {
+            "id": "basic-agent",
+            "title": "Basic Agent",
+            "start": 14,
+            "end": 17,
+            "example": {
+              "title": "A Bounded Support Agent",
+              "content": [
+                "A customer asks where an order is. The model receives the request and the description of one order lookup tool. It proposes a tool call with an order identifier. Application code verifies that the authenticated customer can access that order, validates the arguments, and executes the read only lookup. The result is returned to the model as a labeled tool result. The model then writes a response based on the verified status. The model chooses the next conversational step, while application code controls permissions, execution, limits, and acceptance."
+              ]
+            }
+          },
+          {
+            "id": "application-visibility",
+            "title": "Application Visibility",
+            "start": 17,
+            "end": 21,
+            "example": {
+              "title": "Following One Agent Run",
+              "content": [
+                "A trace for one support request shows the pinned provider model, rendered messages, available tool schema, proposed order identifier, authorization result, limited tool output, final model response, token usage, latency, and validation outcome. A framework organizes the calls, but every decision needed to explain the run remains visible."
+              ]
+            }
+          }
         ]
       )
     ]
