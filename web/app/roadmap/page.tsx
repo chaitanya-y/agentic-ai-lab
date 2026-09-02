@@ -14,7 +14,7 @@ export default function RoadmapPage() {
     <main className="inner-page">
       <VisitMarker page="roadmap" />
       <section className="page-hero roadmap-hero">
-        <p className="eyebrow">120 hour roadmap</p>
+        <p className="eyebrow">117 hour roadmap</p>
         <h1>Agentic AI engineering roadmap.</h1>
         <p>
           A focused {totalHours} hour course for software engineers preparing to build AI applications. Start with LLM

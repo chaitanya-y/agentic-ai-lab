@@ -1,6 +1,14 @@
 # Local configuration
 .env
 .env.*
+!.env.example
+!**/.env.example
+
+# Python lab environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
 
 # Website dependencies and build output
 node_modules/
@@ -8,6 +16,7 @@ web/node_modules/
 web/.next/
 web/out/
 web/dist/
+*.tsbuildinfo
 .vercel/
 
 # OS/editor files

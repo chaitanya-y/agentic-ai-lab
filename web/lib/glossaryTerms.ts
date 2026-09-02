@@ -34,11 +34,15 @@ export const glossaryTerms: GlossaryTerm[] = [
   },
   {
     term: "probability distribution",
-    definition: "A set of probabilities across possible outcomes. For the next token, it describes how likely the model considers each token to be."
+    definition: "A set of probabilities assigned to all possible outcomes, adding up to 100 percent. For next token prediction, it describes how likely the model considers each possible token to be."
   },
   {
     term: "autoregressive",
     definition: "A generation method that produces one token at a time, using the prompt and all previously generated tokens as context for the next one."
+  },
+  {
+    term: "context",
+    definition: "The information available to a model for one request. It can include instructions, the user’s input, conversation history, retrieved documents, tool results, and tokens already generated in the response."
   },
   {
     term: "context window",
@@ -69,6 +73,18 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition: "The ability to apply learned patterns to inputs that were not reproduced exactly in the training data. It does not give a model access to current facts."
   },
   {
+    term: "general capability",
+    definition: "A model’s reusable ability to work across many language and code tasks rather than being trained for only one narrow product workflow."
+  },
+  {
+    term: "accelerator hours",
+    definition: "A measure of training compute. One accelerator used for one hour equals one accelerator hour, so 100 accelerators running for 10 hours consume 1,000 accelerator hours."
+  },
+  {
+    term: "GPU hours",
+    definition: "Accelerator hours measured specifically for graphics processing units. The number describes hardware use, but not the full cost of data, experiments, infrastructure, or staff."
+  },
+  {
     term: "RLHF",
     definition: "Reinforcement Learning from Human Feedback. A family of methods that uses human preference signals to shape a model's responses after pretraining."
   },
@@ -93,12 +109,32 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition: "The architecture used by most modern LLMs. It uses attention to relate tokens across a sequence."
   },
   {
+    term: "attention",
+    definition: "A mechanism that assigns weights to information from different token positions and combines that information to build a more useful representation."
+  },
+  {
     term: "self attention",
     definition: "The transformer operation that lets each token weigh information from other permitted tokens in the same sequence when building its representation."
   },
   {
+    term: "masked self attention",
+    definition: "Self attention with a causal mask that prevents each token from using information from tokens that appear later in the sequence."
+  },
+  {
+    term: "feed forward network",
+    definition: "A neural network inside a transformer block that processes each token separately after attention. It changes which learned features are emphasized so later blocks can recognize more useful patterns."
+  },
+  {
+    term: "feed forward networks",
+    definition: "Neural networks inside transformer blocks that process each token separately after attention. They change which learned features are emphasized so later blocks can recognize more useful patterns."
+  },
+  {
     term: "positional encoding",
     definition: "Information added to token representations so a transformer can distinguish where each token appears in a sequence."
+  },
+  {
+    term: "positional information",
+    definition: "Numerical information that represents where a token appears in a sequence, allowing a transformer to distinguish the same tokens arranged in different orders."
   },
   {
     term: "causal mask",
@@ -193,6 +229,26 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition: "Software Development Kit. A library maintained by the provider that makes it easier for application code to call that provider's API."
   },
   {
+    term: "structured output",
+    definition: "Model output constrained to a defined data shape so application code can parse and validate fields instead of interpreting free form text."
+  },
+  {
+    term: "LangChain",
+    definition: "An application framework that provides common interfaces for model providers, messages, structured output, tools, retrieval components, and agent workflows."
+  },
+  {
+    term: "tool binding",
+    definition: "Supplying tool definitions to a model so it can propose a tool call. Binding exposes the allowed schemas but does not execute the tools."
+  },
+  {
+    term: "authorization",
+    definition: "The application check that determines whether the authenticated user or service is permitted to access data or perform an action."
+  },
+  {
+    term: "trace identifier",
+    definition: "A unique value attached to one application run so related model calls, tool calls, measurements, and errors can be followed together."
+  },
+  {
     term: "schema",
     definition: "A formal description of the fields, types, and allowed values in a data structure. It lets application code validate a model's structured result."
   },
@@ -203,6 +259,10 @@ export const glossaryTerms: GlossaryTerm[] = [
   {
     term: "provenance",
     definition: "Information about where data came from, how it was produced, and which version or source supplied it."
+  },
+  {
+    term: "deterministic code",
+    definition: "Application code that follows rules written by engineers. Given the same input and state, it follows the same defined path instead of asking a model to choose the next step."
   },
   {
     term: "agent",

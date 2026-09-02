@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { visitProgressEvent, visitProgressKeys } from "../../lib/visitProgress";
 type RoadmapLesson = {
   slug: string;
   time: string;
@@ -25,12 +26,17 @@ export function RoadmapLessonList({ isPublished, lessons }: RoadmapLessonListPro
     return () => window.clearTimeout(timeoutId);
   }, [showToast]);
 
+  const confirmRoadmapVisit = () => {
+    window.localStorage.setItem(visitProgressKeys.roadmapVisited, "true");
+    window.dispatchEvent(new Event(visitProgressEvent));
+  };
+
   return (
     <>
       <div className="timeline-lessons">
         {lessons.map((item) =>
           isPublished ? (
-            <Link href={`/learn/${item.slug}`} key={item.slug}>
+            <Link href={`/learn/${item.slug}`} key={item.slug} onClick={confirmRoadmapVisit}>
               <span>{item.title}</span>
               <small>{item.time}</small>
             </Link>

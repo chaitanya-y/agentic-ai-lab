@@ -12,7 +12,7 @@ The goal is to help engineers prepare for AI engineering roles in about two mont
 
 ## What is included
 
-- A 120 hour roadmap across seven phases
+- A 117 hour roadmap across seven phases
 - Plain language phase overviews
 - A practical learning path for building LLM applications and agents
 

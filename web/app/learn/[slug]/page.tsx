@@ -1,14 +1,69 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Fragment } from "react";
 import { GlossaryText } from "../../components/GlossaryText";
+import { LessonCodeBlock } from "../../components/LessonCodeBlock";
+import { LessonLabPanel } from "../../components/LessonLabPanel";
+import { LessonTableOfContents } from "../../components/LessonTableOfContents";
 import { LessonNotes } from "../../components/LessonNotes";
+import { LessonVisitMarker } from "../../components/LessonVisitMarker";
+import { LessonVisual } from "../../components/LessonVisual";
 import { LearningContentComingSoon } from "../../components/LearningContentComingSoon";
-import { allLessons, getAdjacentLessons, getLesson, getLessonSections, getPhase } from "../../../lib/curriculum";
+import { RoadmapAccessGate } from "../../components/RoadmapAccessGate";
+import { allLessons, getAdjacentLessons, getLesson, getLessonSections, getPhase, type LessonSection } from "../../../lib/curriculum";
+import { getLessonCodeExamples } from "../../../lib/lessonCodeExamples";
+import { getLessonLab } from "../../../lib/lessonLabs";
 import { isPhasePublished } from "../../../lib/siteStatus";
 
 type LessonPageProps = {
   params: Promise<{ slug: string }>;
 };
+
+function LessonSectionContent({ lessonSlug, section }: { lessonSlug: string; section: LessonSection }) {
+  const codeExamples = getLessonCodeExamples(lessonSlug, section.id);
+
+  function renderCodeExample(example: (typeof codeExamples)[number]) {
+    return (
+      <LessonCodeBlock
+        code={example.code}
+        description={example.description}
+        file={example.file}
+        intent={example.intent}
+        key={`${example.file}-${example.title}`}
+        title={example.title}
+      />
+    );
+  }
+
+  return (
+    <section id={section.id}>
+      <h2>{section.title}</h2>
+      <LessonVisual lessonSlug={lessonSlug} sectionId={section.id} />
+      {section.content.map((paragraph, paragraphIndex) => (
+        <Fragment key={`${section.id}-${paragraphIndex}`}>
+          <p data-note-anchor={`${section.id}-${paragraphIndex}`} tabIndex={-1}>
+            <GlossaryText text={paragraph} />
+          </p>
+          {codeExamples
+            .filter((example) => example.afterParagraph === paragraphIndex)
+            .map(renderCodeExample)}
+        </Fragment>
+      ))}
+      {codeExamples.filter((example) => example.afterParagraph === undefined).map(renderCodeExample)}
+      {section.example ? (
+        <aside className="lesson-concept-example" aria-label={`${section.title} example`}>
+          <p className="lesson-example-label">Example</p>
+          <h3>{section.example.title}</h3>
+          {section.example.content.map((paragraph, paragraphIndex) => (
+            <p data-note-anchor={`${section.id}-example-${paragraphIndex}`} key={paragraph} tabIndex={-1}>
+              <GlossaryText text={paragraph} />
+            </p>
+          ))}
+        </aside>
+      ) : null}
+    </section>
+  );
+}
 
 export function generateStaticParams() {
   return allLessons.map((item) => ({ slug: item.slug }));
@@ -52,9 +107,17 @@ export default async function LessonPage({ params }: LessonPageProps) {
   const previousIsPublished = previous ? isPhasePublished(previous.phaseId) : false;
   const nextIsPublished = next ? isPhasePublished(next.phaseId) : false;
   const sections = getLessonSections(item);
+  const lab = getLessonLab(item.slug);
+  const showLessonExample = Boolean(item.example);
+  const lessonTopics = [
+    ...sections.map(({ id, title }) => ({ id, title })),
+    ...(showLessonExample ? [{ id: "customer-service-example", title: "Customer Service Agent example" }] : [])
+  ];
 
   return (
-    <main className="lesson-page">
+    <RoadmapAccessGate>
+      <main className="lesson-page">
+      <LessonVisitMarker lessonSlug={item.slug} />
       <nav className="breadcrumb" aria-label="Breadcrumb">
         <Link href="/">Home</Link>
         <span>/</span>
@@ -75,61 +138,44 @@ export default async function LessonPage({ params }: LessonPageProps) {
             <strong>Time</strong>
             {item.time}
           </span>
-          <span>
-            <strong>Format</strong>
-            {item.format}
-          </span>
-          <span>
-            <strong>Phase commitment</strong>
-            {item.phaseTime}
-          </span>
         </div>
         <LessonNotes lessonSlug={item.slug} />
       </header>
 
       <div className="lesson-content-layout">
-        <aside className="lesson-table-of-contents" aria-label="Lesson topics">
-          <p>Lesson topics</p>
-          <nav>
-            {sections.map((section) => (
-              <a href={`#${section.id}`} key={section.id}>
-                {section.title}
-              </a>
-            ))}
-            <a href="#customer-service-example">Customer Service Agent example</a>
-          </nav>
-        </aside>
+        <LessonTableOfContents topics={lessonTopics} />
 
         <article className="lesson-reading-content" data-lesson-slug={item.slug}>
+          {item.slug === "using-llm-apis-and-langchain" ? (
+            <aside className="lesson-code-reading-note" aria-label="Code example guidance">
+              <strong>Code examples in this lesson</strong>
+              <p>
+                The short code snippets in this lesson are for observation while you read the concepts. Do not run or modify them yet. If a line or concept is unclear, use a coding agent to ask questions and understand it before continuing. The final topic, Build a Support Request Analyzer, explains the project setup, the files and functions to inspect, and the complete steps for running all three implementations.
+              </p>
+            </aside>
+          ) : null}
+          {lab ? (
+            <LessonLabPanel
+              description={lab.description}
+              path={lab.path}
+              title={lab.title}
+              url={lab.url}
+            />
+          ) : null}
           {sections.map((section) => (
-            <section id={section.id} key={section.id}>
-              <h2>{section.title}</h2>
-              {section.content.map((paragraph, paragraphIndex) => (
-                <p data-note-anchor={`${section.id}-${paragraphIndex}`} key={paragraph} tabIndex={-1}>
-                  <GlossaryText text={paragraph} />
-                </p>
-              ))}
-              {section.example ? (
-                <aside className="lesson-concept-example" aria-label={`${section.title} example`}>
-                  <p className="lesson-example-label">Example</p>
-                  <h3>{section.example.title}</h3>
-                  {section.example.content.map((paragraph, paragraphIndex) => (
-                    <p data-note-anchor={`${section.id}-example-${paragraphIndex}`} key={paragraph} tabIndex={-1}>
-                      <GlossaryText text={paragraph} />
-                    </p>
-                  ))}
-                </aside>
-              ) : null}
-            </section>
+            <LessonSectionContent key={section.id} lessonSlug={item.slug} section={section} />
           ))}
 
-          <section className="lesson-example" id="customer-service-example">
-            <p className="lesson-example-label">Lesson example</p>
-            <h2>Customer Service Agent</h2>
-            <p data-note-anchor="customer-service-example-0" tabIndex={-1}>
-              <GlossaryText text={item.example} />
-            </p>
-          </section>
+          {item.example ? (
+            <section className="lesson-example" id="customer-service-example">
+              <p className="lesson-example-label">Lesson example</p>
+              <h2>Customer Service Agent</h2>
+              <p data-note-anchor="customer-service-example-0" tabIndex={-1}>
+                <GlossaryText text={item.example} />
+              </p>
+            </section>
+          ) : null}
+
         </article>
       </div>
 
@@ -159,6 +205,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
           </Link>
         )}
       </nav>
-    </main>
+      </main>
+    </RoadmapAccessGate>
   );
 }

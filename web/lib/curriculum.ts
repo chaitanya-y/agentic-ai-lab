@@ -29,7 +29,7 @@ export type Lesson = {
   content: string[];
   sectionOutline?: LessonSectionOutline[];
   sections?: LessonSection[];
-  example: string;
+  example?: string;
   concepts: string[];
 };
 
@@ -53,7 +53,7 @@ const lesson = (
   time: string,
   summary: string,
   content: string[],
-  example: string,
+  example: string | undefined,
   concepts: string[],
   format: LessonFormat = "Concept",
   sectionOutline?: LessonSectionOutline[],
@@ -94,8 +94,8 @@ export const curriculum: CurriculumPhase[] = [
     number: "01",
     title: "LLM Fundamentals",
     shortTitle: "LLM fundamentals",
-    time: "15 hours",
-    hours: 15,
+    time: "12 hours",
+    hours: 12,
     summary: "Understand how large language models generate responses, use context, and fit into an application.",
     prerequisite: "Comfort with a programming language, HTTP APIs, JSON, and basic backend development.",
     outcome: "You can describe the role of an LLM in an application and make informed decisions about models, context, and generated output.",
@@ -104,7 +104,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "what-is-a-large-language-model",
         "What Is a Large Language Model?",
-        "3 hours",
+        "1.5 hours",
         "Learn what generative AI and large language models are, how LLMs represent and generate language, and how they should be used within a software application.",
         [
           "A large language model, or LLM, is a neural network trained to continue a sequence of language. Given the text that came before, it estimates which small piece of text is most likely to come next. It then uses the new piece as part of its input and repeats the process. A response that appears to be a single, coherent thought is therefore produced incrementally, one token after another.",
@@ -121,7 +121,7 @@ export const curriculum: CurriculumPhase[] = [
           "This does not reduce an LLM to an autocomplete toy. Its value is precisely that it can operate on the ambiguous language surrounding a software product. It can address the issue a customer describes, the meaning of a long document, the shape of an answer a person can understand, or the next useful question to ask. The engineering work is to use that flexibility where it helps and to constrain it where correctness, security, or policy must be deterministic.",
           "By the end of this phase, you should be able to look at an AI feature and identify three things. The first is the language task assigned to the model. The second is the trusted information the model needs for that task. The third is the decision or action that must stay in application code. That mental model is the foundation for prompts, retrieval, tool use, agent workflows, and evaluation. We will add implementation examples once the course reaches the API and application integration lesson. This lesson deliberately establishes the system model before introducing a framework."
         ],
-        "In the Customer Service Agent, the model receives a customer message and produces a structured proposal with the likely issue, requested outcome, and missing details. The application retrieves the authenticated customer’s order, applies the refund rules, and records any approved action. If the policy is unclear or the evidence is missing, the application asks a follow up question or routes the case to a person instead of asking the model to guess.",
+        "The customer writes, ‘Where is my refund?’ The tokenizer converts the message into token IDs. The LLM processes those tokens and generates a structured interpretation one token at a time, identifying the request as a refund status question and noting that an order number may be needed. This output reflects learned language patterns and the context supplied to the model. It does not reveal the actual refund status. The application must retrieve the authenticated refund record before the model can explain the verified result.",
         ["generative AI", "tokens", "next token prediction", "autoregressive generation", "runtime context", "grounding", "application boundaries"],
         "Concept",
         undefined,
@@ -145,7 +145,7 @@ export const curriculum: CurriculumPhase[] = [
             id: "the-working-model",
             title: "Large Language Models",
             content: [
-              "A large language model, or LLM, is a neural network trained to estimate probability distributions over sequences of tokens. Given the tokens that already appear in a sequence, it calculates which tokens are plausible next steps. During generation, one token is selected, added to the sequence, and used to calculate the following distribution. Repeating this process produces a complete response.",
+              "A large language model, or LLM, is a neural network trained to estimate a probability distribution over sequences of tokens. Given the tokens that already appear in a sequence, it calculates which tokens are plausible next steps. During generation, one token is selected, added to the sequence, and used to calculate the following distribution. Repeating this process produces a complete response.",
               "The word large refers to the scale of the model, its training data, and the computation used to train it. A model can contain billions of learned parameters. These parameters are numerical weights that capture patterns found across language, code, and other training data. They are not rows in a knowledge database, and they do not provide a guaranteed or current record of the world.",
               "A language model is different from a product built around one. A chat product can include conversation history, file handling, search, tools, account controls, safety checks, and a user interface. The LLM provides language interpretation and generation within that system. Application code remains responsible for data access, permissions, validation, state changes, and audit records.",
               "A deployed model consists of learned parameters, a model architecture, a tokenizer, a configuration, and software that performs inference. Training creates the parameters. Inference uses those parameters to process a new request. Most application engineers work primarily with inference. They select a model, provide the appropriate context, inspect its output, and connect it to the rest of the system."
@@ -321,14 +321,15 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "transformer-architecture-and-attention",
         "Transformer Architecture and Attention",
-        "3 hours",
+        "1.5 hours",
         "Understand how transformers represent tokens, preserve their order, use attention, and scale model capacity for language generation.",
         [
-          "A transformer is a neural network architecture that processes a sequence of token representations through repeated attention and feed forward operations. Its central advantage is the ability to relate tokens across a sequence while processing the known input positions efficiently during training.",
+          "A transformer is a neural network architecture built from a stack of similar layers called transformer blocks. Each transformer block centers on two main operations called self attention and a feed forward network. Self attention is a type of attention that lets each token weigh and combine relevant information from other permitted tokens in the same sequence. The feed forward network then processes each token separately and changes which learned features are emphasized. For example, after self attention connects ‘charge’ with ‘credit card,’ the feed forward network can strengthen features associated with a payment issue rather than charging a device. Repeating these operations across many blocks allows the model to develop a more useful understanding of the sequence. The known input positions can also be processed together during training, which makes transformers more efficient to train than earlier sequence models.",
           "Before transformers, recurrent neural networks commonly processed language one token at a time. Each step combined the current token with a hidden state carried from earlier steps. Information from the beginning of a long sequence had to pass through every intermediate step before influencing a later token. Gated architectures improved this process, but the sequential dependency still limited training parallelism and made distant relationships difficult to preserve.",
           "A token embedding is a learned vector that converts a token ID into a numerical representation the network can process. The initial embedding represents the token before its current context has been incorporated. The token ‘charge’ begins from the same learned embedding whether a request concerns a credit card charge or charging a device. Transformer layers update that representation using surrounding tokens so that its meaning becomes specific to the current sequence.",
-          "Positional information tells a transformer where each token appears in a sequence. Self attention can compare token content, but token content alone does not express whether one event happened before another. Models may add learned position vectors or use rotation based methods such as RoPE. The implementation varies, but every approach gives the network information about token identity and sequence order.",
+          "Positional information is numerical information that represents where each token appears in a sequence. Without it, self attention can compare token content but cannot distinguish ‘refund after delivery’ from ‘delivery after refund’ using order alone. The model combines position with each token representation so the same token can be treated differently when it appears in a different place. Models may use learned position vectors or rotation based methods such as RoPE. The implementation varies, but each method gives the network both token identity and sequence order.",
           "Self attention is the operation that lets each token representation incorporate information from other permitted tokens in the same sequence. For every token, the model creates three learned projections called a query, a key, and a value. The query is compared with keys to determine which positions are relevant. The corresponding values provide the information used to update the token representation.",
+          "Masked self attention is self attention with a causal mask applied. Each token can use information from tokens that appear before it, but it cannot inspect tokens that appear later in the sequence. This allows the model to learn next token prediction without seeing the answer in advance.",
           "An attention score measures compatibility between one token’s query and another token’s key. The model scales the scores and applies softmax to convert them into attention weights. The output is a weighted combination of the value vectors. A larger weight means that a position contributes more through that particular attention operation. Every layer and head calculates separate weights, so there is no single attention map that completely describes how the model interpreted a request.",
           "In compact form, the operation is Attention(Q, K, V) = softmax(QKᵀ / √dₖ)V. Application engineers do not need to derive the equation. The important data flow is that queries and keys determine the weights, and the weights determine how values are combined.",
           "Transformers use multiple attention heads in parallel. Each head provides another way to relate positions in the same sequence. The roles of individual heads are learned and may overlap, so engineers should not assign permanent human descriptions to them.",
@@ -344,7 +345,7 @@ export const curriculum: CurriculumPhase[] = [
           "For a damaged item request, the application should send a short task instruction, the latest customer message, a limited order projection, and the relevant current policy passage with its heading and source label. It should exclude unrelated history, expired policies, and internal notes.",
           "Transformer architecture explains why token order, context placement, irrelevant text, source labels, and output length affect model behavior. It does not remove the need for trusted data, validation, authorization, or application controlled execution."
         ],
-        "For a damaged item request, the Customer Service Agent will send the model the customer’s latest message, a limited set of verified order facts, and the current public policy section. The policy heading stays attached to the relevant paragraph so its conditions are not separated from the rule. The application will keep internal notes and stale policies outside the model context, then validate any proposed action using deterministic code.",
+        "The customer writes, ‘The replacement arrived damaged.’ Token embeddings represent each token, positional information preserves their order, and attention connects ‘damaged’ with ‘replacement.’ Transformer blocks refine these representations, and the decoder generates an issue summary one token at a time. This processing helps the model interpret the request, but it does not verify the order or determine refund eligibility.",
         ["transformer", "token embeddings", "positional information", "self attention", "queries keys values", "multiple attention heads", "Mixture of Experts", "causal masking", "decoder only models"],
         "Concept",
         [
@@ -364,7 +365,7 @@ export const curriculum: CurriculumPhase[] = [
             id: "self-attention",
             title: "Self Attention",
             start: 4,
-            end: 7,
+            end: 8,
             example: {
               title: "Connecting damaged to replacement",
               content: [
@@ -372,12 +373,12 @@ export const curriculum: CurriculumPhase[] = [
               ]
             }
           },
-          { id: "transformer-blocks", title: "Transformer Blocks", start: 7, end: 9 },
+          { id: "transformer-blocks", title: "Transformer Blocks", start: 8, end: 10 },
           {
             id: "mixture-of-experts",
             title: "Mixture of Experts",
-            start: 9,
-            end: 13,
+            start: 10,
+            end: 14,
             example: {
               title: "Active and total experts",
               content: [
@@ -388,8 +389,8 @@ export const curriculum: CurriculumPhase[] = [
           {
             id: "decoder-only-models",
             title: "Decoder Only Architecture",
-            start: 13,
-            end: 15,
+            start: 14,
+            end: 16,
             example: {
               title: "Predicting the hidden token",
               content: [
@@ -397,11 +398,11 @@ export const curriculum: CurriculumPhase[] = [
               ]
             }
           },
-          { id: "attention-and-evidence", title: "Attention and Interpretability", start: 15, end: 16 },
+          { id: "attention-and-evidence", title: "Attention and Interpretability", start: 16, end: 17 },
           {
             id: "context-as-input",
-            title: "Context Design",
-            start: 16,
+            title: "Context as Model Input",
+            start: 17,
             example: {
               title: "Selecting useful context",
               content: [
@@ -418,12 +419,17 @@ export const curriculum: CurriculumPhase[] = [
         "Learn how pretraining creates general capability, how post training shapes assistant behavior, and how engineers evaluate or adapt a model for a specific application.",
         [
           "Training a large language model is the process of adjusting its parameters so it becomes better at a defined prediction task. During training, the model processes examples, produces predictions, measures the difference between its predictions and the expected results, and updates its parameters to reduce that error. Repeating this process across very large datasets produces the language and reasoning capabilities that application engineers later access through an API.",
-          "The model available through an API is usually the result of several training stages rather than one training run. The broad sequence is pretraining followed by post training. Pretraining develops general capability with language, code, and common patterns. Post training shapes that capability into behavior that is more useful for conversation, instruction following, structured output, tool use, and safety. Application engineers do not need to reproduce these training runs, but they need to understand what each stage can change and what must still be handled by application code.",
+          "The model available through an API usually comes from a model development pipeline rather than one training run. A common order begins with pretraining and continues through post training stages such as instruction tuning, preference optimization, and specialized training for reasoning, safety, structured output, or tool use. Teams evaluate the model between stages and again before deployment. The exact pipeline varies, and a stage may be repeated when evaluation reveals a weakness. Pretraining develops general capability, which means a reusable ability to work with many kinds of language and code tasks rather than one narrow product workflow. Post training shapes that broad capability into more useful assistant behavior. Application engineers do not need to reproduce these training runs, but they need to understand what each stage can change and what must still be handled by application code.",
           "Pretraining is the large scale training stage in which a model learns from extensive collections of text, code, and other permitted data. The training objective is usually next token prediction. The model receives a sequence, predicts the next token, compares that prediction with the actual token, and adjusts its parameters through gradient based optimization. Over many examples, it learns patterns involving grammar, programming languages, factual associations, document structures, writing styles, and common problem solving approaches.",
           "Training data strongly affects the resulting model. Data quality, diversity, recency, language coverage, code coverage, duplication, and incorrect material all influence later behavior. Large training pipelines therefore include collection, filtering, deduplication, formatting, and quality assessment. These processes improve the dataset, but they do not turn it into a complete or perfectly current source of knowledge.",
           "A base model is the model produced by pretraining before it has been extensively shaped to behave as an assistant. It can continue text, complete code, imitate document structures, and reproduce many patterns learned during training. It does not automatically treat a user request as an instruction that must be answered directly. Its original objective was to predict likely continuations rather than to become a cooperative product interface.",
           "Generalization is the ability to apply learned patterns to inputs that were not reproduced verbatim during training. A model does not need to have seen every possible customer message. It can learn that phrases such as ‘the package was broken,’ ‘my delivery arrived damaged,’ and ‘the item is unusable’ describe related situations. This capability allows one model to work with the variety of language found in real applications.",
           "Generalization is not the same as access to current evidence. A model may recognize that a message concerns a damaged delivery while still lacking the customer’s order details, the current refund policy, or a recent policy exception. Rare domains, changing rules, unusual identifiers, and exact transactional facts require runtime evidence from retrieval or tools.",
+          "Training compute is commonly measured in accelerator hours. One accelerator running for one hour equals one accelerator hour. A training run using 1,024 accelerators for 30 days consumes 737,280 accelerator hours. This measure makes the scale visible, but it does not describe the speed of the hardware, how efficiently it was used, or how much useful training the system completed.",
+          "The direct compute cost depends on the accelerator type, the number of accelerators, the duration of the run, system utilization, and the cost assigned to each accelerator hour. Training also requires high speed networking, storage for data and checkpoints, power, cooling, data processing, monitoring, and engineers who operate the system. A slow or unstable training system can therefore cost more even when the model and dataset remain unchanged.",
+          "Published model reports illustrate this scale. Meta reports 39.3 million cumulative H100 80 GB GPU hours for the Llama 3.1 model family. The DeepSeek V3 technical report records 2.788 million H800 GPU hours for its complete training and estimates a cost of 5.576 million dollars using an assumed rate of two dollars per GPU hour. These figures are not a direct price comparison. They cover different hardware, architectures, model families, training data, training stages, and accounting boundaries.",
+          "A reported final training run is not the full cost of developing a model. It may exclude earlier experiments, failed runs, ablation studies, data collection, data cleaning, evaluation, staff, and the capital cost of owning the infrastructure. Reproducing a model can therefore cost substantially more than multiplying one published GPU hour figure by a rental rate.",
+          "For most application teams, training a foundation model is unnecessary. Engineers should first measure whether prompting, retrieval, tools, structured output, or a focused fine tuning job can solve the task. Foundation model training becomes reasonable only when an organization has a strong data or research advantage, substantial compute infrastructure, and requirements that existing models cannot meet.",
           "Supervised fine tuning is a post training method that teaches a model from examples containing an input and a desirable output. When the examples are instructions paired with strong responses, the process is also called instruction tuning. The model learns patterns such as answering the requested question, respecting an output format, asking for missing information, following system instructions, and returning structured data.",
           "Supervised fine tuning helps explain the difference between a base model and an assistant model. A base model may continue a customer conversation as if it were completing a transcript. An assistant model has been trained on examples that demonstrate how to respond to the customer. The architecture may remain the same, but the expected interaction has changed.",
           "Supervised fine tuning shapes behavior. It does not guarantee that a response is correct. If the training examples contain outdated policies, inconsistent labels, or weak answers, the model can learn those weaknesses. Current facts should still come from runtime context, and important output should still be evaluated or validated.",
@@ -445,8 +451,8 @@ export const curriculum: CurriculumPhase[] = [
           "Application evaluation should use representative inputs, trusted expected behavior, and failure cases from the intended workflow. When comparing models, engineers should record the model identifier, prompt version, available tools, supplied context, output schema, latency, cost, and evaluation results. This makes the comparison reproducible and exposes whether an improvement came from the model or from another part of the system.",
           "Training determines a model’s general capabilities and tendencies. It does not determine whether an application is correct. Pretraining supplies broad capability. Post training makes that capability easier to use. The application still defines the task, supplies current evidence, controls access to tools, validates important output, and measures whether the result is acceptable."
         ],
-        "The Customer Service Agent will begin with an instruction following model and a versioned evaluation set containing damaged items, unclear requests, policy exceptions, missing order information, and unsafe refund instructions. Every candidate model will receive the same trusted context, tool definitions, and output contract. A lower cost model may handle issue classification if it meets the required quality threshold, while a stronger model may explain complex policy. Application code will continue to control customer data access, eligibility checks, and refund approval.",
-        ["large language model training", "pretraining", "training data", "base model", "generalization", "supervised fine tuning", "preference optimization", "RLHF", "reward model", "PPO", "DPO", "reasoning models", "application fine tuning", "model evaluation", "benchmarks"],
+        "A customer writes, ‘My replacement arrived damaged.’ A base model may continue the text as though it were part of a document or support transcript. After instruction tuning, the model is more likely to respond as an assistant and ask for the missing order number. Preference optimization can teach it to favor a helpful response that avoids promising a refund without evidence. Specialized tool use training can teach it to produce a structured order lookup request. These stages improve the model’s behavior, but they do not give it access to the customer’s order or authority to approve a refund.",
+        ["large language model training", "pretraining", "training data", "base model", "generalization", "training compute", "accelerator hours", "training cost", "supervised fine tuning", "preference optimization", "RLHF", "reward model", "PPO", "DPO", "reasoning models", "application fine tuning", "model evaluation", "benchmarks"],
         "Concept",
         [
           { id: "training-large-language-models", title: "Training Large Language Models", start: 0, end: 2 },
@@ -458,16 +464,28 @@ export const curriculum: CurriculumPhase[] = [
             example: {
               title: "Base models and generalization",
               content: [
-                "A base model given ‘Write a response to a customer requesting a refund’ may continue with another instruction or imitate a transcript. An assistant model is more likely to answer directly because post training has taught it the expected interaction.",
+                "A base model given ‘Write a response to a customer requesting a refund’ may continue the pattern by writing an instruction to ask for the order number instead of producing the response. If the prompt resembles a conversation, it may generate lines for both the agent and the customer as though extending a transcript. An assistant model is more likely to write the customer facing reply directly because post training has taught it the expected interaction.",
                 "The messages ‘my parcel is cracked’, ‘the product arrived broken’, and ‘the item was damaged during delivery’ use different wording. A model can classify all three as damaged item requests through generalization. It still needs verified order data and the current policy before any refund decision can be made."
+              ]
+            }
+          },
+          {
+            id: "training-compute-and-cost",
+            title: "Training Compute and Cost",
+            start: 7,
+            end: 12,
+            example: {
+              title: "Counting accelerator hours",
+              content: [
+                "A training run that uses 1,024 accelerators continuously for 30 days consumes 737,280 accelerator hours. Multiplying that number by an hourly rate estimates only the compute portion of the run. A complete budget must also account for data preparation, storage, networking, power, experiments, evaluation, infrastructure, and the people operating the training system."
               ]
             }
           },
           {
             id: "supervised-fine-tuning",
             title: "Supervised Fine Tuning",
-            start: 7,
-            end: 10,
+            start: 12,
+            end: 15,
             example: {
               title: "Learning an application response format",
               content: [
@@ -478,8 +496,8 @@ export const curriculum: CurriculumPhase[] = [
           {
             id: "preference-optimization",
             title: "Preference Optimization",
-            start: 10,
-            end: 16,
+            start: 15,
+            end: 21,
             example: {
               title: "RLHF, PPO, and DPO",
               content: [
@@ -488,12 +506,12 @@ export const curriculum: CurriculumPhase[] = [
               ]
             }
           },
-          { id: "specialized-post-training", title: "Specialized Post Training", start: 16, end: 19 },
+          { id: "specialized-post-training", title: "Specialized Post Training", start: 21, end: 24 },
           {
             id: "fine-tuning-decisions",
             title: "Fine Tuning Decisions",
-            start: 19,
-            end: 22,
+            start: 24,
+            end: 27,
             example: {
               title: "When fine tuning becomes reasonable",
               content: [
@@ -504,8 +522,8 @@ export const curriculum: CurriculumPhase[] = [
           {
             id: "model-evaluation",
             title: "Model Evaluation",
-            start: 22,
-            end: 26,
+            start: 27,
+            end: 31,
             example: {
               title: "Comparing models for customer support",
               content: [
@@ -513,13 +531,13 @@ export const curriculum: CurriculumPhase[] = [
               ]
             }
           },
-          { id: "application-responsibility", title: "Application Responsibility", start: 26 }
+          { id: "application-responsibility", title: "Application Responsibility", start: 31 }
         ]
       ),
       lesson(
         "inference-tokens-context-and-latency",
         "LLM Inference, Tokens, Context Windows, and Latency",
-        "3 hours",
+        "1 hour",
         "Understand how a trained LLM serves a request from prefill through decoding, then measure and control the token, memory, latency, and cost tradeoffs that shape an application.",
         [
           "LLM inference is the runtime process of using a trained language model to generate a response. The application sends a request, the serving system converts its text into tokens, the model processes those tokens, and the serving system generates output tokens until it reaches a stopping condition or the configured output limit. Inference is different from training because the model parameters do not change when a user sends a request. Conversation history affects an answer only when the application includes that history in the current context.",
@@ -543,9 +561,9 @@ export const curriculum: CurriculumPhase[] = [
           "Cost is also a property of the complete request. Providers commonly meter input and output tokens differently, while prices and caching rules change over time. A long output can cost more and take longer even when the input is small. A large retrieved context can dominate input usage even if only one sentence appears in the final answer. Log usage from the provider response, attribute it to the feature and request type, and set budgets or alerts around measured traffic.",
           "A context budget turns these ideas into a design decision. Suppose a feature has room for 16,000 tokens. It might reserve 1,000 for system instructions and the output schema, 2,000 for recent conversation, 1,500 for verified order facts and tool results, 6,000 for retrieved policy evidence, and 2,000 for the customer response. The remaining space provides headroom for variation. These numbers are illustrative. The important habit is to allocate space intentionally and define what is shortened or removed first when a request would exceed the budget.",
           "For a damaged item request, the Customer Service Agent should not send the complete conversation or every return policy document. It can send the current request, a compact summary of necessary prior turns, a limited projection of the verified order, and the few current policy passages selected for the case. The trace should show how many tokens each component used and whether latency came from retrieval, the order tool, provider queueing, prefill, or decoding.",
-          "LLM inference is an observable runtime process. It has a serving path, input and output budgets, decoding settings, caches, memory requirements, measurable latency stages, and operating costs. In the next lesson, learners make these boundaries visible in code through a direct API request, response streaming, structured output, and a small agent built with selected LangChain components."
+          "LLM inference is an observable runtime process, but a hosted API exposes only part of that process to the application. Engineers can record the request identifier, model identifier, configured input and output budgets, streaming events, token usage, completion status, errors, time to first token, and total model latency. Internal details such as accelerator memory allocation, provider scheduling, and the exact KV cache implementation usually remain inside the provider. In the next lesson, learners make the application visible boundary concrete through direct API requests, streaming, structured output, and LangChain model operations."
         ],
-        "For a refund question, the Customer Service Agent will reserve context space for the task instruction, the latest customer message, a small verified order projection, and selected policy passages. It will reserve output space for a concise explanation, stream the final text, and record input tokens, output tokens, TTFT, ITL, tokens per second, TTLT, and the time spent in retrieval and order lookup.",
+        "A customer asks, ‘Where is my refund?’ The application retrieves the verified refund record in 180 milliseconds, then sends the task instructions, the customer’s message, and the retrieved result to the model. The request uses 850 input tokens. The first output token arrives 420 milliseconds after the model request begins, and the complete 70 token response finishes after 1.6 seconds. Recording retrieval time, input and output tokens, time to first token, and total response time helps the team determine whether a delay came from data retrieval, prompt processing, or token generation.",
         [
           "LLM inference",
           "serving systems",
@@ -565,7 +583,9 @@ export const curriculum: CurriculumPhase[] = [
           "ITL",
           "tokens per second",
           "TTLT",
-          "cost"
+          "cost",
+          "application visible metrics",
+          "provider internal details"
         ],
         "Concept",
         [
@@ -669,148 +689,498 @@ export const curriculum: CurriculumPhase[] = [
       ),
       lesson(
         "using-llm-apis-and-langchain",
-        "Using LLM APIs and LangChain",
+        "LLM APIs, Provider SDKs, and LangChain",
         "3 hours",
-        "Build a basic agent through a direct provider integration and selected LangChain components while keeping requests, model versions, tools, outputs, and failures visible to application code.",
+        "Learn how application code connects to hosted and local models. You will examine how agents differ from deterministic workflows, then build the same Support Request Analyzer with the OpenAI SDK, LangChain, and Ollama running qwen3:14b before building an agent in the next lesson.",
         [
-          "An LLM API is a network interface that allows an application to send input to a hosted language model and receive generated output. A request usually contains a model identifier, instructions, task input, configuration, and sometimes an output schema or tool definitions. The provider returns generated content and operational metadata such as a request identifier, token usage, and completion status. The application must treat that response as the result of an external dependency and decide whether it is valid for the product workflow.",
-          "A basic integration follows a familiar software lifecycle. The server authenticates the caller, validates the application request, assembles permitted context, calls the model, validates the returned result, and sends an application response. The model output is probabilistic and may be incomplete, malformed, or unsuitable for the requested task. Application code therefore remains responsible for permissions, validation, business rules, and side effects.",
-          "Provider SDKs are usually the best place to start. A direct SDK call exposes the actual model identifier, messages, output settings, streaming events, errors, and usage fields. This visibility is valuable while a feature is small because an engineer can see what crosses the boundary and compare prompt or model changes. A framework can be introduced when it removes real repetition rather than becoming the first abstraction in the project.",
-          "Chat APIs commonly represent a request as an ordered collection of messages or content blocks. A system instruction describes the task and application boundaries. A user message contains the person's request. Retrieved documents, tool results, and earlier conversation may appear as additional content. The exact message types differ across providers, but the application should preserve the identity and role of each source.",
-          "Source identity describes where information came from and what that source is allowed to establish. A customer message is authoritative for what the customer is asking, but it is not proof of an order status. An authenticated order record can establish selected order facts. A policy passage can support a policy explanation only when its version and scope are current. The traceable origin of this information is often called provenance. Recording it helps engineers understand why the model received a claim and whether the application was entitled to rely on it.",
-          "Labels alone do not create trust. Untrusted text can still contain false claims or instructions designed to influence the model. The application must enforce permissions, restrict data access, and decide which source can support each business decision. Keeping sources separate makes those boundaries easier to review, test, and debug.",
-          "The API contract should fit the task. A routing step might return a small structured proposal containing an issue category, missing details, and a recommended next step. A customer explanation might return text only after application code has determined the outcome. Avoid asking one model call to interpret a request and execute a business decision. Separating those jobs gives each call a clearer input, a smaller output budget, and a better test surface.",
-          "Set explicit limits on output and time. An output token limit prevents an extraction call from producing an unnecessary essay and establishes a bound on generation work. A timeout prevents an upstream delay from holding an application request indefinitely. A cancellation path matters when the user leaves the page or changes the request. These are familiar service concerns, but generation can take longer than a database read and may deliver partial output while it is still running.",
-          "Retries require care. A transient network failure may justify retrying a model request, but a retry can increase cost and create duplicate work. The safe policy depends on what completed before the failure and whether the workflow can produce side effects. Retrying a classification request that only reads data is different from retrying a workflow that already sent an email or created a ticket. Consequential actions need their own idempotency and approval controls instead of relying on a general API retry.",
-          "Streaming is a delivery choice rather than a correctness feature. When a provider streams, the server receives incremental events and can forward suitable text to the browser before the final response is complete. This can improve perceived responsiveness for a long explanation. It also means the interface must handle interruption, reconnects, final metadata, and content that should not be accepted until the run finishes. For a structured decision, it is often simpler to wait for a complete validated result.",
-          "The model choice belongs to the task. A smaller model may be sufficient for classifying a short message, extracting a few fields, or selecting from a fixed set of routes. A stronger reasoning model can be useful when the task requires complex synthesis or planning. Compare candidates on representative cases under the same context. Measure task quality, schema validity, latency, and cost rather than choosing from a provider's broad model description.",
-          "Pin the model identifier when the provider allows it and record the version actually called. A model name can be an alias that changes over time. The same principle applies to prompts, schemas, tools, and framework versions. For an important request, a trace should answer which model received which approved context, what settings were used, and what the application accepted or rejected. This is the minimum evidence needed to investigate a behavior change.",
-          "LangChain is an application framework with integrations for model providers, message types, structured output, tools, document loaders, retrieval components, and workflow composition. Its value is not that it makes the model more capable. It can give common components a consistent interface and reduce repeated adapter code as a system grows.",
-          "Use LangChain when its abstractions solve an integration problem. It can help when a team tests two providers behind one model interface, binds one structured output schema to several model calls, or composes reusable retrieval components. A direct SDK is often easier to debug for one small endpoint. Whichever approach is used, the prompt, input data, tool permissions, model choice, errors, and returned usage should remain understandable to a teammate who did not create the feature.",
-          "An agent is an LLM application in which the model can propose the next action from a bounded set of choices while application code controls execution. The model may decide to answer directly, request more information, or call an available tool. The application validates the proposal, executes an allowed action, returns the result to the model when needed, and stops the process when it reaches a final response or a configured step limit.",
-          "In this lesson, learners build a basic customer service agent using selected LangChain concepts. The implementation uses a chat model interface, typed messages, one read only lookup tool, tool binding, structured output, and a bounded execution loop. The application validates tool arguments, controls access to customer data, limits the number of steps, records each model and tool event, and validates the final response.",
-          "This example is intentionally small. It teaches the boundary between model choice and application execution without introducing planning systems, long term memory, graph workflows, specialist agents, or multi agent coordination. Those topics appear in later agent workflow lessons after learners understand the model request lifecycle.",
-          "A framework should reduce repeated integration work without hiding the underlying model call. Engineers should still be able to inspect the provider model, generated messages, prompt version, output schema, available tools, retry policy, token usage, latency, errors, and completion status. If a framework automatically retries a request, follows a tool call, or selects a model, that behavior should be explicitly configured and visible in traces.",
-          "Keep prompt templates and schemas versioned in the application. Make request construction testable without a live model call. Convert framework response objects into the narrow types the product uses. A teammate should be able to follow the complete data flow without depending on undocumented framework behavior.",
-          "The lesson begins with a direct provider SDK so learners can see the complete request and response boundary. It then rebuilds the same narrow workflow with selected LangChain components and extends it into the bounded support agent. Comparing both implementations shows what the framework simplifies and what the application must continue to own.",
-          "For the Customer Service Agent, the model first identifies the request type and decides whether verified order data is needed. When it proposes the order lookup tool, the server validates the arguments and confirms that the authenticated customer can access the requested order. The tool returns a limited order projection. The model then explains that verified result. The trace records the provider model, prompt version, tool proposal, validated arguments, tool result, response time, token usage, and final validation outcome."
+          "An LLM API is a network interface for sending input to a hosted language model and receiving generated output. The request identifies a model and supplies instructions, task input, configuration, and optional output schemas or tool definitions. The provider runs the model and returns content with operational metadata. The application must decide whether that result is complete, valid, and suitable for its workflow.",
+          "The API boundary divides responsibilities. The provider owns model hosting, inference scheduling, accelerator memory, internal caches, and model execution. The application owns authentication, approved context, permissions, request construction, output validation, business rules, and side effects. A provider response can propose or explain an outcome, but it does not bypass those application controls.",
+          "A model call follows a familiar service lifecycle. The server authenticates the caller, validates the incoming request, assembles permitted context, calls the provider, receives the result, validates it, and returns an application response. Network failures, timeouts, rate limits, invalid output, and changing model behavior must be handled like failures from any other external dependency.",
+          "A provider SDK is an official language library that represents the provider's HTTP API as familiar program objects and methods. This lesson uses the OpenAI Python SDK as its concrete example. Learners use the Responses API directly before adding LangChain, so the model identifier, input, output configuration, streaming events, request metadata, usage, and errors remain visible.",
+          "The SDK does not remove the API boundary. It builds the network request, authenticates it, parses the response, and converts provider errors into language specific exceptions. Engineers should still understand which values are sent, which defaults the SDK applies, how long the call may wait, and which metadata is returned.",
+          "A request begins with a narrow task. The Support Request Analyzer receives a customer message and returns the issue type, any order identifier found in the message, whether verified order data is required, and which required detail is missing. It does not retrieve an order, determine eligibility, or perform an action. Those responsibilities belong to later application steps.",
+          "Request content should preserve the identity of each source. An application instruction defines the task and its limits. A user input contains the customer message. Retrieved records and tool results are separate evidence when they are introduced. A customer can state that an order was delivered, but only an authenticated order record can establish the current delivery status.",
+          "The request also includes operating controls. The application selects a model, sets an output budget, chooses whether to stream, and supplies a structured output schema when the result is intended for code. These values should be configured deliberately and recorded with a prompt version. Provider defaults can change and are difficult to investigate when the application never records what it relied on.",
+          "A provider response contains more than visible text. Depending on the interface, it can include a response identifier, provider request identifier, model information, token usage, completion status, output items, and error details. The exact fields vary by provider and API version. Convert the response into the narrow application type needed by the feature instead of passing a large provider object through the product.",
+          "Request identifiers are important diagnostic evidence. An application trace identifier connects all work performed for one product request. A provider request identifier identifies one external model call. Record both because one application request may contain more than one model call, and a provider support investigation may require its identifier rather than the application's identifier.",
+          "Structured output asks the model to produce data that follows a defined schema. The Support Request Analyzer uses a typed result rather than asking code to parse free form prose. The schema constrains field names, value types, and allowed categories. The application validates the returned object before accepting it. In this schema, order_id is a required key with a nullable value. Every result includes the key. When the customer provides no order number, the value is null. This produces a stable response shape while still representing missing information.",
+          "Schema validity is not factual validity. A model can return a perfectly valid order identifier that does not exist or does not belong to the authenticated customer. A schema definition can also be wrong. An overly strict rule can reject a valid result, while a loose rule can accept an unusable one. Test the contract with present, absent, malformed, and unexpected values. Application code must still verify identifiers, permissions, and business facts against trusted systems.",
+          "Streaming lets the application receive output events before generation finishes. It is useful for a customer explanation that may take several seconds. The first usable text event provides a practical time to first token measurement, while the final event supplies completion data and often the complete usage record. Partial text should not be treated as a finished or validated result.",
+          "A streaming client must handle interruption and cancellation. If the user leaves the page or starts a new request, the application should stop forwarding old output and cancel upstream work when the interface supports it. Cancellation can reduce unnecessary work, but it does not guarantee that the provider stopped before recording usage.",
+          "Timeouts define how long the application will wait for a model call. Connect, read, and complete request timeouts may fail at different stages. A clear timeout policy prevents one slow dependency from consuming an application worker indefinitely and gives the user a controlled failure path.",
+          "Retries should be limited to failures that may succeed on a later attempt. A short provider outage or rate limit may justify a delayed retry. Invalid structured output usually requires a different repair path, not repeated identical calls. Every retry adds latency and cost, and a model call connected to a side effect needs idempotency controls before any part of the workflow is repeated.",
+          "Useful measurements begin before the call is dispatched and finish after the result is validated. Record the provider and model identifier, prompt version, configured output budget, input and output token usage, cache usage when exposed, time to first token for streaming, total model latency, retry configuration and attempt count when exposed, completion status, error category, and output validation result. End to end latency should also include authentication, retrieval, tool execution, and application processing when those stages exist.",
+          "The direct SDK exercise makes these measurements visible around a small Support Request Analyzer. Given 'Where is order 10492? It was supposed to arrive yesterday,' the model returns that the issue concerns order status, identifies 10492, marks that verified order data is required, and reports that no required detail is missing. The trace records the call without pretending that the model knows the actual order status.",
+          "LangChain is an application framework that provides common interfaces for models, messages, structured output, tools, retrieval, and workflows. It does not make a model more capable and it does not replace the provider. A LangChain provider integration still reaches an underlying model API and still depends on provider authentication, availability, limits, and pricing.",
+          "A LangChain chat model represents a configured model integration. In this lesson, ChatOpenAI connects LangChain model operations to an OpenAI model. The chat model accepts an ordered list of messages and returns a model response. Each message type records the role that a piece of content plays in that exchange.",
+          "SystemMessage represents instructions supplied by the application for the model to follow during a request. It commonly describes the task, boundaries, response style, and expected behavior. For the Support Request Analyzer, it tells the model to classify the issue, extract a five digit order identifier when present, and avoid inventing customer details. A system message guides model behavior, but application code must still enforce permissions and business rules.",
+          "HumanMessage represents content sent in the user role. The content often comes from a person, but the class name does not prove that a human wrote it or that the content is trustworthy. In this lesson, the customer request becomes a HumanMessage. The application treats it as input to interpret rather than evidence that an order exists or belongs to the customer.",
+          "AIMessage represents output returned by the model. It may contain generated text, structured content, response metadata, usage metadata, or proposals to call tools. An AIMessage records what the model produced. It does not prove that the content is factually correct, and a proposed tool call inside it has not been executed.",
+          "ToolMessage represents the result of a tool execution that application code sends back to the model. It is associated with the tool call identifier from the earlier AIMessage so the model can connect a result to the request that produced it. In the next lesson, the application executes an approved order lookup and places its limited result in a ToolMessage before asking the model for a final response.",
+          "The message sequence preserves the source and purpose of each contribution. A SystemMessage contains application instructions, a HumanMessage contains request input, an AIMessage contains model output, and a ToolMessage contains an application supplied tool result. These roles help assemble and inspect a model interaction, but they do not replace validation, authorization, or decisions about whether the underlying content can be trusted.",
+          "The invoke operation sends one complete request and waits for one complete result. It is appropriate for the structured Support Request Analyzer because the application must validate the whole object before using it. The stream operation yields incremental model events or chunks and is appropriate when the interface should show an explanation while it is generated.",
+          "The with_structured_output operation binds a schema to a chat model and returns a typed result supported by the selected integration. The bind_tools operation supplies tool definitions that a model may choose to call. Binding a tool does not execute it. Application code receives the proposal and remains responsible for argument validation, authorization, execution, and step limits.",
+          "LangChain response objects can expose content, tool calls, response metadata, and usage metadata. The exact metadata depends on the provider integration. The application should extract the fields it needs into its own trace rather than assuming that every provider returns identical details.",
+          "Ollama runs supported models through a local service on the learner's computer. Instead of sending a request to a hosted provider, application code sends it to the local Ollama endpoint. The model still has input and output limits, can produce invalid output, and needs the same validation and application controls as a hosted model.",
+          "This lab uses qwen3:14b as the local example. The Ollama download is approximately 9.3 GB, and the memory and response time required at runtime depend on the computer and its available hardware. The local path is optional. If qwen3:14b does not run comfortably on a learner's machine, they should continue with the OpenAI exercises rather than treating the local route as a requirement.",
+          "The Ollama analyzer uses the native Python client and the same SupportRequest Pydantic schema. It explicitly asks the model to return only JSON, validates the returned JSON with Pydantic, then streams a short explanation in a second local model call. This keeps the local implementation comparable to the hosted examples without depending on a model specific schema runtime.",
+          "A local model does not require an OpenAI API key, but local does not automatically mean safe or private in every respect. The application still decides which customer data it sends to the model, what it stores in logs, and which tools it may use. The Ollama runtime returns local token counts and completion details, but it does not provide a hosted provider request identifier.",
+          "The same Support Request Analyzer is implemented three times. The direct SDK version exposes OpenAI specific request and response objects. The LangChain version uses ChatOpenAI, message objects, invoke, stream, and with_structured_output. The Ollama version uses a local client and the native structured output format. All three use the same task and Pydantic contract, which makes the comparison meaningful.",
+          "A direct provider SDK is often the simplest choice for one hosted provider and a small number of calls. LangChain becomes useful when consistent model operations, message types, schemas, tool definitions, or multiple integrations reduce repeated application code. Ollama is useful when local execution is a deliberate product or development choice. In every case, keep the model identifier, rendered input, output schema, token usage, latency, errors, and retry behavior visible to the engineer operating the feature.",
+          "This lesson teaches only the LangChain components needed for model calls and the basic agent in the next lesson. Prompt composition appears when prompts and context are designed in the next phase. The RAG phase introduces Documents, document loaders, text splitters, embedding integrations, vector stores, and retrievers. The agent workflow phase introduces LangGraph, state, nodes, transitions, checkpoints, and human review when those concepts become relevant.",
+          "An AI agent is a software system that uses a model to pursue a goal and complete work on behalf of a user or another system. Instead of producing one response and ending, an agent can examine its current state, choose from permitted actions, observe the result, and continue until it reaches a defined completion or stopping condition.",
+          "Agency exists on a spectrum. A simple agent may choose whether to answer, ask for missing information, or propose one tool call. A more capable agent may create a plan, use several tools, revise the plan after observing results, and coordinate with another agent. Greater autonomy does not mean unrestricted control. The surrounding application still defines what the agent can access and what it is allowed to do.",
+          "Reasoning and planning help an agent interpret a goal, compare possible actions, and decide what information or operation is needed next. These capabilities come from model inference and should not be treated as proof that the chosen plan is correct. Important decisions still require evidence, validation, and evaluation.",
+          "Acting lets an agent affect an external environment through approved tools. Observing means receiving the result of an action and using it in the next decision. State records what has happened during the run, while memory can preserve selected information across a longer interaction or across runs. Collaboration allows several agents or humans to contribute to the same goal. Not every agent needs planning, long term memory, collaboration, or multiple tools.",
+          "An agent begins with a goal, instructions, current context, available state, and descriptions of the actions it may request. The model evaluates that information and returns either a response or a proposed action. Application code validates the proposal, checks permissions, executes approved work, and returns an observation to the agent.",
+          "The cycle of deciding, acting, and observing may repeat as the state changes. The run ends when the goal is complete, the agent needs human input, a policy blocks further work, an error occurs, or an execution limit is reached. The model proposes decisions inside the loop, but the application owns the loop and the stopping conditions.",
+          "A deterministic workflow has steps and branches selected by engineers before the program runs. Given the same input and state, it follows the same defined path. An agentic workflow allows the model to select among permitted next steps at runtime because the correct path may depend on natural language, available evidence, or the result of an earlier action.",
+          "Most production agents are hybrid systems. The model interprets language, plans, and selects among bounded actions. Deterministic code handles authentication, authorization, argument validation, calculations, business rules, database writes, side effects, retries, and execution limits. Giving a model access to a tool does not remove these application responsibilities.",
+          "Use an agent when a task has several possible paths and the appropriate next step depends on unstructured language, changing evidence, or results discovered during execution. A customer support request may require a clarifying question, a knowledge search, an order lookup, or escalation depending on what the customer asks and what earlier steps reveal.",
+          "Do not create an agent merely because an LLM is present. Classification, extraction, summarization, fixed API sequences, deterministic calculations, and approval rules often need only one model call or an ordinary workflow. Agents add model calls, latency, cost, state, testing requirements, and additional failure paths. Start with deterministic code and add model selected decisions only where the added flexibility produces measurable value.",
+          "This lab introduces a small Customer Service Agent now because it connects the fundamentals to a complete application and makes the learning process more engaging. Learners can see how model output, structured data, a tool, permissions, latency, and validation work together instead of waiting until the later agent workflow phase.",
+          "The first agent has one goal, one read only order lookup, no long term memory, and strict execution limits. It can ask for a missing order identifier, propose one lookup, and explain verified status. The next lesson implements the complete loop before later phases introduce retrieval, durable state, LangGraph, human review, and specialist agents.",
+          "The earlier snippets were provided for observation. This final section is where you set up the project, inspect the complete files, run the model calls, and compare the direct provider SDK with LangChain. Follow the steps in order so each result has a clear purpose.",
+          "Step 01. Install the required tools for your operating system. Confirm that Git is available first, then use the official standalone uv installer for macOS or Windows. Reopen the terminal if the uv command is not immediately available. After installing uv, use it to install Python 3.12. Python 3.12 is the recommended version for this lab. The project supports Python 3.11 or newer, but all instructions and examples are tested with Python 3.12. Using the recommended version helps avoid dependency and environment differences.",
+          "Step 02. Clone the Agentic AI Lab repository from GitHub and enter the repository directory. If Git reports an authentication request, confirm that you used the public HTTPS address shown in the command. No GitHub account or access token is required to clone the public repository.",
+          "Step 03. Enter the Support Request Analyzer lab directory, create a local .env file from the supplied example, and install the locked dependencies with Python 3.12. The command for copying a file differs between macOS Terminal and Windows PowerShell. uv creates the virtual environment and installs the OpenAI SDK, LangChain, Pydantic, and python dotenv. You do not need to activate the environment because uv run uses it automatically.",
+          "Step 04. Choose the hosted or local route in the new .env file. The OpenAI SDK and LangChain examples require an OpenAI API key. The local Ollama example requires no API key and uses qwen3:14b by default. The sample customer message can also be changed in this file. Never commit the .env file or place an API key inside Python source code. OpenAI requests are paid. Local inference uses the learner's computer instead.",
+          "Step 05. Read shared.py before calling a model. Start with SupportRequest because it defines the structured result accepted by the application. Then inspect ModelCallMetrics, RunTrace, openai_usage, and langchain_usage to understand which operational fields the examples record.",
+          "Step 06. Read provider_sdk.py from top to bottom. Begin with ANALYZER_INSTRUCTIONS and the output budgets. Then inspect analyze_request to see the direct structured model call, stream_explanation to see streamed text and time to first token, and main to see configuration, execution order, error handling, and final trace output.",
+          "Step 07. Run the provider SDK example without changing the code. The program should print a structured SupportRequest, stream a short explanation, and finish with run metadata. Confirm that the structured result identifies the issue and order identifier without claiming that an order lookup occurred.",
+          "Step 08. Inspect the run metadata after the request completes. Find the model name, prompt version, provider request identifier when available, input and output token usage, time to first token for the streamed call, total model latency, validation result, and final completion reason. These fields connect the API concepts to observable application behavior.",
+          "Step 09. Change only CUSTOMER_MESSAGE in .env and run the provider example again. First remove the order identifier and confirm that missing information is reported. Then try the damaged item request 'Order 10492 arrived with a cracked screen. What should I do?' Compare the structured fields, streamed explanation, token usage, and latency across the runs.",
+          "Step 10. Read langchain_analyzer.py after understanding the direct SDK version. Inspect ChatOpenAI in main, the SystemMessage and HumanMessage inputs, with_structured_output inside analyze_request, and model.stream inside stream_explanation. Then run the LangChain example with the same customer message.",
+          "Step 11. Install Ollama from ollama.com/download for macOS or Windows, then pull qwen3:14b. Read ollama_analyzer.py before running it. Inspect the Client configuration, the SupportRequest JSON schema passed to format, Pydantic validation, local token counts, and the streamed explanation loop. The first download is approximately 9.3 GB.",
+          "Step 12. Run the Ollama analyzer with the same customer message. If the request fails, confirm that the Ollama application is running, the model pull completed, and OLLAMA_HOST points to the local service. Unlike the OpenAI examples, this run does not use an API key or a hosted provider request identifier.",
+          "Step 13. Compare the three implementations rather than choosing a preferred framework immediately. Verify that each produces the same SupportRequest contract. Identify which OpenAI details are most visible through the direct SDK, which repeated model operations LangChain standardizes, and which operational tradeoffs change when qwen3:14b runs locally.",
+          "Stop after the comparison and write down what changed between the direct SDK, LangChain, and Ollama paths. Do not modify agent.py during this lesson. The next lesson uses that file to add the tool definition, authorization boundary, execution loop, and validated customer response.",
+          "Run the Section 5 tests from the customer-service-agent folder after completing the analyzer exercises. These tests check the shared SupportRequest contract, including valid, missing, and malformed order identifiers. They also check the Ollama analyzer's JSON instructions and its handling of connection, model, and validation failures.",
+          "The Section 5 tests use controlled objects instead of live model calls. They do not require OpenAI credits or a running Ollama model. Passing tests confirm the application contracts and failure handling, while running the three analyzer programs remains necessary to observe real model output, streaming, token usage, and latency."
         ],
-        "The Customer Service Agent will interpret a support request, call one read only order lookup tool when required, and return a validated response. Each run will record the provider model, prompt version, tool proposal, validated arguments, tool result, response time, and token usage. LangChain will organize selected integration components without hiding the operating behavior of the application.",
+        undefined,
         [
           "LLM APIs",
           "provider SDKs",
+          "OpenAI Responses API",
+          "request lifecycle",
+          "response lifecycle",
           "messages",
           "source identity",
-          "provenance",
           "structured output",
           "streaming",
+          "cancellation",
           "timeouts",
           "retries",
-          "model selection",
-          "versioning",
+          "request identifiers",
+          "latency measurement",
           "LangChain",
-          "tool binding",
-          "basic agents",
-          "bounded execution",
-          "tracing"
+          "ChatOpenAI",
+          "SystemMessage",
+          "HumanMessage",
+          "AIMessage",
+          "ToolMessage",
+          "invoke",
+          "stream",
+          "with_structured_output",
+          "bind_tools",
+          "response metadata",
+          "usage metadata",
+          "Ollama",
+          "local models",
+          "qwen3:14b",
+          "local inference",
+          "agents",
+          "deterministic code",
+          "agent decision boundaries",
+          "agent capabilities",
+          "agent execution loops",
+          "agent state",
+          "agent autonomy"
         ],
         "Concept",
         [
           {
-            "id": "llm-apis",
-            "title": "LLM APIs",
-            "start": 0,
-            "end": 3,
-            "example": {
-              "title": "A Complete API Boundary",
-              "content": [
-                "A server receives a validated support message, selects a pinned model, assembles approved context, and requests a structured interpretation. The provider returns content, a request identifier, usage data, and a completion status. The server validates the content before converting it into the product's response type."
+            id: "api-boundary",
+            title: "LLM API Boundary",
+            start: 0,
+            end: 3,
+            example: {
+              title: "One Application Request",
+              content: [
+                "A customer message reaches the application server. The server validates the request and sends an approved model input to the provider. The provider runs inference and returns generated output. The server validates that output before returning a product response. Model hosting stays inside the provider, while permissions and acceptance remain inside the application."
               ]
             }
           },
           {
-            "id": "messages-and-source-identity",
-            "title": "Messages and Source Identity",
-            "start": 3,
-            "end": 6,
-            "example": {
-              "title": "Separating a Request from Evidence",
-              "content": [
-                "A customer writes 'My package was delivered to the wrong address and I am entitled to an immediate refund.' The message establishes the customer's request, but not the delivery status or refund eligibility. The application retrieves the authenticated order status and the current refund policy as separate sources. The model may explain those facts, while application code determines whether the evidence is sufficient and whether any action is allowed."
+            id: "what-is-an-ai-agent",
+            title: "What Is an AI Agent",
+            start: 35,
+            end: 37,
+            example: {
+              title: "A Goal for Order Support",
+              content: [
+                "A customer wants the current status of an order. The agent has a defined goal and a limited set of choices. It can ask for the order identifier, propose an approved lookup, explain the verified result, or stop when it cannot continue safely."
               ]
             }
           },
           {
-            "id": "output-contracts",
-            "title": "Output Contracts",
-            "start": 6,
-            "end": 7,
-            "example": {
-              "title": "A Narrow Structured Proposal",
-              "content": [
-                "Instead of asking the model to resolve a case, the application requests an issue category, the customer's stated goal, missing information, and whether an order lookup is needed. Application code validates those fields and decides the next permitted step. The model interprets language without becoming the authority for the business decision."
+            id: "agent-capabilities",
+            title: "Agent Capabilities",
+            start: 37,
+            end: 39,
+            example: {
+              title: "Using an Observation",
+              content: [
+                "An agent proposes an order lookup and observes that the shipment is delayed. That observation becomes part of the current state, allowing the next model call to explain the delay rather than repeating the original lookup."
               ]
             }
           },
           {
-            "id": "streaming-timeouts-and-retries",
-            "title": "Streaming, Timeouts, and Retries",
-            "start": 7,
-            "end": 10,
-            "example": {
-              "title": "Retrying Without Repeating an Action",
-              "content": [
-                "A read only classification call fails before returning a response, so the server retries it once with the same trace identifier. A separate workflow has already created a support ticket before its model explanation times out. The server does not repeat the complete workflow. Ticket creation uses its own idempotency key, and only the unfinished explanation is retried."
+            id: "how-an-agent-works",
+            title: "How an Agent Works",
+            start: 39,
+            end: 41,
+            example: {
+              title: "One Execution Cycle",
+              content: [
+                "The model proposes a lookup for order 10492. Application code validates the order identifier, confirms customer access, executes the lookup, and returns the limited result as an observation. The model then uses that observation to write the response."
               ]
             }
           },
           {
-            "id": "model-selection-and-versioning",
-            "title": "Model Selection and Versioning",
-            "start": 10,
-            "end": 12,
-            "example": {
-              "title": "Choosing a Model for the Task",
-              "content": [
-                "A small model and a stronger model are evaluated on the same 200 support messages. The team compares category accuracy, structured output validity, TTFT, total latency, and cost. If the small model meets the acceptance target for routing, it serves that step. The stronger model is reserved for policy explanations that show a measured benefit."
+            id: "agents-and-deterministic-workflows",
+            title: "Agents and Deterministic Workflows",
+            start: 41,
+            end: 43,
+            example: {
+              title: "Flexible Decisions with Fixed Controls",
+              content: [
+                "The model decides whether the customer must provide more information or whether an order lookup should be proposed. Deterministic application code controls authorization, executes the lookup, and prevents an unapproved action."
               ]
             }
           },
           {
-            "id": "langchain",
-            "title": "LangChain",
-            "start": 12,
-            "end": 14,
-            "example": {
-              "title": "Using an Abstraction Without Losing Visibility",
-              "content": [
-                "A support application uses a LangChain chat model interface so it can test two providers with the same message structure. The trace still records the actual provider, model identifier, rendered messages, token usage, latency, structured output result, and any tool call. LangChain reduces adapter code, while the application retains the evidence needed to compare behavior and investigate failures."
+            id: "when-to-use-an-agent",
+            title: "When to Use an Agent",
+            start: 43,
+            end: 45,
+            example: {
+              title: "Agent or Ordinary Workflow",
+              content: [
+                "Routing an unfamiliar support request among a clarification, knowledge search, order lookup, and escalation may benefit from an agent. Calculating a shipping charge from verified weight and destination should remain deterministic application code."
               ]
             }
           },
           {
-            "id": "basic-agent",
-            "title": "Basic Agent",
-            "start": 14,
-            "end": 17,
-            "example": {
-              "title": "A Bounded Support Agent",
-              "content": [
-                "A customer asks where an order is. The model receives the request and the description of one order lookup tool. It proposes a tool call with an order identifier. Application code verifies that the authenticated customer can access that order, validates the arguments, and executes the read only lookup. The result is returned to the model as a labeled tool result. The model then writes a response based on the verified status. The model chooses the next conversational step, while application code controls permissions, execution, limits, and acceptance."
+            id: "agent-in-this-lab",
+            title: "The Agent in This Lab",
+            start: 45,
+            end: 47,
+            example: {
+              title: "A Bounded First Agent",
+              content: [
+                "The first agent has one goal, one read only tool, no long term memory, at most two model calls, and at most one tool call. These limits keep every decision and application control visible to the learner."
               ]
             }
           },
           {
-            "id": "application-visibility",
-            "title": "Application Visibility",
-            "start": 17,
-            "end": 21,
-            "example": {
-              "title": "Following One Agent Run",
-              "content": [
-                "A trace for one support request shows the pinned provider model, rendered messages, available tool schema, proposed order identifier, authorization result, limited tool output, final model response, token usage, latency, and validation outcome. A framework organizes the calls, but every decision needed to explain the run remains visible."
+            id: "provider-sdks",
+            title: "Provider SDKs",
+            start: 3,
+            end: 6,
+            example: {
+              title: "The Support Request Analyzer",
+              content: [
+                "The OpenAI Python SDK sends a customer message to the Responses API and requests four fields. The result identifies the issue type, extracts an order identifier when present, reports whether order data is required, and lists a missing detail. The call interprets the request without claiming to know the order status."
               ]
             }
+          },
+          {
+            id: "requests-and-responses",
+            title: "Requests and Responses",
+            start: 6,
+            end: 10,
+            example: {
+              title: "Following the Call",
+              content: [
+                "The application trace records the approved instruction, customer input, model identifier, output budget, provider request identifier, token usage, completion status, and validation result. A teammate can follow what crossed the API boundary without inspecting provider infrastructure."
+              ]
+            }
+          },
+          {
+            id: "structured-output",
+            title: "Structured Output",
+            start: 10,
+            end: 12,
+            example: {
+              title: "Valid Shape and Verified Facts",
+              content: [
+                "When the customer supplies order number 10492, the model returns order_id as the five digit string 10492. When no order number is present, the result still contains order_id with a null value. The schema confirms the required shape in both cases. A later order lookup must still prove that a supplied order exists and belongs to the authenticated customer."
+              ]
+            }
+          },
+          {
+            id: "streaming-and-cancellation",
+            title: "Streaming and Cancellation",
+            start: 12,
+            end: 14,
+            example: {
+              title: "Streaming an Explanation",
+              content: [
+                "A customer explanation begins arriving after 420 milliseconds and finishes after 1.6 seconds. The interface displays suitable text as it arrives, but saves the answer only after the final event. If the customer starts another request, the application stops displaying the earlier stream and attempts to cancel it."
+              ]
+            }
+          },
+          {
+            id: "timeouts-and-retries",
+            title: "Timeouts and Retries",
+            start: 14,
+            end: 17,
+            example: {
+              title: "One Controlled Retry",
+              content: [
+                "A read only analysis call reaches a temporary rate limit. The application waits and retries once, then returns a controlled error if the second call fails. The trace records both attempts. No order action is repeated because this step only interprets text."
+              ]
+            }
+          },
+          {
+            id: "measurement",
+            title: "Measurement and Observability",
+            start: 17,
+            end: 18,
+            example: {
+              title: "What the Application Can Measure",
+              content: [
+                "One trace records the provider, model, prompt version, output budget, input and output tokens, first token time, total model latency, retries, completion status, and schema validation. It does not claim to know the provider's internal accelerator allocation or KV cache layout."
+              ]
+            }
+          },
+          {
+            id: "langchain-model-integration",
+            title: "LangChain Model Integration",
+            start: 18,
+            end: 20,
+            example: {
+              title: "A Configured Chat Model",
+              content: [
+                "ChatOpenAI stores the selected model and operating configuration, accepts an ordered message sequence, and sends the corresponding request through the OpenAI integration. LangChain provides the common model interface while the provider still performs inference."
+              ]
+            }
+          },
+          {
+            id: "langchain-message-types",
+            title: "LangChain Message Types",
+            start: 20,
+            end: 25,
+            example: {
+              title: "A Customer Service Message Sequence",
+              content: [
+                "A SystemMessage defines the order support task. A HumanMessage contains the customer's question. An AIMessage may propose an approved order lookup. After application code validates and executes that request, a ToolMessage returns the limited result to the model. A final AIMessage then explains the result to the customer."
+              ]
+            }
+          },
+          {
+            id: "langchain-model-operations",
+            title: "LangChain Model Operations",
+            start: 25,
+            end: 28,
+            example: {
+              title: "The Same Task Through LangChain",
+              content: [
+                "ChatOpenAI receives system and human messages. with_structured_output applies the analyzer schema, invoke returns the complete typed result, and stream yields an explanation incrementally. bind_tools is introduced as the way to make the order lookup definition available in the next lesson."
+              ]
+            }
+          },
+          {
+            id: "local-models-with-ollama",
+            title: "Local Models with Ollama",
+            start: 28,
+            end: 32,
+            example: {
+              title: "A Local Support Request Analyzer",
+              content: [
+                "Ollama runs qwen3:14b on the local computer. The analyzer supplies the same customer request and SupportRequest schema used by the hosted versions. The local model returns structured JSON, Pydantic validates it, and the application records local token counts and latency."
+              ]
+            }
+          },
+          {
+            id: "sdk-langchain-and-ollama-comparison",
+            title: "Provider SDK, LangChain, and Ollama",
+            start: 32,
+            end: 35,
+            example: {
+              title: "Choosing a Model Integration",
+              content: [
+                "A feature that uses one hosted provider and one call may remain clearer with the direct SDK. A product that shares message construction, schemas, and tools across several model calls may benefit from LangChain. A local Ollama model can be useful when local execution is a deliberate requirement. In every case, application code keeps operating behavior visible."
+              ]
+            }
+          },
+          {
+            id: "build-support-request-analyzer",
+            title: "Build a Support Request Analyzer",
+            start: 47,
+            end: 62,
+            example: {
+              title: "Completing the Comparison",
+              content: [
+                "After running all three paths with the same customer message, the learner should be able to locate the structured contract, identify each model call, explain the streaming path, read the trace, and describe how the direct SDK, LangChain, and local Ollama approaches differ without describing any implementation as an agent."
+              ]
+            }
+          },
+          {
+            id: "testing-the-analyzer",
+            title: "Testing the Analyzer",
+            start: 62
+          }
+        ]
+      ),
+      lesson(
+        "building-a-basic-agent-with-langchain",
+        "Building an Agent with LangChain",
+        "2 hours",
+        "Build a customer service agent with LangChain and run it with either OpenAI or Ollama. The same agent loop controls tool calls, authorization, validation, execution limits, and tracing for both model providers.",
+        [
+          "The previous lesson defined an agent and explained when model selected actions are useful. This lesson does not repeat that theory. It implements the small Customer Service Agent introduced there and keeps each model decision visible in ordinary Python code.",
+          "The implementation uses LangChain as the common model interface. The agent code works with ChatOpenAI for a hosted OpenAI model and ChatOllama for qwen3:14b running locally. It does not use the direct provider SDK because provider comparison was completed in the previous lesson.",
+          "The application selects the provider through MODEL_PROVIDER. Use openai for the hosted route or ollama for the local route. The provider is not inferred from a model name because names can change and several providers may expose similar names. One small factory contains the provider specific configuration while the agent loop receives the same LangChain chat model interface. The qwen3:14b configuration disables its optional reasoning output so the small output budget is used for the required tool call and customer reply.",
+          "The agent handles only order status questions. It can ask for a missing order identifier, propose one read only lookup, and explain one verified result. It cannot cancel an order, issue a refund, change an address, or search arbitrary customers.",
+          "The run begins with a SystemMessage that defines the task and a HumanMessage containing the customer request. LangChain converts the LookupOrder Pydantic model into a tool schema and makes it available through bind_tools. The first model call may ask a question or propose the lookup tool.",
+          "A model proposal is data, not execution. The application checks the tool name, validates the five digit order identifier, enforces the one tool call limit, and supplies the authenticated customer identifier from trusted request state. The model never chooses which customer is signed in.",
+          "The local OrderStore represents an authenticated order service. It returns only status, expected delivery, and the latest update for an order belonging to the authenticated customer. Unknown and unauthorized orders receive the same limited result so the application does not reveal whether another customer's order exists.",
+          "When the request does not contain an order identifier, the first model response asks for it. The application returns that clarification without calling a tool or making a second model request. This is the shortest valid path through the agent.",
+          "When the model proposes LookupOrder, application code validates and authorizes the request before calling the store. A successful result is added as a ToolMessage linked to the model's tool call. This message gives the second model call verified evidence and preserves the role of the tool result.",
+          "The second model call writes a CustomerReply containing the customer message, its information source, and whether order data was verified. The OpenAI route uses LangChain function calling. The Ollama route gives qwen3:14b an explicit JSON instruction because this model can return ordinary text instead of the requested CustomerReply tool call. Pydantic validates both results before the application accepts them.",
+          "The run permits no more than two model calls and one tool call. These limits are constants in the code and are checked by the loop. Direct control flow is intentional because learners should be able to follow every branch before LangGraph introduces reusable graph execution later in the course.",
+          "The same trace is used for both providers. It records the selected provider, model, prompt version, token usage when available, model latency, tool latency, validation, authorization, step counts, completion reason, and safe error categories. A hosted provider may return a request identifier while a local Ollama run usually does not.",
+          "Failures produce controlled outcomes. Invalid tool arguments stop before execution. Unknown or unauthorized orders expose no order facts. Repeated tool proposals exceed the limit. A model or validation failure returns a safe response and records the reason rather than starting an unrestricted recovery loop.",
+          "Tests use model doubles, which are predictable replacements for a live model. They cover the valid path, missing information, malformed arguments, repeated tool calls, unauthorized access, timeouts, and invalid final responses without requiring an API key or running Ollama.",
+          "Run the Section 6 tests from the customer-service-agent folder before or after using a live provider. The test command runs tests/test_agent.py only. It does not call OpenAI or Ollama, so it is fast, repeatable, and free to run. A passing result confirms the agent's tool boundary, authorization rules, execution limits, fallback behavior, and trace outcomes.",
+          "The runnable agent is in labs/01-llm-fundamentals/customer-service-agent. Its main implementation file is src/customer_service_lab/agent.py, and its configuration is stored in the local .env file inside the lab folder.",
+          "Step 01. Open a terminal at the Agentic AI Lab repository root and enter the customer-service-agent folder. Run every remaining command in this section from that folder.",
+          "Step 02. Install the locked Python dependencies with uv. Python 3.12 is the recommended version for this lab. The project supports Python 3.11 or newer, but all instructions and examples are tested with Python 3.12. Using the recommended version helps avoid dependency and environment differences. uv installs LangChain, the OpenAI and Ollama integrations, Pydantic, and the test tools inside the lab environment.",
+          "Step 03. Read src/customer_service_lab/agent.py before running it. Start with create_agent_model, then read LookupOrder, OrderStore, run_agent, and main in that order. This shows configuration first, followed by the tool contract, trusted data access, the execution loop, and the program entry point.",
+          "Step 04. Create .env from .env.example if the file does not already exist. To use OpenAI, set MODEL_PROVIDER to openai, provide OPENAI_API_KEY, and keep the selected OPENAI_MODEL. Never commit the .env file.",
+          "Step 05. Run the agent through its Python module from the lab folder. Using the module command ensures Python loads the customer_service_lab package from the environment created by uv.",
+          "Step 06. To use the local route, confirm that Ollama is running and qwen3:14b is installed. Change MODEL_PROVIDER to ollama and check OLLAMA_HOST and OLLAMA_MODEL. Run the same module command again. No agent code changes are required.",
+          "Step 07. Compare the two runs. Read the customer response first, then inspect provider, model, model call count, tool call count, authorization result, validation result, latency, token usage when available, and stop reason in the run metadata."
+        ],
+        undefined,
+        [
+          "LangChain agents",
+          "model providers",
+          "ChatOpenAI",
+          "ChatOllama",
+          "tool binding",
+          "tool proposals",
+          "read only tools",
+          "argument validation",
+          "authorization",
+          "bounded execution",
+          "explicit agent loops",
+          "ToolMessage",
+          "application state",
+          "step limits",
+          "error handling",
+          "agent tracing",
+          "behavior testing"
+        ],
+        "Concept",
+        [
+          {
+            id: "lesson-scope",
+            title: "Lesson Scope",
+            start: 0,
+            end: 2,
+            example: {
+              title: "One Agent Implementation",
+              content: [
+                "The agent loop is implemented once with LangChain. OpenAI and Ollama provide different model runtimes, but neither provider changes which tools exist, who authorizes a lookup, or when the run must stop."
+              ]
+            }
+          },
+          {
+            id: "model-configuration",
+            title: "Model Configuration",
+            start: 2,
+            end: 3,
+            example: {
+              title: "Explicit Provider Selection",
+              content: [
+                "MODEL_PROVIDER selects openai or ollama. The factory creates ChatOpenAI or ChatOllama, then returns the same model interface to the agent loop."
+              ]
+            }
+          },
+          {
+            id: "agent-boundary",
+            title: "Agent Boundary",
+            start: 3,
+            end: 7,
+            example: {
+              title: "One Narrow Responsibility",
+              content: [
+                "The Customer Service Agent can ask for an order identifier, look up one authorized order status, or explain one verified result. A cancellation request remains outside its scope."
+              ]
+            }
+          },
+          {
+            id: "first-model-call",
+            title: "First Model Call",
+            start: 7,
+            end: 8,
+            example: {
+              title: "A Clarification Path",
+              content: [
+                "For 'Where is my order?' the first call asks for the missing identifier. No lookup or second model call is needed."
+              ]
+            }
+          },
+          {
+            id: "tool-validation-and-authorization",
+            title: "Tool Validation and Authorization",
+            start: 8,
+            end: 9,
+            example: {
+              title: "An Order Belonging to Another Customer",
+              content: [
+                "The model proposes order 10492, but the authenticated customer does not own it. Application code returns no order facts and does not confirm whether the order exists."
+              ]
+            }
+          },
+          {
+            id: "second-model-call",
+            title: "Second Model Call",
+            start: 9,
+            end: 10,
+            example: {
+              title: "A Validated Customer Reply",
+              content: [
+                "The model receives a limited order result through ToolMessage. It returns a CustomerReply, and Pydantic checks the response before it reaches the customer."
+              ]
+            }
+          },
+          {
+            id: "execution-limits-and-tracing",
+            title: "Execution Limits and Tracing",
+            start: 10,
+            end: 13,
+            example: {
+              title: "A Bounded Run",
+              content: [
+                "A completed order lookup uses two model calls and one tool call. The trace records which provider ran, what the application allowed, how long each stage took, and why execution stopped."
+              ]
+            }
+          },
+          {
+            id: "testing",
+            title: "Testing",
+            start: 13,
+            end: 15
+          },
+          {
+            id: "run-the-agent",
+            title: "Run the Agent",
+            start: 15
           }
         ]
       )
