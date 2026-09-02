@@ -3803,6 +3803,11 @@ a:not(.button):not(.primary-action):not(.secondary-action):visited {
   overflow: hidden;
 }
 
+.lesson-reading-content #build-support-request-analyzer .lesson-code-block,
+.lesson-reading-content #run-the-agent .lesson-code-block {
+  margin-bottom: 42px;
+}
+
 .lesson-code-block figcaption {
   align-items: center;
   border-bottom: 1px solid rgba(255, 250, 240, 0.16);
