@@ -153,6 +153,13 @@ export default async function LessonPage({ params }: LessonPageProps) {
                 The short code snippets in this lesson are for observation while you read the concepts. Do not run or modify them yet. If a line or concept is unclear, use a coding agent to ask questions and understand it before continuing. The final topic, Build a Support Request Analyzer, explains the project setup, the files and functions to inspect, and the complete steps for running all three implementations.
               </p>
             </aside>
+          ) : item.slug === "building-a-basic-agent-with-langchain" ? (
+            <aside className="lesson-code-reading-note" aria-label="Code example guidance">
+              <strong>Code examples in this lesson</strong>
+              <p>
+                The short code snippets in this lesson are for observation while you follow the agent execution path. Do not run or modify them yet. If a line or concept is unclear, use a coding agent to ask questions and understand it before continuing. The final topic, Run the Agent, explains the project setup, the files and functions to inspect, the complete steps for using OpenAI or Ollama, and how to read the Agent steps output and run metadata.
+              </p>
+            </aside>
           ) : null}
           {lab ? (
             <LessonLabPanel

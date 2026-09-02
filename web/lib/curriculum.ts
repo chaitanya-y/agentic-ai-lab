@@ -77,12 +77,14 @@ export function getLessonSections(item: Lesson): LessonSection[] {
   }
 
   if (item.sectionOutline) {
-    return item.sectionOutline.map(({ id, title, start, end, example }) => ({
-      id,
-      title,
-      content: item.content.slice(start, end),
-      example
-    }));
+    return [...item.sectionOutline]
+      .sort((first, second) => first.start - second.start)
+      .map(({ id, title, start, end, example }) => ({
+        id,
+        title,
+        content: item.content.slice(start, end),
+        example
+      }));
   }
 
   return [{ id: "content", title: "Content", content: item.content }];
