@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 5001",
     "build": "next build",
     "build:sites": "node scripts/build-sites.mjs",
     "start": "next start",

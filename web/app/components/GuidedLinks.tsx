@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
-import { visitProgressKeys } from "../../lib/visitProgress";
+import { visitProgressEvent, visitProgressKeys } from "../../lib/visitProgress";
 
 type LinkProps = {
   className: string;
@@ -49,4 +49,25 @@ export function RoadmapLink({ className, children }: LinkProps) {
       {children}
     </Link>
   );
+}
+
+export function LearningNavLink() {
+  const [canLearn, setCanLearn] = useState(false);
+
+  useEffect(() => {
+    const updateAccess = () => {
+      setCanLearn(window.localStorage.getItem(visitProgressKeys.roadmapVisited) === "true");
+    };
+
+    updateAccess();
+    window.addEventListener("storage", updateAccess);
+    window.addEventListener(visitProgressEvent, updateAccess);
+
+    return () => {
+      window.removeEventListener("storage", updateAccess);
+      window.removeEventListener(visitProgressEvent, updateAccess);
+    };
+  }, []);
+
+  return canLearn ? <Link href="/learn">Learn</Link> : null;
 }
