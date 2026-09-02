@@ -469,7 +469,8 @@ def main() -> None:
         provider=provider,
     )
 
-    print("Customer response")
+    trace.print_execution_summary()
+    print("\nCustomer response")
     print(reply.message)
     trace.print_summary()
 

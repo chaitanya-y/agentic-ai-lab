@@ -101,6 +101,46 @@ class RunTrace:
     errors: list[str] = field(default_factory=list)
     end_to_end_ms: float | None = None
 
+    def execution_summary(self) -> str:
+        """Describe the bounded agent path without exposing customer or tool data."""
+
+        lines = ["Agent steps", "1. First model call"]
+
+        if self.tool_call_count == 0:
+            lines.extend(
+                [
+                    "   Decision: ask the customer for more information",
+                    "   No tool call was proposed.",
+                ]
+            )
+            return "\n".join(lines)
+
+        lines.extend(
+            [
+                f"   Decision: propose {self.tool_name or 'a tool'}",
+                f"   Proposed tool calls: {self.tool_call_count}",
+                f"   Argument validation: {self.argument_validation_result or 'not recorded'}",
+                "2. Application control",
+                f"   Authorization: {self.authorization_result or 'not reached'}",
+                f"   Tool result: {self.tool_result or 'not executed'}",
+            ]
+        )
+
+        if self.model_call_count > 1:
+            lines.extend(
+                [
+                    "3. Second model call",
+                    "   Purpose: explain the application result to the customer.",
+                ]
+            )
+
+        return "\n".join(lines)
+
+    def print_execution_summary(self) -> None:
+        """Print a concise learning aid before the final response and full trace."""
+
+        print(self.execution_summary())
+
     def print_summary(self) -> None:
         """Print operational metadata without prompts, tool arguments, or tool data."""
 

@@ -188,6 +188,11 @@ def test_authorized_order_uses_one_tool_and_two_model_calls() -> None:
     assert trace.model_calls[0].provider_request_id == "req_decision"
     assert trace.model_calls[1].provider_request_id == "req_final"
     assert trace.model_calls[1].usage.cached_input_tokens == 10
+    summary = trace.execution_summary()
+    assert "Decision: propose LookupOrder" in summary
+    assert "Argument validation: passed" in summary
+    assert "Authorization: authorized" in summary
+    assert "3. Second model call" in summary
 
 
 def test_authenticated_identity_stays_outside_model_control() -> None:
@@ -248,6 +253,10 @@ def test_missing_order_number_does_not_call_tool() -> None:
     assert trace.stop_reason == "needs_information"
     assert trace.model_call_count == 1
     assert trace.tool_call_count == 0
+    summary = trace.execution_summary()
+    assert "Decision: ask the customer for more information" in summary
+    assert "No tool call was proposed." in summary
+    assert "2. Application control" not in summary
 
 
 def test_invalid_tool_arguments_stop_before_tool_execution() -> None:

@@ -1045,14 +1045,16 @@ export const curriculum: CurriculumPhase[] = [
           "The implementation uses LangChain as the common model interface. The agent code works with ChatOpenAI for a hosted OpenAI model and ChatOllama for qwen3:14b running locally. It does not use the direct provider SDK because provider comparison was completed in the previous lesson.",
           "The application selects the provider through MODEL_PROVIDER. Use openai for the hosted route or ollama for the local route. The provider is not inferred from a model name because names can change and several providers may expose similar names. One small factory contains the provider specific configuration while the agent loop receives the same LangChain chat model interface. The qwen3:14b configuration disables its optional reasoning output so the small output budget is used for the required tool call and customer reply.",
           "The agent handles only order status questions. It can ask for a missing order identifier, propose one read only lookup, and explain one verified result. It cannot cancel an order, issue a refund, change an address, or search arbitrary customers.",
-          "The run begins with a SystemMessage that defines the task and a HumanMessage containing the customer request. LangChain converts the LookupOrder Pydantic model into a tool schema and makes it available through bind_tools. The first model call may ask a question or propose the lookup tool.",
-          "A model proposal is data, not execution. The application checks the tool name, validates the five digit order identifier, enforces the one tool call limit, and supplies the authenticated customer identifier from trusted request state. The model never chooses which customer is signed in.",
-          "The local OrderStore represents an authenticated order service. It returns only status, expected delivery, and the latest update for an order belonging to the authenticated customer. Unknown and unauthorized orders receive the same limited result so the application does not reveal whether another customer's order exists.",
-          "When the request does not contain an order identifier, the first model response asks for it. The application returns that clarification without calling a tool or making a second model request. This is the shortest valid path through the agent.",
-          "When the model proposes LookupOrder, application code validates and authorizes the request before calling the store. A successful result is added as a ToolMessage linked to the model's tool call. This message gives the second model call verified evidence and preserves the role of the tool result.",
-          "The second model call writes a CustomerReply containing the customer message, its information source, and whether order data was verified. The OpenAI route uses LangChain function calling. The Ollama route gives qwen3:14b an explicit JSON instruction because this model can return ordinary text instead of the requested CustomerReply tool call. Pydantic validates both results before the application accepts them.",
+          "The first model call reads the customer’s request and decides what information the application needs next. Its job is not to answer the customer or retrieve an order. It makes one limited choice. It can ask for a missing order identifier or propose an order lookup when the identifier is present.",
+          "The run begins with a SystemMessage that defines this narrow task and a HumanMessage containing the customer request. LangChain converts the LookupOrder Pydantic model into a tool schema and makes it available through bind_tools. For ‘Where is order 10492?’, the first call should propose LookupOrder with 10492 as its argument. For ‘Where is my order?’, it should ask for the missing identifier instead.",
+          "When you run the order request, begin with the Agent steps output. For an order identifier request, it shows that the first call proposed LookupOrder, then shows argument validation, authorization, and the tool result before the final response. It does not print the raw order argument or tool call identifier because production traces should avoid exposing request data unnecessarily. In the missing identifier path, observe that the first call asks for more information and that no tool call or second model call occurs.",
+          "Tool Validation and Authorization begins only after the first model call proposes LookupOrder. Its purpose is to decide whether the application may perform that proposed lookup. The model does not make this decision.",
+          "A model proposal is data, not execution. The application checks that the proposed tool is LookupOrder, validates the five digit order identifier, enforces the one tool call limit, and supplies the authenticated customer identifier from trusted request state. The model never chooses which customer is signed in. Observe that an invalid identifier or unexpected tool proposal stops at this boundary instead of reaching the order store.",
+          "The local OrderStore represents an authenticated order service. It returns only status, expected delivery, and the latest update for an order belonging to the authenticated customer. Unknown and unauthorized orders receive the same limited result so the application does not reveal whether another customer's order exists. After a permitted lookup, the application adds this limited record as a ToolMessage linked to the model's tool call.",
+          "The second model call begins only after the application has added a ToolMessage with the verified lookup result. Its job is to explain that result to the customer. It does not decide whether the lookup was allowed and it does not fetch another order.",
+          "The second model call writes a CustomerReply containing the customer message, its information source, and whether order data was verified. The OpenAI route uses LangChain function calling. The Ollama route gives qwen3:14b an explicit JSON instruction because this model can return ordinary text instead of the requested CustomerReply tool call. Pydantic validates both results before the application accepts them. For a successful lookup, observe two model calls and one tool call in the trace. The first proposes LookupOrder, the application performs the verified lookup, and the second turns that result into the customer response.",
           "The run permits no more than two model calls and one tool call. These limits are constants in the code and are checked by the loop. Direct control flow is intentional because learners should be able to follow every branch before LangGraph introduces reusable graph execution later in the course.",
-          "The same trace is used for both providers. It records the selected provider, model, prompt version, token usage when available, model latency, tool latency, validation, authorization, step counts, completion reason, and safe error categories. A hosted provider may return a request identifier while a local Ollama run usually does not.",
+          "The same trace is used for both providers. It records the selected provider, model, prompt version, token usage when available, model latency, tool latency, validation, authorization, step counts, completion reason, and safe error categories. A hosted provider may return a request identifier while a local Ollama run usually does not. Read a trace in execution order. First confirm the model call count and tool call count. Then confirm that authorization and validation passed before checking latency and token usage. This shows whether a response was produced through the intended path before you compare how much the path cost or how long it took.",
           "Failures produce controlled outcomes. Invalid tool arguments stop before execution. Unknown or unauthorized orders expose no order facts. Repeated tool proposals exceed the limit. A model or validation failure returns a safe response and records the reason rather than starting an unrestricted recovery loop.",
           "Tests use model doubles, which are predictable replacements for a live model. They cover the valid path, missing information, malformed arguments, repeated tool calls, unauthorized access, timeouts, and invalid final responses without requiring an API key or running Ollama.",
           "Run the Section 6 tests from the customer-service-agent folder before or after using a live provider. The test command runs tests/test_agent.py only. It does not call OpenAI or Ollama, so it is fast, repeatable, and free to run. A passing result confirms the agent's tool boundary, authorization rules, execution limits, fallback behavior, and trace outcomes.",
@@ -1115,7 +1117,7 @@ export const curriculum: CurriculumPhase[] = [
             id: "agent-boundary",
             title: "Agent Boundary",
             start: 3,
-            end: 7,
+            end: 4,
             example: {
               title: "One Narrow Responsibility",
               content: [
@@ -1126,20 +1128,21 @@ export const curriculum: CurriculumPhase[] = [
           {
             id: "first-model-call",
             title: "First Model Call",
-            start: 7,
-            end: 8,
+            start: 4,
+            end: 7,
             example: {
-              title: "A Clarification Path",
+              title: "Two Possible First Decisions",
               content: [
-                "For 'Where is my order?' the first call asks for the missing identifier. No lookup or second model call is needed."
+                "For ‘Where is order 10492?’, the first call proposes LookupOrder with order_id 10492. It does not look up the order itself.",
+                "For ‘Where is my order?’, the first call asks for the missing identifier. No lookup or second model call is needed."
               ]
             }
           },
           {
             id: "tool-validation-and-authorization",
             title: "Tool Validation and Authorization",
-            start: 8,
-            end: 9,
+            start: 7,
+            end: 10,
             example: {
               title: "An Order Belonging to Another Customer",
               content: [
@@ -1150,8 +1153,8 @@ export const curriculum: CurriculumPhase[] = [
           {
             id: "second-model-call",
             title: "Second Model Call",
-            start: 9,
-            end: 10,
+            start: 10,
+            end: 12,
             example: {
               title: "A Validated Customer Reply",
               content: [
@@ -1162,8 +1165,8 @@ export const curriculum: CurriculumPhase[] = [
           {
             id: "execution-limits-and-tracing",
             title: "Execution Limits and Tracing",
-            start: 10,
-            end: 13,
+            start: 12,
+            end: 15,
             example: {
               title: "A Bounded Run",
               content: [
@@ -1174,13 +1177,13 @@ export const curriculum: CurriculumPhase[] = [
           {
             id: "testing",
             title: "Testing",
-            start: 13,
-            end: 15
+            start: 15,
+            end: 17
           },
           {
             id: "run-the-agent",
             title: "Run the Agent",
-            start: 15
+            start: 17
           }
         ]
       )

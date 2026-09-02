@@ -304,7 +304,7 @@ elif provider == "ollama":
       {
         title: "Let the model propose the next step",
         file: "agent.py",
-        description: "Binding a tool gives the model a choice. It does not execute the Python function.",
+        description: "Binding a tool gives the model a choice. When you run the lab, inspect decision.tool_calls. A proposed tool name, arguments, and call identifier are model output, not proof that the Python function has executed.",
         code: `model_with_tools = model.bind_tools(
     [LookupOrder],
     strict=True,
@@ -323,6 +323,7 @@ decision = stream_decision(
       {
         title: "Validate first and authorize inside the application",
         file: "agent.py",
+        description: "Follow this in order. The application validates the model arguments, looks up data using the trusted customer identity, then adds only the returned record as ToolMessage for the second model call.",
         code: `proposed_call = decision.tool_calls[0]
 arguments = LookupOrder.model_validate(proposed_call.get("args"))
 
