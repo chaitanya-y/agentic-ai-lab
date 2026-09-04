@@ -42,7 +42,7 @@ export default function BlogPage() {
 
         <section className="article-finish">
           <p>
-            Agentic AI Lab is a focused 117 hour path for people with some experience in the software industry. You do
+            Agentic AI Lab is a focused path of about 100 hours for people with some experience in the software industry. You do
             not need to come from one particular role. Frontend engineers, backend engineers, testers, SAP consultants,
             and tooling engineers already understand enough about how software products are built. It focuses on the
             theory and hands on work needed to build LLM applications and agents, then brings those skills together in

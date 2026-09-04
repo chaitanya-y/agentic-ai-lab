@@ -1,4 +1,4 @@
-import { curriculum, totalHours } from "../../lib/curriculum";
+import { curriculum } from "../../lib/curriculum";
 import { isPhasePublished } from "../../lib/siteStatus";
 import { RoadmapLessonList } from "../components/RoadmapLessonList";
 import { VisitMarker } from "../components/VisitMarker";
@@ -14,16 +14,16 @@ export default function RoadmapPage() {
     <main className="inner-page">
       <VisitMarker page="roadmap" />
       <section className="page-hero roadmap-hero">
-        <p className="eyebrow">117 hour roadmap</p>
+        <p className="eyebrow">About 100 hours</p>
         <h1>Agentic AI engineering roadmap.</h1>
         <p>
-          A focused {totalHours} hour course for software engineers preparing to build AI applications. Start with LLM
+          A focused course of about 100 hours for software engineers preparing to build AI applications. Start with LLM
           fundamentals, then move through retrieval, tools, agentic workflows, and evaluation before completing the
           Customer Service Agent capstone.
         </p>
         <div className="page-meta">
           <span>{curriculum.length} phases</span>
-          <span>{totalHours} hours</span>
+          <span>About 100 hours</span>
           <span>1 capstone project</span>
         </div>
       </section>
@@ -54,7 +54,7 @@ export default function RoadmapPage() {
       </section>
 
       <p className="roadmap-time-note">
-        Plan for around 15 hours each week to complete the course in two months. The estimate includes reading,
+        Plan for around 12 to 13 hours each week to complete the course in two months. The estimate includes reading,
         implementation, debugging, evaluation, and capstone work.
       </p>
     </main>
