@@ -9,7 +9,7 @@ export default function Home() {
         <div className="hero-intro">
           <h1>Agentic AI Engineering Lab for Software Engineers</h1>
           <p>
-            A focused path for software engineers who want to build the skills needed for AI engineering roles in
+            A focused learning path for software engineers who want to build the skills needed for agentic AI engineering roles in
             about two months. Work through short lessons, runnable examples, and one capstone project.
           </p>
           <div className="hero-actions">
