@@ -9,6 +9,7 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.artifacts/
 
 # Website dependencies and build output
 node_modules/

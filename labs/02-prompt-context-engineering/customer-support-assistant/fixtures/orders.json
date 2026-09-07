@@ -1,0 +1,23 @@
+[
+  {
+    "customer_id": "customer_001",
+    "order_id": "10492",
+    "status": "In transit",
+    "expected_delivery": "September 8, 2026 by 8 PM",
+    "latest_update": "Departed the regional distribution center"
+  },
+  {
+    "customer_id": "customer_001",
+    "order_id": "10429",
+    "status": "Delivered",
+    "expected_delivery": null,
+    "latest_update": "Delivered on September 2, 2026"
+  },
+  {
+    "customer_id": "customer_002",
+    "order_id": "77777",
+    "status": "Processing",
+    "expected_delivery": "September 12, 2026",
+    "latest_update": "Payment confirmed"
+  }
+]

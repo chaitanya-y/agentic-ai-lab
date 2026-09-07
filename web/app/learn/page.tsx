@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LearningHome, type ReleasedLearningPhase } from "../components/LearningHome";
 import { RoadmapAccessGate } from "../components/RoadmapAccessGate";
 import { curriculum } from "../../lib/curriculum";
-import { isPhasePublished } from "../../lib/siteStatus";
+import { isPhaseAvailable } from "../../lib/siteStatus";
 
 export const metadata: Metadata = {
   title: "Learn",
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default function LearnPage() {
-  const phases: ReleasedLearningPhase[] = curriculum.filter((phase) => isPhasePublished(phase.id)).map((phase) => ({
+  const phases: ReleasedLearningPhase[] = curriculum.filter((phase) => isPhaseAvailable(phase.id)).map((phase) => ({
     id: phase.id,
     number: phase.number,
     title: phase.title,

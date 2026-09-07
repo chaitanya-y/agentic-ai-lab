@@ -2,81 +2,61 @@
 
 ## Purpose
 
-Phase 2 teaches software engineers how to design model requests, assemble permitted context, validate model output, and measure whether a change improved an application. It extends the skills introduced in Phase 1 without modifying the published Phase 1 lab.
+Phase 2 teaches software engineers how to design model instructions, assemble permitted runtime context, protect application boundaries, and measure whether a change improved behavior. It extends Phase 1 without modifying the published Phase 1 lab.
 
-The phase is named **Prompt Engineering, Context Engineering, and Structured Outputs**. It contains seven lessons and approximately 14 hours of core work. Every lesson includes practical work that contributes to one standalone customer support application.
+The phase is named **Prompt Engineering and Context Engineering**. It contains five lessons and approximately 12 hours of core work.
 
-## Approved boundaries
+## Boundaries
 
-The implementation will create a new lab at:
+The Phase 2 lab lives at:
 
 `labs/02-prompt-context-engineering/customer-support-assistant`
 
-The new lab will not import code from the Phase 1 lab. It may reuse familiar domain ideas, such as support requests and order records, so learners can focus on the Phase 2 concepts. Phase 1 files and commands must continue to work unchanged.
+The lab is independent from the Phase 1 code. It reuses familiar customer support scenarios so learners can focus on prompt and context decisions.
 
-Phase 2 includes conversation history only as one source of model context. It covers history selection, trimming, summaries, corrections, and token budgets. It does not implement application state, persistent memory, checkpoints, pause and resume, or durable execution. Those remain in Phase 5.
+Phase 1 already teaches reasoning models, sampling controls, provider structured output, Pydantic validation, and prompt caching. Phase 2 uses these capabilities but does not teach them again.
 
-Retrieval remains in Phase 3. Tool calling and MCP remain in Phase 4. Agent loops, LangGraph, durable execution, and specialist agents remain in Phase 5. Broad production evaluation, observability, red teaming, and release monitoring remain in Phase 6.
+Conversation history appears as one source of runtime context. Persistent memory, application state, checkpoints, pause and resume, and durable execution remain in Phase 5. Retrieval remains in Phase 3. Tools and MCP remain in Phase 4. Broader production evaluation, observability, safety, and release management remain in Phase 6.
 
 ## Curriculum
 
 | Lesson | Subject | Practical result | Time |
 | --- | --- | --- | ---: |
-| 01 | Prompt Engineering | A versioned task specification and baseline prompt comparison | 1.5 hours |
-| 02 | In Context Learning and Reasoning | A measured zero shot and few shot comparison | 2 hours |
-| 03 | Structured Outputs and Validation | A typed response contract with explicit failure paths | 2 hours |
-| 04 | Context Engineering | An inspectable context builder with source and budget reports | 2.5 hours |
-| 05 | Prompt Injection and Trust Boundaries | Adversarial fixtures that cannot bypass application controls | 1.5 hours |
-| 06 | Prompt Evaluation | A small evaluation runner and comparison report | 2 hours |
-| 07 | Customer Support Response Assistant | A complete fixed workflow using all Phase 2 components | 2.5 hours |
-| **Total** | | | **14 hours** |
+| 01 | Prompt Engineering | A reusable prompt renderer with explicit examples and inputs | 3 hours |
+| 02 | Context Engineering | An inspectable context builder with source and budget reports | 3 hours |
+| 03 | Prompt Injection and Trust Boundaries | Adversarial fixtures that cannot bypass application controls | 1.5 hours |
+| 04 | Prompt Evaluation | A small evaluation runner and comparison report | 2 hours |
+| 05 | Customer Support Response Assistant | A fixed workflow using all Phase 2 components | 2.5 hours |
+| **Total** | | | **12 hours** |
 
-Each lesson begins with the named concept and its definition. It then explains the mechanism, engineering relevance, realistic example, limitations, code, practical task, expected result, failure cases, tests, and completion checkpoint. Code appears beside the concept it demonstrates. A definition does not receive artificial code when inspection or comparison is the more useful exercise.
+Each lesson begins with its named concept and definition. It explains the mechanism, engineering relevance, realistic examples, limitations, code, practical work, expected results, and failure cases. Code appears beside the concept it demonstrates.
 
 ## Teaching progression
 
-Lesson 01 defines prompting as application interface design. Learners specify the task, allowed evidence, missing information behavior, and response requirements before changing the prompt. They compare a baseline with one targeted revision while holding the model and dataset constant.
+Prompt Engineering treats a prompt as an application interface. Learners define the task, message roles, inputs, output behavior, constraints, and incomplete path. Zero shot, one shot, few shot, and example selection are taught inside this lesson because demonstrations are part of prompt design.
 
-Lesson 02 explains zero shot, one shot, few shot, example selection, reasoning models, and task decomposition. Learners compare prompt variants against the same cases. The lesson does not require hidden chain of thought or present one reasoning phrase as universally effective.
+Context Engineering distinguishes instructions from the complete information supplied during inference. Learners work with context windows, budgets, provenance, ordering, compression, conversation history, memory boundaries, dynamic assembly, and observability.
 
-Lesson 03 distinguishes free text, requested JSON, provider structured output, local parsing, schema validation, and semantic validation. Learners handle missing and nullable values, refusals, incomplete generation, parsing errors, schema errors, and unsupported facts as different outcomes.
+Prompt Injection and Trust Boundaries focuses on malicious instructions and application controls. It does not repeat how source selection works. Instead, learners use the existing context selector and verify that untrusted content cannot grant permission or cause unsupported actions.
 
-Lesson 04 defines context engineering and distinguishes it from prompt engineering. Learners select permitted sources, track provenance, order evidence, reserve output tokens, select conversation history, and inspect a context budget. Fixed policy fixtures are used here so retrieval mechanics remain in Phase 3.
+Prompt Evaluation owns datasets, graders, prompt comparisons, and failure analysis. Prompt Engineering introduces testable requirements but does not duplicate the complete evaluation workflow.
 
-Lesson 05 defines direct and indirect prompt injection. Learners place malicious instructions in customer input and supplied policy content. The application prevents restricted data and actions from becoming available regardless of whether the model follows the malicious text.
-
-Lesson 06 introduces a small development and evaluation dataset, exact checks, a human review rubric, failure categories, prompt versions, and regression comparison. It does not introduce a hosted evaluation platform or treat model judging as authoritative.
-
-Lesson 07 connects the preceding components into one fixed application workflow. It is not described as an autonomous agent because application code controls the sequence.
+The Customer Support Response Assistant connects the components. Its lesson focuses on the files to inspect, commands to run, trace fields to observe, and failures to diagnose rather than teaching the preceding definitions again.
 
 ## Application flow
 
 The complete path uses two model calls when sufficient information is present.
 
-1. The application receives a customer message and optional supplied conversation history.
+1. The application receives a customer message and optional conversation history.
 2. The first model call produces a typed `SupportRequest`.
-3. Application code checks completion, parsing, schema validity, and required information.
-4. Application code loads the permitted local order facts and selects eligible policy fixtures by metadata.
-5. The context builder selects relevant history and evidence, labels each source, orders the request, and enforces the configured budget.
-6. The second model call produces a typed `SupportResponse` containing its status, message, evidence identifiers, and missing information.
-7. Application code checks that evidence identifiers exist, the referenced order is permitted, required evidence is present, and the response does not claim an unsupported application action.
-8. The run trace records provider, model, prompt versions, schema version, selected evidence, excluded evidence and reasons, token usage when available, latency, validation outcomes, and completion reason.
+3. Application code validates the request and checks required information.
+4. Application code loads the permitted synthetic order and policy sources.
+5. The context builder selects relevant history and evidence, records exclusions, and enforces the input budget.
+6. The second model call produces a typed `SupportResponse`.
+7. Application code checks source identifiers, order references, and unsupported action claims.
+8. The trace records prompts, selected context, validation outcomes, usage, latency, and completion reason.
 
-A request with missing essential information stops after the first call and returns a clarification outcome. A provider error, incomplete generation, invalid structure, or unsupported answer follows a distinct failure path. The program does not silently retry missing evidence or manufacture a replacement value.
-
-## Domain contracts
-
-The lab uses a small set of explicit Pydantic models.
-
-`SupportRequest` records the issue type, optional order identifier, requested outcome, and missing information. Optional identifiers use an explicit default of `None` so the Python contract matches the intended behavior.
-
-`EvidenceSource` records a stable source identifier, source type, audience, effective date, version, content, and trust classification. Source authority for a fact does not grant instruction authority.
-
-`ContextReport` records included and excluded sources, exclusion reasons, estimated or provider measured tokens, the configured input budget, and the output reserve.
-
-`SupportResponse` records an outcome such as answered, needs information, or cannot answer. It also contains the customer message, evidence identifiers, and missing information. A valid schema is treated as a structural result, not proof that the answer is true.
-
-`RunTrace` records the model calls and deterministic application stages without storing unrestricted secrets or credentials.
+A request with missing essential information stops after the first call. Provider failures, invalid structure, unauthorized data, and unsupported answers follow distinct failure paths.
 
 ## Repository structure
 
@@ -91,119 +71,73 @@ labs/02-prompt-context-engineering/customer-support-assistant/
     evaluation_cases.json
     orders.json
     policies.json
+  practice/
+    starter.py
+    answers.py
+    context_starter.py
+    context_answers.py
   src/support_assistant/
-    __init__.py
     config.py
     context.py
+    context_practice.py
     evaluation.py
     models.py
+    prompt_practice.py
     prompts.py
     providers.py
     validation.py
     workflow.py
   tests/
-    test_context.py
-    test_evaluation.py
-    test_prompts.py
-    test_providers.py
-    test_trust_boundaries.py
-    test_validation.py
-    test_workflow.py
 ```
 
-Files have one clear responsibility. `prompts.py` renders versioned instructions and examples. `context.py` selects and reports context. `models.py` defines contracts. `validation.py` checks deterministic invariants. `providers.py` creates the selected model and normalizes available metadata. `workflow.py` owns the fixed sequence. `evaluation.py` runs bounded cases and writes a readable report.
+`prompts.py` renders versioned instructions and examples. `context.py` selects runtime information. `models.py` defines contracts. `validation.py` checks deterministic invariants. `providers.py` creates the selected model. `workflow.py` owns the fixed sequence. `evaluation.py` runs bounded cases and writes a readable report.
 
-The lab recommends Python 3.12 and supports Python 3.11 or newer. `uv` manages the environment. OpenAI and Ollama use the LangChain model interface already introduced in Phase 1. The core path requires only one provider. Ollama with `qwen3:14b` remains optional.
+The lab recommends Python 3.12 and supports Python 3.11 or newer. OpenAI and optional Ollama with `qwen3:14b` use the LangChain model interface introduced in Phase 1.
 
-## Prompt versions and examples
+## Prompt design
 
-The lab contains explicit prompt versions rather than one prompt that learners repeatedly overwrite. The initial variants are a baseline task prompt, a revised task specification, and a revised prompt with representative examples.
+The lab contains baseline, revised, and few shot prompt variants. Prompt examples are separate from development and held out evaluation cases.
 
-Prompt examples are separate from development and final evaluation cases. The example set includes ordinary, ambiguous, incomplete, and boundary inputs. It also contains a case in which a misleading example makes performance worse, demonstrating that adding examples is not automatically an improvement.
+The prompt renderer uses named inputs and rejects missing or unexpected values before a model call. Instructions, demonstrations, customer input, supplied context, and the response contract remain visibly separate. Formatting helps organization but is not presented as a security boundary.
 
-The prompt renderer uses named inputs and rejects missing variables before a model call. Instructions, examples, current customer input, context sources, and the response contract remain visibly separated. Markdown or XML structure is presented as organization, not as a security boundary.
+## Context design
 
-## Context fixtures
+Policy fixtures include current, expired, future, internal, unrelated, and adversarial records. Metadata selection records every included and excluded source before generation.
 
-The policy fixtures include a current customer facing policy, an expired policy, an internal note, an irrelevant policy, a policy with an exception, and a customer facing document containing an injected instruction. Metadata selection excludes sources that are expired, internal, unrelated, or unavailable to the current request.
+Conversation fixtures include a corrected order identifier and stale assistant output. The selector preserves the correction while excluding information tied only to the abandoned order. The lab does not persist conversation data across runs.
 
-The conversation fixtures include a short request, a long conversation, a corrected order identifier, stale assistant text, and a compact summary that drops an important qualifier. Learners compare the complete history, a recent window, and a supplied summary. The lab does not persist this information across program runs.
+The context budget reserves output capacity before allocating input components. Required components cannot be silently removed. Optional components are considered by priority and every exclusion is reported.
 
-The order fixtures contain only synthetic data. Application code uses the authenticated customer identifier supplied outside model control to select an order. The model never chooses the authenticated identity.
+## Trust boundaries
 
-## Validation and failure handling
+The authenticated customer identifier enters outside model control. Application code authorizes order access and source audiences before data reaches the model.
 
-Validation occurs in layers.
-
-1. Request completion verifies that the provider returned a completed response rather than a refusal, timeout, or output limit condition.
-2. Parsing verifies that a response can be converted to the expected representation.
-3. Schema validation checks field types, allowed values, required fields, nullable values, and cross field rules.
-4. Semantic validation checks identifiers and evidence against the supplied fixtures and application invariants.
-5. Evaluation compares observed behavior with case specific expectations.
-
-Retries are bounded and limited to provider or formatting failures where a repeat may reasonably help. Missing source data, failed authorization, and unsupported claims do not trigger a model retry. Error messages and traces name the actual failure category instead of reducing every failure to `ValueError`.
-
-## Provider behavior
-
-OpenAI and Ollama share the application contracts and workflow but may use different structured output mechanisms. Provider specific handling remains contained in `providers.py`. The application records which mechanism was used and validates the result locally in both cases.
-
-No test makes a paid API call by default. Live OpenAI evaluation requires both an API key and an explicit `ALLOW_PAID_API_CALLS=true` setting. Ollama evaluation checks that the local service and selected model are available before starting. Live runs use a bounded case limit.
-
-Provider guidance that changes by model, API, or date appears in a short note near the relevant concept. The lesson does not promise that temperature zero is deterministic, that a fixed number of examples is ideal, or that one reasoning instruction works across models.
+The model may interpret untrusted text but cannot grant itself authority, retrieve an unauthorized record, or claim that an unavailable business action occurred. Tests cover direct injection, indirect injection, restricted sources, unsupported citations, and unsupported action claims.
 
 ## Evaluation design
 
-The repository includes a small synthetic dataset divided into prompt examples, development cases, and held out evaluation cases. Cases cover normal order status, damaged items, refund questions, ambiguous intent, missing identifiers, corrected identifiers, conflicting evidence, insufficient evidence, expired sources, restricted sources, direct injection, indirect injection, and schema valid but unsupported output.
+Prompt examples, development cases, and held out cases have separate identifiers and purposes. Deterministic checks cover structured fields, source membership, completion outcomes, and forbidden actions. Human review covers groundedness, completeness, and clarity where exact code is insufficient.
 
-Deterministic checks measure fields, evidence membership, exclusion rules, completion outcomes, and forbidden actions. A short human rubric covers groundedness, completeness, clarity, and unsupported claims. Model based judging may appear as optional reading but is not required to complete the core lab.
-
-The evaluation report records counts as well as percentages, prompt and model versions, case identifiers, observed failures, usage when available, and latency. It distinguishes offline tests from live model evaluation. A result from this teaching dataset is not described as production accuracy.
+The report records case counts, prompt and model versions, failures, usage when available, and latency. Results from the teaching dataset are not described as production accuracy.
 
 ## Website implementation
 
-The current Phase 2 placeholders in `web/lib/curriculum.ts` will be replaced with seven complete lessons. The Phase 2 lesson data should live in a dedicated module so the already large curriculum file does not become harder to maintain.
+Phase 2 lesson data lives in `web/lib/phases/phase2.ts`. Code examples live in `web/lib/phases/phase2CodeExamples.ts`. The review pages derive their lesson list from the same five lesson slugs.
 
-Each lesson receives professional sidebar topics, real examples, adjacent code snippets, runnable commands where appropriate, glossary tooltips, and a completion checkpoint. Visuals are limited to relationships that are easier to understand graphically:
+Each lesson has professional sidebar topics, real examples, adjacent code, glossary tooltips, and hands on work. The useful visuals are prompt boundaries, context budgets and selection, conversation history selection, trust boundaries, the evaluation loop, and the complete fixed workflow.
 
-- Prompt components and instruction boundaries
-- The structured output validation stages
-- Context sources and token budget
-- Conversation history selection
-- Instructions, untrusted data, and application controls
-- The prompt evaluation loop
-- The complete fixed application workflow
+Phase 2 remains a development preview with `noindex` metadata until a separate release decision publishes it.
 
-A development review page at `/review/phase-2` lists all seven lessons and links to their preview pages. Phase 2 is available on local development and the Vercel `dev` branch preview, with `noindex` metadata. It remains unavailable on the production `main` deployment until a separate release change adds its phase identifier to the published set.
+## Verification
 
-The lab panel points to the Phase 2 folder. During development review, repository links use the `dev` branch. The release change updates them to `main` after the implementation is merged.
+Offline Python tests cover prompt rendering, context inclusion and exclusion, history correction, budget overflow, semantic validation, injection boundaries, provider selection, workflow stopping paths, evaluation scoring, and trace fields.
 
-## Tests and verification
+The website build verifies TypeScript and static route generation. Browser review covers the five lesson links, sidebar navigation, code blocks, examples, solutions, lesson pagination, review access, and the production access gate.
 
-Offline Python tests cover prompt rendering, schema behavior, context inclusion and exclusion, history correction, token budget overflow, semantic validation, direct and indirect injection boundaries, provider selection, workflow stopping paths, evaluation scoring, and trace fields.
-
-The website build verifies TypeScript, static route generation, and lesson data. Browser review covers desktop and mobile layouts, sidebar navigation, notes across multiple paragraphs, code block spacing, glossary tooltips, lesson pagination, review access, and the production access gate.
-
-Final verification includes:
-
-- All Phase 1 Python tests remain unchanged and pass
-- All Phase 2 offline tests pass without a provider key
-- The Phase 2 OpenAI and Ollama setup instructions match the actual entry points
-- One bounded live provider run is performed only when explicitly authorized
-- The website production build succeeds
-- Phase 2 is visible locally and on the dev preview
-- Phase 2 remains unavailable on the production main configuration
-- No `.env`, API key, generated evaluation output, virtual environment, or cache is tracked
-
-## Research basis
-
-The curriculum adapts relevant concepts and experiment ideas from [AI Engineering from Scratch Prompt Engineering](https://github.com/rohitg00/ai-engineering-from-scratch/blob/main/phases/11-llm-engineering/01-prompt-engineering/docs/en.md), [Few Shot and Reasoning](https://github.com/rohitg00/ai-engineering-from-scratch/blob/main/phases/11-llm-engineering/02-few-shot-cot/docs/en.md), [Structured Outputs](https://github.com/rohitg00/ai-engineering-from-scratch/blob/main/phases/11-llm-engineering/03-structured-outputs/docs/en.md), [Context Engineering](https://github.com/rohitg00/ai-engineering-from-scratch/blob/main/phases/11-llm-engineering/05-context-engineering/docs/en.md), and [Evaluation](https://github.com/rohitg00/ai-engineering-from-scratch/blob/main/phases/11-llm-engineering/10-evaluation/docs/en.md). Explanations, examples, application design, and code will be original to Agentic AI Lab.
-
-Current behavior and recommendations are checked against primary documentation. Important sources include [OpenAI prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering), [OpenAI structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs), [OpenAI evaluation guidance](https://developers.openai.com/api/docs/guides/evaluation-best-practices), [Anthropic context engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents), [Anthropic prompt injection guidance](https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks), [Gemini structured outputs](https://ai.google.dev/gemini-api/docs/structured-output), [LangChain structured model output](https://docs.langchain.com/oss/python/langchain/models#structured-output), and [Pydantic field behavior](https://docs.pydantic.dev/latest/concepts/fields/).
-
-The reference curriculum is not treated as the authority for current provider behavior. Broad claims, simulated results, fixed prompting recipes, model identifiers, and API examples are independently checked before they are used.
+No `.env`, API key, generated evaluation output, virtual environment, or cache may be tracked.
 
 ## Completion criteria
 
-The implementation is complete when all seven lessons are readable through the development preview, every lesson has meaningful practical work, the standalone lab and offline tests run from documented commands, the fixed workflow handles its required success and failure cases, the evaluation report is reproducible, the website build passes, and the production access gate remains closed until release approval.
+The implementation is complete when all five lessons are readable through the development preview, the lab tests run without a provider key, the website build succeeds, and obsolete lesson routes are absent from generated pages and navigation.
 
-The learner completes Phase 2 when they can explain the difference between prompts and context, compare prompt variants using fixed cases, validate model output beyond its schema, inspect selected and excluded context, identify a prompt injection boundary, and run the complete customer support response workflow with either OpenAI or Ollama.
+The learner completes Phase 2 when they can explain the difference between prompts and context, select useful demonstrations, inspect selected and excluded information, identify a prompt injection boundary, compare prompt variants using fixed cases, and run the complete customer support response workflow.

@@ -1,3 +1,5 @@
+import { phase2CodeExamples } from "./phases/phase2CodeExamples";
+
 export type LessonCodeExample = {
   afterParagraph?: number;
   code: string;
@@ -8,6 +10,7 @@ export type LessonCodeExample = {
 };
 
 const examples: Record<string, Record<string, LessonCodeExample[]>> = {
+  ...phase2CodeExamples,
   "using-llm-apis-and-langchain": {
     "provider-sdks": [
       {
@@ -143,10 +146,10 @@ analysis = SupportRequest.model_validate_json(response.message.content)`
     ],
     "build-support-request-analyzer": [
       {
-        title: "Step 01 Install uv and Python on macOS",
+        title: "Step 02 Install uv and Python on macOS",
         file: "macOS Terminal",
         intent: "practice",
-        afterParagraph: 1,
+        afterParagraph: 2,
         description: "Use the official uv installer, reopen Terminal if needed, and let uv install Python 3.12.",
         code: `git --version
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -154,10 +157,10 @@ uv --version
 uv python install 3.12`
       },
       {
-        title: "Step 01 Install uv and Python on Windows",
+        title: "Step 02 Install uv and Python on Windows",
         file: "Windows PowerShell",
         intent: "practice",
-        afterParagraph: 1,
+        afterParagraph: 2,
         description: "Use the official uv installer, reopen PowerShell if needed, and let uv install Python 3.12.",
         code: `git --version
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
@@ -165,11 +168,11 @@ uv --version
 uv python install 3.12`
       },
       {
-        title: "Step 02 Clone Agentic AI Lab",
+        title: "Step 01 Open Agentic AI Lab",
         file: "Terminal or PowerShell",
         intent: "practice",
-        afterParagraph: 2,
-        description: "Clone the public repository with HTTPS and enter its root directory.",
+        afterParagraph: 1,
+        description: "Run the clone command only when the repository is not already available on your computer. Then enter its root directory.",
         code: `git clone https://github.com/chaitanya-y/agentic-ai-lab.git
 cd agentic-ai-lab`
       },
@@ -431,12 +434,14 @@ assert "In transit" not in reply.message`
     ],
     "run-the-agent": [
       {
-        title: "Step 01 Enter the lab folder",
+        title: "Step 01 Open the lab repository",
         file: "Terminal or PowerShell",
         intent: "practice",
         afterParagraph: 1,
-        description: "Run this from the root folder of the cloned Agentic AI Lab repository.",
-        code: `cd labs/01-llm-fundamentals/customer-service-agent`
+        description: "Run the clone command only when the repository is not already available. Then open the repository root and enter the lab folder.",
+        code: `git clone https://github.com/chaitanya-y/agentic-ai-lab.git
+cd agentic-ai-lab
+cd labs/01-llm-fundamentals/customer-service-agent`
       },
       {
         title: "Step 02 Install the lab dependencies",

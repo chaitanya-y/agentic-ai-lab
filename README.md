@@ -21,7 +21,7 @@ Detailed lessons, runnable labs, and the capstone project will be released in ph
 ## Learning path
 
 1. LLM Fundamentals
-2. Prompt Engineering, Context Engineering, and Structured Outputs
+2. Prompt Engineering and Context Engineering
 3. Retrieval Augmented Generation
 4. Tool Calling and Model Context Protocol
 5. Agentic Workflows

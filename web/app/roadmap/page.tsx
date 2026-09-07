@@ -1,5 +1,6 @@
 import { curriculum } from "../../lib/curriculum";
-import { isPhasePublished } from "../../lib/siteStatus";
+import { getLessonLab } from "../../lib/lessonLabs";
+import { isPhaseAvailable } from "../../lib/siteStatus";
 import { RoadmapLessonList } from "../components/RoadmapLessonList";
 import { VisitMarker } from "../components/VisitMarker";
 
@@ -45,8 +46,13 @@ export default function RoadmapPage() {
               </div>
               <p>{phase.summary}</p>
               <RoadmapLessonList
-                isPublished={isPhasePublished(phase.id)}
-                lessons={phase.lessons.map(({ slug, time, title }) => ({ slug, time, title }))}
+                isPublished={isPhaseAvailable(phase.id)}
+                lessons={phase.lessons.map(({ slug, time, title }) => ({
+                  activityLabel: getLessonLab(slug)?.roadmapLabel,
+                  slug,
+                  time,
+                  title
+                }))}
               />
             </div>
           </article>

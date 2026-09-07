@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { visitProgressEvent, visitProgressKeys } from "../../lib/visitProgress";
 type RoadmapLesson = {
+  activityLabel?: string;
   slug: string;
   time: string;
   title: string;
@@ -37,13 +38,19 @@ export function RoadmapLessonList({ isPublished, lessons }: RoadmapLessonListPro
         {lessons.map((item) =>
           isPublished ? (
             <Link href={`/learn/${item.slug}`} key={item.slug} onClick={confirmRoadmapVisit}>
-              <span>{item.title}</span>
-              <small>{item.time}</small>
+              <span className="roadmap-lesson-label">
+                <span>{item.title}</span>
+                {item.activityLabel ? <span className="roadmap-activity-badge">{item.activityLabel}</span> : null}
+              </span>
+              <small className="roadmap-lesson-time">{item.time}</small>
             </Link>
           ) : (
             <button className="roadmap-lesson-disabled" key={item.slug} onClick={() => setShowToast(true)} type="button">
-              <span>{item.title}</span>
-              <small>{item.time}</small>
+              <span className="roadmap-lesson-label">
+                <span>{item.title}</span>
+                {item.activityLabel ? <span className="roadmap-activity-badge">{item.activityLabel}</span> : null}
+              </span>
+              <small className="roadmap-lesson-time">{item.time}</small>
             </button>
           )
         )}
