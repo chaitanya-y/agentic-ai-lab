@@ -9,7 +9,7 @@ export const phase2ReviewLessons: Phase2ReviewLesson[] = [
   {
     slug: "prompt-engineering",
     title: "Prompt Engineering",
-    time: "3 hours",
+    time: "1.5 hours",
     additions: [
       "Prompt anatomy, roles, clarity, output formats, constraints, reusable patterns, examples, anti patterns, and cross model design",
       "A prompt template library, example selection guidance, and three exercises with worked solutions"

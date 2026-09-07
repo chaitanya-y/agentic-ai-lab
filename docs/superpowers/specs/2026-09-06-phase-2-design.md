@@ -4,7 +4,7 @@
 
 Phase 2 teaches software engineers how to design model instructions, assemble permitted runtime context, protect application boundaries, and measure whether a change improved behavior. It extends Phase 1 without modifying the published Phase 1 lab.
 
-The phase is named **Prompt Engineering and Context Engineering**. It contains five lessons and approximately 12 hours of core work.
+The phase is named **Prompt Engineering and Context Engineering**. It contains five lessons and approximately 10.5 hours of core work.
 
 ## Boundaries
 
@@ -22,12 +22,12 @@ Conversation history appears as one source of runtime context. Persistent memory
 
 | Lesson | Subject | Practical result | Time |
 | --- | --- | --- | ---: |
-| 01 | Prompt Engineering | A reusable prompt renderer with explicit examples and inputs | 3 hours |
+| 01 | Prompt Engineering | A reusable prompt renderer with explicit examples and inputs | 1.5 hours |
 | 02 | Context Engineering | An inspectable context builder with source and budget reports | 3 hours |
 | 03 | Prompt Injection and Trust Boundaries | Adversarial fixtures that cannot bypass application controls | 1.5 hours |
 | 04 | Prompt Evaluation | A small evaluation runner and comparison report | 2 hours |
 | 05 | Customer Support Response Assistant | A fixed workflow using all Phase 2 components | 2.5 hours |
-| **Total** | | | **12 hours** |
+| **Total** | | | **10.5 hours** |
 
 Each lesson begins with its named concept and definition. It explains the mechanism, engineering relevance, realistic examples, limitations, code, practical work, expected results, and failure cases. Code appears beside the concept it demonstrates.
 

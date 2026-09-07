@@ -6,7 +6,7 @@ Updated for Agentic AI Lab on September 6, 2026.
 
 ## Recommendation
 
-Phase 2 contains five lessons and approximately 12 hours of core work. Prompt Engineering and Context Engineering are the main teaching sections. Prompt Injection and Prompt Evaluation remain separate because they develop security and measurement skills that should not be reduced to short notes inside the main lessons.
+Phase 2 contains five lessons and approximately 10.5 hours of core work. Prompt Engineering and Context Engineering are the main teaching sections. Prompt Injection and Prompt Evaluation remain separate because they develop security and measurement skills that should not be reduced to short notes inside the main lessons.
 
 Phase 1 already teaches reasoning models, sampling controls, provider structured output, Pydantic validation, and prompt caching. Phase 2 applies those concepts without teaching them again.
 
@@ -26,12 +26,12 @@ Times include reading, examining code, completing exercises, running tests, and 
 
 | Lesson | Page title | Concepts and reading | Implementation | Testing and analysis | Total |
 | --- | --- | ---: | ---: | ---: | ---: |
-| 01 | Prompt Engineering | 90 min | 60 min | 30 min | 3 hours |
+| 01 | Prompt Engineering | 45 min | 30 min | 15 min | 1.5 hours |
 | 02 | Context Engineering | 90 min | 60 min | 30 min | 3 hours |
 | 03 | Prompt Injection and Trust Boundaries | 30 min | 30 min | 30 min | 1.5 hours |
 | 04 | Prompt Evaluation | 30 min | 60 min | 30 min | 2 hours |
 | 05 | Customer Support Response Assistant | 15 min | 90 min | 45 min | 2.5 hours |
-| **Core total** | | **4.25 hours** | **5 hours** | **2.75 hours** | **12 hours** |
+| **Core total** | | **3.5 hours** | **4.5 hours** | **2.5 hours** | **10.5 hours** |
 
 ## 01 Prompt Engineering
 

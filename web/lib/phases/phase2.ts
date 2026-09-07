@@ -53,8 +53,8 @@ function validatePhase2Lessons(lessons: Lesson[]) {
     return total + hours;
   }, 0);
 
-  if (lessonHours !== 12) {
-    throw new Error("Phase 2 lesson times must total 12 hours");
+  if (lessonHours !== 10.5) {
+    throw new Error("Phase 2 lesson times must total 10.5 hours");
   }
 
   return lessons;
@@ -65,8 +65,8 @@ export const phase2Curriculum: CurriculumPhase = {
   number: "02",
   title: "Prompt Engineering and Context Engineering",
   shortTitle: "Prompts and context",
-  time: "12 hours",
-  hours: 12,
+  time: "10.5 hours",
+  hours: 10.5,
   summary: "Design model instructions, assemble the information supplied at runtime, test changes, and protect the application from untrusted input.",
   prerequisite: "LLM Fundamentals or equivalent experience calling a language model API.",
   outcome: "You can design and evaluate prompts, assemble runtime context, and define trust boundaries for a focused LLM application.",
@@ -75,8 +75,8 @@ export const phase2Curriculum: CurriculumPhase = {
     phase2Lesson(
       "prompt-engineering",
       "Prompt Engineering",
-      "3 hours",
-      "Learn how to turn an application requirement into a model request, control observable behavior, and improve prompts through measured comparisons.",
+      "1.5 hours",
+      "Learn how to translate an application requirement into clear model instructions, define inputs and expected outputs, and create reusable prompts that can be tested.",
       ["prompt engineering", "message roles", "prompt patterns", "prompt testing"],
       [
         {
@@ -223,7 +223,7 @@ export const phase2Curriculum: CurriculumPhase = {
           content: [
             "Choose examples for coverage rather than quantity. Include categories the model confuses, fields it often omits, and at least one request with missing information. Several nearly identical examples add less value than a smaller set that demonstrates different boundaries.",
             "Examples should be correct, current, and permitted for the task. Remove personal data and secrets. Keep prompt examples separate from development and held out evaluation cases so the final comparison does not measure cases the model already saw in its request.",
-            "Order can influence how demonstrations are used because they occupy positions in the model input. Compare more than one arrangement when a task is sensitive to order, and remove examples that do not improve the defined behavior."
+            "Examples are part of the model’s ordered input, so their position can affect the response. A model may rely more heavily on examples close to the current request or miss an example buried in a long prompt. If evaluation results change after the same examples are reordered, test a few fixed arrangements and keep only examples that improve performance across representative cases."
           ],
           example: {
             title: "Coverage instead of repetition",
@@ -347,7 +347,7 @@ If no approved order record is available, say that the order cannot be verified.
                 content: [
                   "Named inputs make the prompt contract visible. The renderer checks the names before formatting the instruction."
                 ],
-                code: `template = PromptTemplate(
+                code: `SUPPORT_SUMMARY_TEMPLATE = PromptTemplate(
     name="support_summary",
     template=(
         "Explain the {issue_type} request to a {audience}. "
@@ -356,11 +356,14 @@ If no approved order record is available, say that the order cannot be verified.
     required_variables=("issue_type", "audience", "word_limit"),
 )
 
-prompt = template.render({
+prompt = SUPPORT_SUMMARY_TEMPLATE.render({
     "issue_type": "damaged item",
     "audience": "customer",
     "word_limit": 50,
-})`,
+})
+
+print("\\nPrompt Engineering Exercise 2")
+print(prompt)`,
                 file: "practice/answers.py"
               }
             },
@@ -382,24 +385,27 @@ prompt = template.render({
                 content: [
                   "The first call raises `missing prompt variables: audience`. The second raises `unexpected prompt variables: tone`. This turns a prompt integration mistake into an immediate application error."
                 ],
-                code: `template.render({"issue_type": "refund", "word_limit": 40})
+                code: `print("\\nPrompt Engineering Exercise 3")
 
-template.render({
-    "issue_type": "refund",
-    "audience": "customer",
-    "word_limit": 40,
-    "tone": "friendly",
-})`,
+attempts = (
+    {"issue_type": "refund", "word_limit": 40},
+    {
+        "issue_type": "refund",
+        "audience": "customer",
+        "word_limit": 40,
+        "tone": "friendly",
+    },
+)
+
+for variables in attempts:
+    try:
+        SUPPORT_SUMMARY_TEMPLATE.render(variables)
+    except ValueError as error:
+        print(error)`,
                 file: "practice/answers.py"
               }
             }
-          ],
-          example: {
-            title: "What to observe",
-            content: [
-              "The prompt should make its task, inputs, examples, output requirements, and missing information path visible without mixing customer data into application instructions."
-            ]
-          }
+          ]
         }
       ]
     ),
