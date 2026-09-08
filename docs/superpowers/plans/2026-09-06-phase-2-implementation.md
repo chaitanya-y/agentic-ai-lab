@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task by task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Publish a development preview of seven Phase 2 lessons and provide a standalone, tested customer support response lab with hands-on work for every lesson.
+**Goal:** Publish a development preview of five Phase 2 lessons and provide a standalone, tested customer support response lab with hands on work for every lesson.
 
 **Architecture:** A new Python package implements one fixed two-call workflow. Small modules own prompts, context assembly, contracts, provider behavior, validation, evaluation, and orchestration. The Next.js application loads Phase 2 lesson data from a dedicated module and exposes it only in local development and the Vercel dev preview until release approval.
 
@@ -197,10 +197,10 @@ def test_missing_order_id_stops_after_analysis() -> None:
 - Create: `web/lib/phase2Review.ts`
 
 **Interfaces:**
-- Produces: one `CurriculumPhase` with seven complete lessons, section outlines, examples, and 14 total hours.
+- Produces: one `CurriculumPhase` with five complete lessons, section outlines, examples, and 6.5 total hours.
 - Consumes: existing curriculum types and lesson page rendering.
 
-- [ ] Add a static content validation script or TypeScript assertions for seven unique slugs, unique section identifiers, valid lesson times, and 14 total hours.
+- [ ] Add a static content validation script or TypeScript assertions for five unique slugs, unique section identifiers, valid lesson times, and 6.5 total hours.
 - [ ] Replace the three Phase 2 placeholders with the dedicated Phase 2 module.
 - [ ] Write every lesson with definition first, professional topic names, practical examples, limitations, exercise instructions, expected result, failure cases, tests, and checkpoint.
 - [ ] Keep conversation history in Context Engineering and explicitly defer state, memory, and durable execution to Phase 5.

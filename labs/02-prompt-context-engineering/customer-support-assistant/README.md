@@ -173,11 +173,13 @@ uv run support-assistant "Where is order 10492?" --prompt-version support-analys
 
 The output shows the customer response, structured request, selected and excluded context, validation stages, model metadata, and total latency. Read the trace before changing a prompt. A better sounding answer is not enough if it used the wrong evidence or failed an application rule.
 
-Conversation fixtures can be included explicitly.
+Conversation fixtures can be included explicitly. This request contains a complete damaged item issue and asks the assistant to use the corrected order number stored in the selected conversation.
 
 ```bash
-uv run support-assistant "Use the corrected order number 10429." --conversation corrected_order
+uv run support-assistant "Order 10429 arrived damaged and I want a replacement." --conversation corrected_order
 ```
+
+Confirm that `turn_correction` appears in the selected context and that information tied only to the earlier order number is excluded.
 
 ## Run the tests
 
