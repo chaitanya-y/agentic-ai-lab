@@ -1,5 +1,5 @@
-const publishedPhaseIds = new Set(["llm-fundamentals"]);
-const previewPhaseIds = new Set(["prompts-context-structured-output"]);
+const publishedPhaseIds = new Set(["llm-fundamentals", "prompts-context-structured-output"]);
+const previewPhaseIds = new Set<string>();
 
 // Agent examples and other detailed content remain unavailable until their release.
 export const learningContentPublished = false;
