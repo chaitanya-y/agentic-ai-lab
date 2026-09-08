@@ -1,0 +1,38 @@
+{
+  "corrected_order": [
+    {
+      "turn_id": "turn_old_request",
+      "role": "customer",
+      "content": "Where is order 10492?"
+    },
+    {
+      "turn_id": "turn_old_result",
+      "role": "assistant",
+      "content": "Order 10492 is in transit."
+    },
+    {
+      "turn_id": "turn_correction",
+      "role": "customer",
+      "content": "Correction. I meant order 10429, not 10492. It arrived damaged."
+    }
+  ],
+  "long_history": [
+    {"turn_id": "long_01", "role": "customer", "content": "I bought a monitor for my home office and saved the packaging."},
+    {"turn_id": "long_02", "role": "assistant", "content": "I can help with an order question."},
+    {"turn_id": "long_03", "role": "customer", "content": "The first delivery date changed twice during transit."},
+    {"turn_id": "long_04", "role": "assistant", "content": "Delivery dates can change as the carrier updates the route."},
+    {"turn_id": "long_05", "role": "customer", "content": "The parcel arrived and the outer box had a deep tear."},
+    {"turn_id": "long_06", "role": "assistant", "content": "Please inspect the item and keep the packaging."},
+    {"turn_id": "long_07", "role": "customer", "content": "The screen is cracked along the lower right corner."},
+    {"turn_id": "long_08", "role": "assistant", "content": "A photograph may be needed to document the damage."},
+    {"turn_id": "long_09", "role": "customer", "content": "This is order 10492 and I would prefer a replacement."},
+    {"turn_id": "long_10", "role": "assistant", "content": "I will check what information is available for that request."}
+  ],
+  "lossy_summary": [
+    {
+      "turn_id": "summary_01",
+      "role": "assistant",
+      "content": "Summary says the refund was approved, although the customer only asked whether a refund might be available."
+    }
+  ]
+}

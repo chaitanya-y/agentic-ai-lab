@@ -10,10 +10,10 @@ import { LessonVisitMarker } from "../../components/LessonVisitMarker";
 import { LessonVisual } from "../../components/LessonVisual";
 import { LearningContentComingSoon } from "../../components/LearningContentComingSoon";
 import { RoadmapAccessGate } from "../../components/RoadmapAccessGate";
-import { allLessons, getAdjacentLessons, getLesson, getLessonSections, getPhase, type LessonSection } from "../../../lib/curriculum";
+import { allLessons, getAdjacentLessons, getLesson, getLessonSections, getPhase, type LessonExercise, type LessonSection } from "../../../lib/curriculum";
 import { getLessonCodeExamples } from "../../../lib/lessonCodeExamples";
 import { getLessonLab } from "../../../lib/lessonLabs";
-import { isPhasePublished } from "../../../lib/siteStatus";
+import { isPhaseAvailable, isPhasePublished } from "../../../lib/siteStatus";
 
 type LessonPageProps = {
   params: Promise<{ slug: string }>;
@@ -50,6 +50,9 @@ function LessonSectionContent({ lessonSlug, section }: { lessonSlug: string; sec
         </Fragment>
       ))}
       {codeExamples.filter((example) => example.afterParagraph === undefined).map(renderCodeExample)}
+      {section.exercises?.map((exercise) => (
+        <LessonExerciseContent exercise={exercise} key={exercise.id} lessonSlug={lessonSlug} />
+      ))}
       {section.example ? (
         <aside className="lesson-concept-example" aria-label={`${section.title} example`}>
           <p className="lesson-example-label">Example</p>
@@ -61,7 +64,106 @@ function LessonSectionContent({ lessonSlug, section }: { lessonSlug: string; sec
           ))}
         </aside>
       ) : null}
+      {section.solution ? (
+        <details className="lesson-solution">
+          <summary>View worked solution</summary>
+          <div className="lesson-solution-content">
+            <p className="lesson-example-label">Solution</p>
+            <h3>{section.solution.title}</h3>
+            {section.solution.content.map((paragraph, paragraphIndex) => (
+              <p data-note-anchor={`${section.id}-solution-${paragraphIndex}`} key={paragraph} tabIndex={-1}>
+                <GlossaryText text={paragraph} />
+              </p>
+            ))}
+            {section.solution.code ? (
+              <LessonCodeBlock
+                code={section.solution.code}
+                file={section.solution.file ?? "Solution"}
+                title="Worked answer"
+              />
+            ) : null}
+          </div>
+        </details>
+      ) : null}
     </section>
+  );
+}
+
+function LessonExerciseContent({ lessonSlug, exercise }: { lessonSlug: string; exercise: LessonExercise }) {
+  const codeExamples = getLessonCodeExamples(lessonSlug, exercise.id);
+  const exerciseCodeExamples = codeExamples.filter((example) => !example.afterResult);
+  const completionCodeExamples = codeExamples.filter((example) => example.afterResult);
+
+  function renderCodeExample(example: (typeof codeExamples)[number]) {
+    return (
+      <LessonCodeBlock
+        code={example.code}
+        description={example.description}
+        file={example.file}
+        intent={example.intent}
+        key={`${example.file}-${example.title}`}
+        title={example.title}
+      />
+    );
+  }
+
+  return (
+    <div className="lesson-exercise" id={exercise.id}>
+      <h3>{exercise.title}</h3>
+      <div className="lesson-exercise-files">
+        <p className="lesson-exercise-label">{exercise.fileLabel}</p>
+        {exercise.files.map((file) => <code key={file}>{file}</code>)}
+      </div>
+      <p className="lesson-exercise-label">What to do</p>
+      <ol className="lesson-exercise-steps">
+        {exercise.content.map((paragraph, paragraphIndex) => (
+          <li key={`${exercise.id}-${paragraphIndex}`}>
+            <p data-note-anchor={`${exercise.id}-${paragraphIndex}`} tabIndex={-1}>
+              <GlossaryText text={paragraph} />
+            </p>
+            {exerciseCodeExamples
+              .filter((example) => example.afterParagraph === paragraphIndex)
+              .map(renderCodeExample)}
+          </li>
+        ))}
+      </ol>
+      {exerciseCodeExamples.filter((example) => example.afterParagraph === undefined).map(renderCodeExample)}
+      <div className="lesson-exercise-result">
+        <p className="lesson-exercise-label">Expected result</p>
+        {exercise.expectedResult.map((result, resultIndex) => (
+          <p data-note-anchor={`${exercise.id}-result-${resultIndex}`} key={result} tabIndex={-1}>
+            <GlossaryText text={result} />
+          </p>
+        ))}
+      </div>
+      {exercise.solution ? (
+        <details className="lesson-solution">
+          <summary>View worked solution</summary>
+          <div className="lesson-solution-content">
+            <p className="lesson-example-label">Solution</p>
+            <h3>{exercise.solution.title}</h3>
+            {exercise.solution.content.map((paragraph, paragraphIndex) => (
+              <p data-note-anchor={`${exercise.id}-solution-${paragraphIndex}`} key={paragraph} tabIndex={-1}>
+                <GlossaryText text={paragraph} />
+              </p>
+            ))}
+            {exercise.solution.code ? (
+              <LessonCodeBlock
+                code={exercise.solution.code}
+                file={exercise.solution.file ?? "Solution"}
+                title="Worked answer"
+              />
+            ) : null}
+          </div>
+        </details>
+      ) : null}
+      {completionCodeExamples.length ? (
+        <div className="lesson-exercise-completion">
+          <p className="lesson-exercise-label">Complete the lab</p>
+          {completionCodeExamples.map(renderCodeExample)}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -77,10 +179,18 @@ export async function generateMetadata({ params }: LessonPageProps) {
     return { title: "Lesson not found" };
   }
 
-  if (!isPhasePublished(item.phaseId)) {
+  if (!isPhaseAvailable(item.phaseId)) {
     return {
       title: "Lessons coming soon",
       description: "Detailed Agentic AI Lab lessons will be released as each phase is completed."
+    };
+  }
+
+  if (!isPhasePublished(item.phaseId)) {
+    return {
+      title: `${item.title} preview`,
+      description: item.summary,
+      robots: { follow: false, index: false }
     };
   }
 
@@ -98,14 +208,14 @@ export default async function LessonPage({ params }: LessonPageProps) {
     notFound();
   }
 
-  if (!isPhasePublished(item.phaseId)) {
+  if (!isPhaseAvailable(item.phaseId)) {
     return <LearningContentComingSoon />;
   }
 
   const phase = getPhase(item.phaseId);
   const { previous, next } = getAdjacentLessons(item.slug);
-  const previousIsPublished = previous ? isPhasePublished(previous.phaseId) : false;
-  const nextIsPublished = next ? isPhasePublished(next.phaseId) : false;
+  const previousIsPublished = previous ? isPhaseAvailable(previous.phaseId) : false;
+  const nextIsPublished = next ? isPhaseAvailable(next.phaseId) : false;
   const sections = getLessonSections(item);
   const lab = getLessonLab(item.slug);
   const showLessonExample = Boolean(item.example);
@@ -146,7 +256,16 @@ export default async function LessonPage({ params }: LessonPageProps) {
         <LessonTableOfContents topics={lessonTopics} />
 
         <article className="lesson-reading-content" data-lesson-slug={item.slug}>
-          {item.slug === "using-llm-apis-and-langchain" ? (
+          {item.phaseId === "prompts-context-structured-output" ? (
+            <aside className="lesson-code-reading-note" aria-label="Code example guidance">
+              <strong>Code examples in this lesson</strong>
+              <p>
+                Read each code excerpt with the concept it implements. The practice topics show what to run, which
+                output to inspect, and how the exercise connects to the Customer Support Response Assistant. If a line
+                is unfamiliar, use a coding assistant to ask about that line before changing the example.
+              </p>
+            </aside>
+          ) : item.slug === "using-llm-apis-and-langchain" ? (
             <aside className="lesson-code-reading-note" aria-label="Code example guidance">
               <strong>Code examples in this lesson</strong>
               <p>

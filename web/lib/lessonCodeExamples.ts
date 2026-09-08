@@ -1,5 +1,8 @@
+import { phase2CodeExamples } from "./phases/phase2CodeExamples";
+
 export type LessonCodeExample = {
   afterParagraph?: number;
+  afterResult?: boolean;
   code: string;
   description?: string;
   file: string;
@@ -8,6 +11,7 @@ export type LessonCodeExample = {
 };
 
 const examples: Record<string, Record<string, LessonCodeExample[]>> = {
+  ...phase2CodeExamples,
   "using-llm-apis-and-langchain": {
     "provider-sdks": [
       {
@@ -143,10 +147,10 @@ analysis = SupportRequest.model_validate_json(response.message.content)`
     ],
     "build-support-request-analyzer": [
       {
-        title: "Step 01 Install uv and Python on macOS",
+        title: "Step 02 Install uv and Python on macOS",
         file: "macOS Terminal",
         intent: "practice",
-        afterParagraph: 1,
+        afterParagraph: 2,
         description: "Use the official uv installer, reopen Terminal if needed, and let uv install Python 3.12.",
         code: `git --version
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -154,10 +158,10 @@ uv --version
 uv python install 3.12`
       },
       {
-        title: "Step 01 Install uv and Python on Windows",
+        title: "Step 02 Install uv and Python on Windows",
         file: "Windows PowerShell",
         intent: "practice",
-        afterParagraph: 1,
+        afterParagraph: 2,
         description: "Use the official uv installer, reopen PowerShell if needed, and let uv install Python 3.12.",
         code: `git --version
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
@@ -165,11 +169,11 @@ uv --version
 uv python install 3.12`
       },
       {
-        title: "Step 02 Clone Agentic AI Lab",
+        title: "Step 01 Open Agentic AI Lab",
         file: "Terminal or PowerShell",
         intent: "practice",
-        afterParagraph: 2,
-        description: "Clone the public repository with HTTPS and enter its root directory.",
+        afterParagraph: 1,
+        description: "Run the clone command only when the repository is not already available on your computer. Then enter its root directory.",
         code: `git clone https://github.com/chaitanya-y/agentic-ai-lab.git
 cd agentic-ai-lab`
       },
@@ -244,15 +248,13 @@ CUSTOMER_MESSAGE=Where is order 10492? It was supposed to arrive yesterday.`
         afterParagraph: 12,
         description: "Run the same analyzer against the local Ollama service with the same customer message.",
         code: `uv run python -m customer_service_lab.ollama_analyzer`
-      }
-    ],
-    "testing-the-analyzer": [
+      },
       {
-        title: "Run the Section 5 tests",
+        title: "Step 14 Run the analyzer tests",
         file: "Terminal or PowerShell",
         intent: "practice",
-        afterParagraph: 1,
-        description: "Run this command from labs/01-llm-fundamentals/customer-service-agent. It uses no API key and makes no model calls.",
+        afterParagraph: 15,
+        description: "Run this command from labs/01-llm-fundamentals/customer-service-agent after completing the analyzer exercises. It uses no API key and makes no model calls.",
         code: `uv run pytest tests/test_shared.py tests/test_ollama_analyzer.py`
       }
     ]
@@ -403,40 +405,16 @@ class ModelCallMetrics:
     error: str | None = None`
       }
     ],
-    "testing": [
-      {
-        title: "Test authorization without an API call",
-        file: "tests/test_agent.py",
-        description: "Deterministic model doubles let the safety boundary run in a normal unit test without spending tokens.",
-        code: `reply, trace = run_agent(
-    model=fake_model,
-    model_name="test-model",
-    customer_message="Where is order 10492?",
-    authenticated_customer_id="another_customer",
-    order_store=OrderStore(),
-)
-
-assert reply.order_verified is False
-        assert trace.authorization_result == "not_authorized_or_not_found"
-assert "In transit" not in reply.message`
-      },
-      {
-        title: "Run the Section 6 tests",
-        file: "Terminal or PowerShell",
-        intent: "practice",
-        afterParagraph: 1,
-        description: "Run this command from labs/01-llm-fundamentals/customer-service-agent. The model doubles make an API key and a running Ollama model unnecessary.",
-        code: `uv run pytest tests/test_agent.py`
-      }
-    ],
     "run-the-agent": [
       {
-        title: "Step 01 Enter the lab folder",
+        title: "Step 01 Open the lab repository",
         file: "Terminal or PowerShell",
         intent: "practice",
         afterParagraph: 1,
-        description: "Run this from the root folder of the cloned Agentic AI Lab repository.",
-        code: `cd labs/01-llm-fundamentals/customer-service-agent`
+        description: "Run the clone command only when the repository is not already available. Then open the repository root and enter the lab folder.",
+        code: `git clone https://github.com/chaitanya-y/agentic-ai-lab.git
+cd agentic-ai-lab
+cd labs/01-llm-fundamentals/customer-service-agent`
       },
       {
         title: "Step 02 Install the lab dependencies",
@@ -476,6 +454,31 @@ OLLAMA_HOST=http://localhost:11434
 OLLAMA_MODEL=qwen3:14b
 
 uv run python -m customer_service_lab.agent`
+      },
+      {
+        title: "A test for the authorization boundary",
+        file: "tests/test_agent.py",
+        afterParagraph: 8,
+        description: "A deterministic model double lets this test exercise the authorization boundary without spending tokens.",
+        code: `reply, trace = run_agent(
+    model=fake_model,
+    model_name="test-model",
+    customer_message="Where is order 10492?",
+    authenticated_customer_id="another_customer",
+    order_store=OrderStore(),
+)
+
+assert reply.order_verified is False
+assert trace.authorization_result == "not_authorized_or_not_found"
+assert "In transit" not in reply.message`
+      },
+      {
+        title: "Step 08 Run the Phase 1 tests",
+        file: "Terminal or PowerShell",
+        intent: "practice",
+        afterParagraph: 9,
+        description: "Run the complete test suite from labs/01-llm-fundamentals/customer-service-agent. It requires no API key and does not call Ollama.",
+        code: `uv run pytest`
       }
     ]
   }

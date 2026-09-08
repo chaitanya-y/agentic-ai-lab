@@ -1,3 +1,5 @@
+import { phase2Curriculum } from "./phases/phase2";
+
 export type LessonFormat = "Concept" | "Capstone";
 
 export type LessonSection = {
@@ -5,10 +7,29 @@ export type LessonSection = {
   title: string;
   content: string[];
   example?: LessonSectionExample;
+  exercises?: LessonExercise[];
+  solution?: LessonSectionSolution;
+};
+
+export type LessonExercise = {
+  id: string;
+  title: string;
+  content: string[];
+  expectedResult: string[];
+  fileLabel: string;
+  files: string[];
+  solution?: LessonSectionSolution;
 };
 
 export type LessonSectionExample = {
   content: string[];
+  title: string;
+};
+
+export type LessonSectionSolution = {
+  code?: string;
+  content: string[];
+  file?: string;
   title: string;
 };
 
@@ -64,7 +85,12 @@ const lesson = (
   time,
   format,
   summary,
-  content: sections ? sections.flatMap((section) => section.content) : content,
+  content: sections
+    ? sections.flatMap((section) => [
+        ...section.content,
+        ...(section.exercises ?? []).flatMap((exercise) => exercise.content)
+      ])
+    : content,
   sectionOutline,
   sections,
   example,
@@ -96,8 +122,8 @@ export const curriculum: CurriculumPhase[] = [
     number: "01",
     title: "LLM Fundamentals",
     shortTitle: "LLM fundamentals",
-    time: "12 hours",
-    hours: 12,
+    time: "6.5 hours",
+    hours: 6.5,
     summary: "Understand how large language models generate responses, use context, and fit into an application.",
     prerequisite: "Comfort with a programming language, HTTP APIs, JSON, and basic backend development.",
     outcome: "You can describe the role of an LLM in an application and make informed decisions about models, context, and generated output.",
@@ -106,7 +132,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "what-is-a-large-language-model",
         "What Is a Large Language Model?",
-        "1.5 hours",
+        "1 hour",
         "Learn what generative AI and large language models are, how LLMs represent and generate language, and how they should be used within a software application.",
         [
           "A large language model, or LLM, is a neural network trained to continue a sequence of language. Given the text that came before, it estimates which small piece of text is most likely to come next. It then uses the new piece as part of its input and repeats the process. A response that appears to be a single, coherent thought is therefore produced incrementally, one token after another.",
@@ -323,7 +349,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "transformer-architecture-and-attention",
         "Transformer Architecture and Attention",
-        "1.5 hours",
+        "1 hour",
         "Understand how transformers represent tokens, preserve their order, use attention, and scale model capacity for language generation.",
         [
           "A transformer is a neural network architecture built from a stack of similar layers called transformer blocks. Each transformer block centers on two main operations called self attention and a feed forward network. Self attention is a type of attention that lets each token weigh and combine relevant information from other permitted tokens in the same sequence. The feed forward network then processes each token separately and changes which learned features are emphasized. For example, after self attention connects ‘charge’ with ‘credit card,’ the feed forward network can strengthen features associated with a payment issue rather than charging a device. Repeating these operations across many blocks allows the model to develop a more useful understanding of the sequence. The known input positions can also be processed together during training, which makes transformers more efficient to train than earlier sequence models.",
@@ -417,7 +443,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "how-llms-are-trained-and-improved",
         "How LLMs Are Trained and Improved",
-        "3 hours",
+        "1 hour",
         "Learn how pretraining creates general capability, how post training shapes assistant behavior, and how engineers evaluate or adapt a model for a specific application.",
         [
           "Training a large language model is the process of adjusting its parameters so it becomes better at a defined prediction task. During training, the model processes examples, produces predictions, measures the difference between its predictions and the expected results, and updates its parameters to reduce that error. Repeating this process across very large datasets produces the language and reasoning capabilities that application engineers later access through an API.",
@@ -692,7 +718,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "using-llm-apis-and-langchain",
         "LLM APIs, Provider SDKs, and LangChain",
-        "3 hours",
+        "1.5 hours",
         "Learn how application code connects to hosted and local models. You will examine how agents differ from deterministic workflows, then build the same Support Request Analyzer with the OpenAI SDK, LangChain, and Ollama running qwen3:14b before building an agent in the next lesson.",
         [
           "An LLM API is a network interface for sending input to a hosted language model and receiving generated output. The request identifies a model and supplies instructions, task input, configuration, and optional output schemas or tool definitions. The provider runs the model and returns content with operational metadata. The application must decide whether that result is complete, valid, and suitable for its workflow.",
@@ -743,8 +769,8 @@ export const curriculum: CurriculumPhase[] = [
           "This lab introduces a small Customer Service Agent now because it connects the fundamentals to a complete application and makes the learning process more engaging. Learners can see how model output, structured data, a tool, permissions, latency, and validation work together instead of waiting until the later agent workflow phase.",
           "The first agent has one goal, one read only order lookup, no long term memory, and strict execution limits. It can ask for a missing order identifier, propose one lookup, and explain verified status. The next lesson implements the complete loop before later phases introduce retrieval, durable state, LangGraph, human review, and specialist agents.",
           "The earlier snippets were provided for observation. This final section is where you set up the project, inspect the complete files, run the model calls, and compare the direct provider SDK with LangChain. Follow the steps in order so each result has a clear purpose.",
-          "Step 01. Install the required tools for your operating system. Confirm that Git is available first, then use the official standalone uv installer for macOS or Windows. Reopen the terminal if the uv command is not immediately available. After installing uv, use it to install Python 3.12. Python 3.12 is the recommended version for this lab. The project supports Python 3.11 or newer, but all instructions and examples are tested with Python 3.12. Using the recommended version helps avoid dependency and environment differences.",
-          "Step 02. Clone the Agentic AI Lab repository from GitHub and enter the repository directory. If Git reports an authentication request, confirm that you used the public HTTPS address shown in the command. No GitHub account or access token is required to clone the public repository.",
+          "Step 01. If Agentic AI Lab is not already available on your computer, clone the public repository from [GitHub](https://github.com/chaitanya-y/agentic-ai-lab) and enter the repository directory. If you already cloned it, open the existing repository and continue. No account or access token is required to clone the public repository.",
+          "Step 02. Install the required tools for your operating system. Confirm that Git is available first, then use the official standalone uv installer for macOS or Windows. Reopen the terminal if the uv command is not immediately available. After installing uv, use it to install Python 3.12. Python 3.12 is the recommended version for this lab. The project supports Python 3.11 or newer, but all instructions and examples are tested with Python 3.12. Using the recommended version helps avoid dependency and environment differences.",
           "Step 03. Enter the Support Request Analyzer lab directory, create a local .env file from the supplied example, and install the locked dependencies with Python 3.12. The command for copying a file differs between macOS Terminal and Windows PowerShell. uv creates the virtual environment and installs the OpenAI SDK, LangChain, Pydantic, and python dotenv. You do not need to activate the environment because uv run uses it automatically.",
           "Step 04. Choose the hosted or local route in the new .env file. The OpenAI SDK and LangChain examples require an OpenAI API key. The local Ollama example requires no API key and uses qwen3:14b by default. The sample customer message can also be changed in this file. Never commit the .env file or place an API key inside Python source code. OpenAI requests are paid. Local inference uses the learner's computer instead.",
           "Step 05. Read shared.py before calling a model. Start with SupportRequest because it defines the structured result accepted by the application. Then inspect ModelCallMetrics, RunTrace, openai_usage, and langchain_usage to understand which operational fields the examples record.",
@@ -757,8 +783,8 @@ export const curriculum: CurriculumPhase[] = [
           "Step 12. Run the Ollama analyzer with the same customer message. If the request fails, confirm that the Ollama application is running, the model pull completed, and OLLAMA_HOST points to the local service. Unlike the OpenAI examples, this run does not use an API key or a hosted provider request identifier.",
           "Step 13. Compare the three implementations rather than choosing a preferred framework immediately. Verify that each produces the same SupportRequest contract. Identify which OpenAI details are most visible through the direct SDK, which repeated model operations LangChain standardizes, and which operational tradeoffs change when qwen3:14b runs locally.",
           "Stop after the comparison and write down what changed between the direct SDK, LangChain, and Ollama paths. Do not modify agent.py during this lesson. The next lesson uses that file to add the tool definition, authorization boundary, execution loop, and validated customer response.",
-          "Run the Section 5 tests from the customer-service-agent folder after completing the analyzer exercises. These tests check the shared SupportRequest contract, including valid, missing, and malformed order identifiers. They also check the Ollama analyzer's JSON instructions and its handling of connection, model, and validation failures.",
-          "The Section 5 tests use controlled objects instead of live model calls. They do not require OpenAI credits or a running Ollama model. Passing tests confirm the application contracts and failure handling, while running the three analyzer programs remains necessary to observe real model output, streaming, token usage, and latency."
+          "Step 14. After completing the analyzer exercises, run the analyzer tests from the current `labs/01-llm-fundamentals/customer-service-agent` folder. The command below checks the shared `SupportRequest` contract, including valid, missing, and malformed order identifiers. It also checks the Ollama analyzer instructions and its handling of connection, model, and validation failures.",
+          "The analyzer tests use controlled objects instead of live model calls. They do not require an OpenAI API key or a running Ollama model. A passing result confirms the application contracts and failure handling. Running the three analyzer programs is still necessary to observe real model output, streaming, token usage, and latency."
         ],
         undefined,
         [
@@ -1022,25 +1048,19 @@ export const curriculum: CurriculumPhase[] = [
             id: "build-support-request-analyzer",
             title: "Build a Support Request Analyzer",
             start: 47,
-            end: 62,
             example: {
               title: "Completing the Comparison",
               content: [
                 "After running all three paths with the same customer message, the learner should be able to locate the structured contract, identify each model call, explain the streaming path, read the trace, and describe how the direct SDK, LangChain, and local Ollama approaches differ without describing any implementation as an agent."
               ]
             }
-          },
-          {
-            id: "testing-the-analyzer",
-            title: "Testing the Analyzer",
-            start: 62
           }
         ]
       ),
       lesson(
         "building-a-basic-agent-with-langchain",
         "Building an Agent with LangChain",
-        "2 hours",
+        "1 hour",
         "Build a customer service agent with LangChain and run it with either OpenAI or Ollama. The same agent loop controls tool calls, authorization, validation, execution limits, and tracing for both model providers.",
         [
           "The previous lesson defined an agent and explained when model selected actions are useful. This lesson does not repeat that theory. It implements the small Customer Service Agent introduced there and keeps each model decision visible in ordinary Python code.",
@@ -1058,16 +1078,16 @@ export const curriculum: CurriculumPhase[] = [
           "The run permits no more than two model calls and one tool call. These limits are constants in the code and are checked by the loop. Direct control flow is intentional because learners should be able to follow every branch before LangGraph introduces reusable graph execution later in the course.",
           "The same trace is used for both providers. It records the selected provider, model, prompt version, token usage when available, model latency, tool latency, validation, authorization, step counts, completion reason, and safe error categories. A hosted provider may return a request identifier while a local Ollama run usually does not. Read a trace in execution order. First confirm the model call count and tool call count. Then confirm that authorization and validation passed before checking latency and token usage. This shows whether a response was produced through the intended path before you compare how much the path cost or how long it took.",
           "Failures produce controlled outcomes. Invalid tool arguments stop before execution. Unknown or unauthorized orders expose no order facts. Repeated tool proposals exceed the limit. A model or validation failure returns a safe response and records the reason rather than starting an unrestricted recovery loop.",
-          "Tests use model doubles, which are predictable replacements for a live model. They cover the valid path, missing information, malformed arguments, repeated tool calls, unauthorized access, timeouts, and invalid final responses without requiring an API key or running Ollama.",
-          "Run the Section 6 tests from the customer-service-agent folder before or after using a live provider. The test command runs tests/test_agent.py only. It does not call OpenAI or Ollama, so it is fast, repeatable, and free to run. A passing result confirms the agent's tool boundary, authorization rules, execution limits, fallback behavior, and trace outcomes.",
           "The runnable agent is in labs/01-llm-fundamentals/customer-service-agent. Its main implementation file is src/customer_service_lab/agent.py, and its configuration is stored in the local .env file inside the lab folder.",
-          "Step 01. Open a terminal at the Agentic AI Lab repository root and enter the customer-service-agent folder. Run every remaining command in this section from that folder.",
+          "Step 01. If Agentic AI Lab is not already available on your computer, clone the public repository from [GitHub](https://github.com/chaitanya-y/agentic-ai-lab). If you already cloned it, open the existing repository. From the repository root, enter the customer-service-agent folder and run every remaining command in this section from that folder.",
           "Step 02. Install the locked Python dependencies with uv. Python 3.12 is the recommended version for this lab. The project supports Python 3.11 or newer, but all instructions and examples are tested with Python 3.12. Using the recommended version helps avoid dependency and environment differences. uv installs LangChain, the OpenAI and Ollama integrations, Pydantic, and the test tools inside the lab environment.",
           "Step 03. Read src/customer_service_lab/agent.py before running it. Start with create_agent_model, then read LookupOrder, OrderStore, run_agent, and main in that order. This shows configuration first, followed by the tool contract, trusted data access, the execution loop, and the program entry point.",
           "Step 04. Create .env from .env.example if the file does not already exist. To use OpenAI, set MODEL_PROVIDER to openai, provide OPENAI_API_KEY, and keep the selected OPENAI_MODEL. Never commit the .env file.",
           "Step 05. Run the agent through its Python module from the lab folder. Using the module command ensures Python loads the customer_service_lab package from the environment created by uv.",
           "Step 06. To use the local route, confirm that Ollama is running and qwen3:14b is installed. Change MODEL_PROVIDER to ollama and check OLLAMA_HOST and OLLAMA_MODEL. Run the same module command again. No agent code changes are required.",
-          "Step 07. Compare the two runs. Read the customer response first, then inspect provider, model, model call count, tool call count, authorization result, validation result, latency, token usage when available, and stop reason in the run metadata."
+          "Step 07. Compare the two runs. Read the customer response first, then inspect provider, model, model call count, tool call count, authorization result, validation result, latency, token usage when available, and stop reason in the run metadata.",
+          "Tests use model doubles, which are predictable replacements for a live model. They cover the analyzer and agent paths, including valid and missing inputs, malformed arguments, repeated tool calls, unauthorized access, timeouts, and invalid final responses without requiring an API key or running Ollama.",
+          "Step 08. Run the complete Phase 1 test suite from the current `labs/01-llm-fundamentals/customer-service-agent` folder. The tests make no OpenAI or Ollama requests. A passing result confirms the analyzer contracts, tool boundary, authorization rules, execution limits, fallback behavior, and trace outcomes."
         ],
         undefined,
         [
@@ -1177,80 +1197,22 @@ export const curriculum: CurriculumPhase[] = [
             }
           },
           {
-            id: "testing",
-            title: "Testing",
-            start: 15,
-            end: 17
-          },
-          {
             id: "run-the-agent",
             title: "Run the Agent",
-            start: 17
+            start: 15
           }
         ]
       )
     ]
   },
-  {
-    id: "prompts-context-structured-output",
-    number: "02",
-    title: "Prompt Engineering, Context Engineering, and Structured Outputs",
-    shortTitle: "Prompts & context",
-    time: "12 hours",
-    hours: 12,
-    summary: "Design model requests, assemble trusted context, and return validated data for application code.",
-    prerequisite: "LLM Fundamentals or equivalent experience calling a model API.",
-    outcome: "You can define the task boundary, the information supplied to a model, and the contract used to accept its result.",
-    accent: "green",
-    lessons: [
-      lesson(
-        "prompt-engineering-for-applications",
-        "Prompt Engineering for Applications",
-        "4 hours",
-        "Use prompts to define a bounded task, its allowed inputs, and the required form of the result.",
-        [
-          "A prompt is the request an application gives to a model. In an application, it commonly includes system-level instructions, task-specific directions, data supplied for the current request, and a response contract. Strong prompts are specific about the model's job, the evidence it may use, the decisions it must not make, and how it should behave when information is missing.",
-          "Prompt engineering is not a collection of clever phrases. It is an iterative engineering practice: identify the task, write an initial instruction, test it against representative and difficult cases, then change one part at a time. Examples can clarify a format or distinction, but they should reflect real application data and should not be used to hide a missing rule or unavailable source of truth.",
-          "Keep the prompt focused on language work. If the task requires authorization, arithmetic, a database lookup, or a policy decision, the application should provide a deterministic component for that work. This makes the prompt simpler and exposes the true source of a failure."
-        ],
-        "The refund-intake prompt will ask the model to identify the customer’s issue, requested outcome, and missing details. It will explicitly state that the model cannot approve a refund or invent order information, because those are application responsibilities.",
-        ["system instructions", "task definition", "few-shot examples", "prompt versions"]
-      ),
-      lesson(
-        "context-engineering",
-        "Context Engineering",
-        "4 hours",
-        "Select, prepare, order, and budget the information a model receives for a particular request.",
-        [
-          "Context engineering is the application work of deciding what goes into a model request. It includes selecting recent conversation turns, trusted customer data, retrieved documents, tool results, and task instructions. The aim is not to maximize the amount of text; it is to provide the smallest complete set of information needed for the next decision or response.",
-          "Different sources carry different levels of trust. A customer message is necessary input but may contain incorrect claims or adversarial instructions. An order record is authoritative for order facts. A policy document may be current, superseded, or internal-only. Labeling those sources and keeping their roles separate helps the model use the context correctly and helps the application prevent unwanted disclosure.",
-          "Context also has a lifecycle. Long conversations need summaries, retrieved evidence needs citations and version metadata, and tool results should be kept only while they remain relevant. Engineers define a context budget, determine how information is ordered, and remove data that does not serve the current task."
-        ],
-        "When a customer asks about a damaged delivery, the capstone will assemble only the relevant message, a safe subset of the order, and current customer-facing policy evidence. Internal notes, payment details, and an outdated policy will remain outside the model context.",
-        ["context assembly", "trusted sources", "context budget", "conversation state"]
-      ),
-      lesson(
-        "structured-outputs-and-validation",
-        "Structured Outputs and Validation",
-        "4 hours",
-        "Use a schema to turn a model response into a data contract that application code can validate before use.",
-        [
-          "Free-form text is useful for a customer-facing explanation, but it is a fragile interface for routing, tool calls, and business logic. Structured output asks the model to return named fields with defined types and allowed values. A schema can require a category, an order reference, a list of item identifiers, a confidence signal, or a reason that a required field is missing.",
-          "A schema improves the interface but does not make model output authoritative. Application code still validates the response against real data and business rules. An item identifier should exist in the retrieved order; an enum value should be allowed; a proposed amount should be checked by policy code. Invalid or incomplete output should follow a defined path, such as asking a clarification question or escalating the request.",
-          "This pattern separates interpretation from action. The model can transform messy natural language into a typed proposal, while the application retains control over what is accepted, stored, shown to a user, or executed."
-        ],
-        "The capstone will represent a refund request as a structured proposal containing the request reason, relevant order items, missing information, and a short explanation. Before the proposal is accepted, the application will confirm that every selected item belongs to the order.",
-        ["schemas", "validation", "typed contracts", "fallback behavior"]
-      )
-    ]
-  },
+  phase2Curriculum,
   {
     id: "retrieval-augmented-generation",
     number: "03",
     title: "Retrieval-Augmented Generation (RAG)",
     shortTitle: "RAG",
-    time: "18 hours",
-    hours: 18,
+    time: "13 hours",
+    hours: 13,
     summary: "Retrieve relevant, current information before an LLM writes an answer.",
     prerequisite: "LLM Fundamentals and practical familiarity with files, APIs, and data structures.",
     outcome: "You can design, inspect, and evaluate a RAG feature that uses the right evidence for a response.",
@@ -1259,7 +1221,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "what-is-retrieval-augmented-generation",
         "What Is Retrieval-Augmented Generation?",
-        "3 hours",
+        "1 hour",
         "Understand the RAG pattern, its two stages, and when it is the right source of information for an AI feature.",
         [
           "Retrieval-augmented generation, usually called RAG, is an application pattern that retrieves relevant information at request time and supplies it to a model before the model generates a response. It is useful when an answer should be based on documents that are too recent, too specific, or too changeable to rely on the model’s training knowledge alone.",
@@ -1272,7 +1234,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "document-ingestion-and-chunking",
         "Document Ingestion and Chunking",
-        "4 hours",
+        "3 hours",
         "Prepare source documents as searchable records that retain the structure and metadata needed for safe retrieval.",
         [
           "Document ingestion turns source files into a consistent internal representation. The system extracts text, preserves meaningful headings and source locations, normalizes formats, and records metadata. Metadata is not an optional decoration: it can identify a document version, the intended audience, an effective date, a product area, or a source URL.",
@@ -1285,7 +1247,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "embeddings-and-vector-databases",
         "Embeddings and Vector Databases",
-        "4 hours",
+        "3 hours",
         "Learn how semantic search represents meaning and why similarity is only one part of evidence selection.",
         [
           "An embedding is a numerical representation of text produced by an embedding model. Texts with related meaning tend to be positioned near one another in the embedding space, which allows a system to retrieve a policy section even when the customer uses different wording. A question about a broken delivery may therefore retrieve a section titled “damaged items.”",
@@ -1311,7 +1273,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "rag-evaluation-and-grounded-answers",
         "RAG Evaluation and Grounded Answers",
-        "4 hours",
+        "3 hours",
         "Evaluate retrieval separately from generation and define how the application behaves when the evidence is missing or unsuitable.",
         [
           "A RAG answer can fail because the search missed the right source, selected an ineligible source, assembled poor context, or generated a claim that the retrieved text did not support. Evaluating only the final wording hides these distinct causes. Retrieval evaluation asks whether the expected evidence was found and ranked highly enough; answer evaluation asks whether the response uses that evidence correctly.",
@@ -1328,8 +1290,8 @@ export const curriculum: CurriculumPhase[] = [
     number: "04",
     title: "Tool Calling and Model Context Protocol (MCP)",
     shortTitle: "Tools & MCP",
-    time: "15 hours",
-    hours: 15,
+    time: "4.5 hours",
+    hours: 4.5,
     summary: "Connect an LLM to tools while application code keeps control of permissions and execution.",
     prerequisite: "LLM Fundamentals and structured-output concepts.",
     outcome: "You can design tool boundaries, approve model-proposed calls, and understand where MCP fits into an AI application.",
@@ -1338,7 +1300,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "function-calling-and-tool-design",
         "Function Calling and Tool Design",
-        "5 hours",
+        "1.5 hours",
         "Understand how models propose typed tool calls and how a well-designed tool limits a task to one clear business capability.",
         [
           "Function calling gives a model a list of tools, their descriptions, and their parameter schemas. Instead of producing a natural-language instruction such as “look up order 123,” the model can propose a structured call with a tool name and arguments. The application receives that proposal, validates it, performs deterministic work, and returns the result as another piece of context.",
@@ -1351,7 +1313,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "tool-safety-and-permissions",
         "Tool Safety and Permissions",
-        "5 hours",
+        "1.5 hours",
         "Design clear boundaries between a model’s proposal, a policy decision, human approval, and a consequential action.",
         [
           "Tools can give an AI application useful access to current information or external systems, but each tool also creates a trust boundary. A model can misunderstand a request, receive an adversarial instruction, or select the wrong operation. The system should therefore apply least privilege: make only the minimum capabilities available for the task and expose read-only access when write access is unnecessary.",
@@ -1364,7 +1326,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "model-context-protocol",
         "Model Context Protocol (MCP)",
-        "5 hours",
+        "1.5 hours",
         "Learn how MCP standardizes the connection between AI clients and external tools, resources, and prompts.",
         [
           "Model Context Protocol, or MCP, is an open protocol for connecting AI applications to external capabilities. An MCP server can publish tools, resources, and prompt templates; an MCP client discovers and uses the approved capabilities. The protocol provides a common interface so the same integration can be used by different AI clients without each client inventing its own connection format.",
@@ -1471,11 +1433,11 @@ export const curriculum: CurriculumPhase[] = [
         "evaluation-driven-development",
         "Evaluation and Testing",
         "4 hours",
-        "Use a versioned set of realistic cases to guide changes to prompts, retrieval, models, tools, and workflows.",
+        "Extend the Phase 2 evaluation method across retrieval, tool calls, workflows, final responses, and production regressions.",
         [
-          "Evaluation-driven development treats behavior as something to measure before and after a change. An evaluation case describes an input, the expected behavior, and unacceptable outcomes. Depending on the feature, it can check structured extraction, retrieved evidence, selected tools, a workflow route, a final answer, or an escalation decision.",
-          "AI evaluations should be specific to the system boundary being tested. Retrieval quality and final answer quality are different measures. A tool-using agent should be evaluated on the tools it selects and the resulting state, not only on whether its final paragraph sounds good. Automated checks, human review, and model-based judging can all be useful when their limitations are understood.",
-          "The evaluation set grows from real usage. A failed or surprising request should be categorized, anonymized if needed, and added as a regression case. This creates a disciplined way to improve the application instead of relying on a few memorable demonstrations."
+          "Phase 2 already establishes success criteria, development cases, held out cases, graders, and controlled comparisons. This lesson applies that method to a complete agent system. Component evaluations isolate retrieval, tool selection, arguments, workflow routes, and response quality. End to end evaluations determine whether those stages combine into an acceptable customer outcome.",
+          "An agent can reach a fluent final answer through an incorrect path. Record the expected evidence, allowed tools, forbidden tools, maximum steps, required review transitions, final state, and customer response. Score the first incorrect stage as well as the final result so a failure can be assigned to the component that owns it.",
+          "Production failures become new regression cases after sensitive data is removed or transformed. Compare offline results with monitored production outcomes, define release thresholds, and retain a rollback path. This lesson focuses on system evaluation and release evidence rather than repeating prompt comparison fundamentals."
         ],
         "The capstone will begin with cases for damaged items, a missing order reference, conflicting policy versions, a tool failure, and a request requiring review. Each change to retrieval or instructions will be compared against the same set before it is accepted.",
         ["evaluation sets", "regression testing", "task metrics", "failure categories"]
@@ -1497,13 +1459,13 @@ export const curriculum: CurriculumPhase[] = [
         "safety-and-guardrails",
         "Safety and Guardrails",
         "4 hours",
-        "Protect the application from untrusted content, misuse of tools, unnecessary data exposure, and unsafe outcomes.",
+        "Extend Phase 2 trust boundaries across tools, long workflows, stored data, human review, and production incidents.",
         [
-          "AI application safety begins with clear trust boundaries. Customer messages, web pages, and retrieved documents may contain instructions that conflict with the application’s intent. Treat this material as data, not as authority. The system instructions, tool permissions, schemas, and deterministic policy checks should remain outside that untrusted content.",
-          "Guardrails are the controls that keep a request within acceptable boundaries. They can include content checks, input validation, data minimization, access controls, rate limits, step limits, approval requirements, and safe fallback states. A guardrail is effective when the application enforces it even if the model produces an unexpected answer or tool request.",
-          "Safety testing is practical engineering work. It includes adversarial inputs, prompt-injection attempts in retrieved text, requests for unavailable data, malformed tool arguments, and transitions that should require human oversight. The resulting controls should be documented as part of the system design."
+          "Phase 2 already covers prompt injection, untrusted context, authorization, and least privilege. This lesson begins with the complete system threat model. Identify every place data enters, every capability a model can propose, every state transition, every external service, and every output that can affect a user or business process.",
+          "Apply controls at the boundary they protect. Tool arguments need schema and authorization checks. Sensitive writes need policy checks, idempotency, and human approval. Stored conversations need retention and access rules. Long workflows need step limits, timeouts, cancellation, and safe terminal states. Content filtering can support these controls but cannot replace them.",
+          "Test abuse paths and operational failures together. Red team direct and indirect injection, unauthorized tool requests, data exposure, repeated actions, reviewer bypass, and recovery after partial execution. Connect findings to traces, incidents, regression cases, ownership, and release decisions instead of treating safety as one prompt or classifier."
         ],
-        "One fictional internal policy document will include a malicious instruction intended to change the assistant’s behavior. The capstone will treat the text only as retrieved content, exclude the document from customer search, and verify that no specialist can gain access to an unavailable refund-write operation.",
+        "One internal policy document will include a malicious instruction intended to change the assistant’s behavior. The capstone will treat the text only as retrieved content, exclude the document from customer search, and verify that no specialist can gain access to an unavailable refund write operation.",
         ["prompt injection", "guardrails", "data minimization", "approval controls"]
       ),
       lesson(

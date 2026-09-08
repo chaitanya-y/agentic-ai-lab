@@ -271,5 +271,117 @@ export const glossaryTerms: GlossaryTerm[] = [
   {
     term: "grounding",
     definition: "Basing a model response on trusted, relevant evidence supplied at request time instead of relying only on the model's learned patterns."
+  },
+  {
+    term: "prompt engineering",
+    definition: "Designing and testing the instructions and inputs supplied to a model for a specific application task."
+  },
+  {
+    term: "system message",
+    definition: "An application controlled message used to establish model behavior and task rules for a request."
+  },
+  {
+    term: "assistant prefill",
+    definition: "Provider supported text placed at the beginning of an assistant response so the model continues from that starting text. Support and behavior vary by provider."
+  },
+  {
+    term: "role prompting",
+    definition: "Giving a model a functional perspective for a task, such as support request classifier, before defining its concrete responsibilities."
+  },
+  {
+    term: "prompt pattern",
+    definition: "A reusable structure for expressing a recurring model task, such as a template, a set of examples, or a decomposition instruction."
+  },
+  {
+    term: "meta prompting",
+    definition: "Using a language model to draft, revise, or critique a prompt that will be used for another model task."
+  },
+  {
+    term: "in context learning",
+    definition: "A model adapting its behavior from instructions or examples in the current request without changing its trained parameters."
+  },
+  {
+    term: "zero shot",
+    definition: "Performing a task from instructions without including a completed example in the model request."
+  },
+  {
+    term: "few shot",
+    definition: "Including a small number of completed demonstrations in a model request to show the desired task behavior."
+  },
+  {
+    term: "reasoning model",
+    definition: "A model optimized to spend additional inference work on tasks that benefit from planning, comparison, or multiple dependent steps."
+  },
+  {
+    term: "JSON Schema",
+    definition: "A standard vocabulary for describing the required fields, types, and constraints of JSON data."
+  },
+  {
+    term: "nullable",
+    definition: "A data field that may explicitly contain a null value instead of a value of its normal type."
+  },
+  {
+    term: "Pydantic",
+    definition: "A Python library that validates external data against typed models and reports contract errors."
+  },
+  {
+    term: "context engineering",
+    definition: "Selecting, organizing, budgeting, and governing the information made available to a model for one operation."
+  },
+  {
+    term: "context budget",
+    definition: "An application limit for how many input tokens may be spent across instructions, user input, history, examples, and evidence."
+  },
+  {
+    term: "output reserve",
+    definition: "Context window capacity deliberately kept available for the model response before input components are added."
+  },
+  {
+    term: "lost in the middle",
+    definition: "An observed tendency for some models to use information near the beginning or end of a long input more effectively than information surrounded by many other items. The effect varies by model and task."
+  },
+  {
+    term: "context compression",
+    definition: "Reducing the size of supplied information through selection, deduplication, extraction, truncation, or summarization while attempting to preserve what the task needs."
+  },
+  {
+    term: "conversation history",
+    definition: "Earlier user and assistant turns that an application may select and supply again as runtime context for a new request."
+  },
+  {
+    term: "long term memory",
+    definition: "Information stored outside a model request so it can be retrieved and supplied during a later session under explicit access and retention rules."
+  },
+  {
+    term: "episodic memory",
+    definition: "Stored representations of specific earlier interactions that an application may retrieve when they are relevant to a new request."
+  },
+  {
+    term: "prompt injection",
+    definition: "Untrusted text attempting to override the intended task or cause behavior outside the application's instructions and permissions."
+  },
+  {
+    term: "trust boundary",
+    definition: "A boundary between components or data sources with different authority, access, or validation requirements."
+  },
+  {
+    term: "least privilege",
+    definition: "Giving a component only the data and capabilities required for its current responsibility."
+  },
+  {
+    term: "deterministic grader",
+    definition: "Code that scores an observed result with explicit, repeatable checks such as exact values, required evidence, or numeric limits."
+  },
+  {
+    term: "model grader",
+    definition: "A separate model call that applies an evaluation rubric to an output when the quality cannot be measured with simple code alone."
+  },
+  {
+    term: "held out",
+    definition: "Evaluation cases reserved until choices are fixed so they provide a less biased check of whether a change generalizes."
+  },
+  {
+    term: "test leakage",
+    definition: "Using information from reserved evaluation cases during development in a way that makes the reported result less trustworthy."
   }
 ];

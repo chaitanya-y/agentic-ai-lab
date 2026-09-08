@@ -13,10 +13,10 @@ export const metadata: Metadata = {
     template: "%s | Agentic AI engineering Lab"
   },
   description:
-    "A focused two-month learning path for software engineers preparing for AI engineering roles.",
+    "A focused two month learning path for software engineers preparing for agentic AI engineering roles.",
   openGraph: {
     title: "Agentic AI engineering Lab for software engineers",
-    description: "A focused two-month path from software engineering to AI engineering.",
+    description: "A focused two month path from software engineering to agentic AI engineering.",
     images: [
       {
         url: "/og.png",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Agentic AI engineering Lab for software engineers",
-    description: "A focused two-month path from software engineering to AI engineering.",
+    description: "A focused two month path from software engineering to agentic AI engineering.",
     images: ["/og.png"]
   }
 };

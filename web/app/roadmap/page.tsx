@@ -1,5 +1,6 @@
 import { curriculum } from "../../lib/curriculum";
-import { isPhasePublished } from "../../lib/siteStatus";
+import { getLessonLab } from "../../lib/lessonLabs";
+import { isPhaseAvailable } from "../../lib/siteStatus";
 import { RoadmapLessonList } from "../components/RoadmapLessonList";
 import { VisitMarker } from "../components/VisitMarker";
 
@@ -14,16 +15,16 @@ export default function RoadmapPage() {
     <main className="inner-page">
       <VisitMarker page="roadmap" />
       <section className="page-hero roadmap-hero">
-        <p className="eyebrow">About 100 hours</p>
+        <p className="eyebrow">About 90 hours</p>
         <h1>Agentic AI engineering roadmap.</h1>
         <p>
-          A focused course of about 100 hours for software engineers preparing to build AI applications. Start with LLM
+          A focused course of about 90 hours for software engineers preparing to build AI applications. Start with LLM
           fundamentals, then move through retrieval, tools, agentic workflows, and evaluation before completing the
           Customer Service Agent capstone.
         </p>
         <div className="page-meta">
           <span>{curriculum.length} phases</span>
-          <span>About 100 hours</span>
+          <span>About 90 hours</span>
           <span>1 capstone project</span>
         </div>
       </section>
@@ -45,8 +46,13 @@ export default function RoadmapPage() {
               </div>
               <p>{phase.summary}</p>
               <RoadmapLessonList
-                isPublished={isPhasePublished(phase.id)}
-                lessons={phase.lessons.map(({ slug, time, title }) => ({ slug, time, title }))}
+                isPublished={isPhaseAvailable(phase.id)}
+                lessons={phase.lessons.map(({ slug, time, title }) => ({
+                  activityLabel: getLessonLab(slug)?.roadmapLabel,
+                  slug,
+                  time,
+                  title
+                }))}
               />
             </div>
           </article>

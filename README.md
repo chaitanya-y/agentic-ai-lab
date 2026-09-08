@@ -1,8 +1,8 @@
 # Agentic AI Lab
 
-Agentic AI Lab is a focused learning path for software engineers moving into AI engineering.
+Agentic AI Lab is a focused learning path for software engineers preparing for agentic AI engineering roles.
 
-The goal is to help engineers prepare for AI engineering roles in about two months, without first taking a full AI or machine learning course.
+The goal is to help engineers prepare for agentic AI engineering roles in about two months, without first taking a full AI or machine learning course.
 
 ## Start here
 
@@ -12,16 +12,16 @@ The goal is to help engineers prepare for AI engineering roles in about two mont
 
 ## What is included
 
-- A roadmap of about 100 hours across seven phases
-- Plain language phase overviews
-- A practical learning path for building LLM applications and agents
+- A roadmap of about 90 hours across seven phases
+- Lessons and runnable examples for LLM Fundamentals
+- Lessons and hands on exercises for Prompt Engineering and Context Engineering
 
-Detailed lessons, runnable labs, and the capstone project will be released in phases.
+The remaining lessons and the capstone project will be released in phases.
 
 ## Learning path
 
 1. LLM Fundamentals
-2. Prompt Engineering, Context Engineering, and Structured Outputs
+2. Prompt Engineering and Context Engineering
 3. Retrieval Augmented Generation
 4. Tool Calling and Model Context Protocol
 5. Agentic Workflows
