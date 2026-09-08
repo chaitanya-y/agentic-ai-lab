@@ -649,7 +649,7 @@ Action validation -> validate_support_response()`,
           id: "success-criteria",
           title: "Success Criteria",
           content: [
-            "Translate requirements into observable checks. Exact values work for categories, identifiers, outcomes, and allowed source lists. Set inclusion works for required evidence. Forbidden phrase checks can catch specific unsupported claims. Latency and token fields provide operational measures when live calls are used.",
+            "Turn each product requirement into a check that code can evaluate. Use an exact comparison when the output must equal one expected value, such as an issue type, order identifier, or response outcome. For evidence, every required source must be present and every restricted source must be absent. Search the generated response for prohibited phrases when certain claims must never appear. For example, an order status result can require `order_status`, order 10492, and approved order and policy sources while rejecting any claim that delivery is guaranteed. Live evaluations can also record latency and token use.",
             "Not every quality dimension has a simple exact answer. Tone, completeness, and support from a long passage may require a rubric, human review, or a carefully validated model grader. Use deterministic checks wherever the application can express the rule directly, then add subjective grading only for the remaining dimension.",
             "Define the acceptable behavior for insufficient information. An application that always produces an answer may look helpful while hiding uncertainty. Include successful abstention, clarification, and cannot answer outcomes in the evaluation."
           ],
@@ -834,7 +834,7 @@ Prompt examples -> demonstrate behavior inside the model request`,
                 "This is a live model comparison. You will not edit source code, but the three commands make model calls. To use OpenAI, set `MODEL_PROVIDER=openai`, provide `OPENAI_API_KEY`, and set `ALLOW_PAID_API_CALLS=true` in `.env`. To use Ollama, set `MODEL_PROVIDER=ollama` and confirm that the configured local model is running.",
                 "Keep the same provider, model, context settings, and four development cases for all three runs. Run the baseline, revised, and few shot commands below. Each command prints how many of the four cases passed and saves a separate report.",
                 "Open all three reports. Compare `pass_rate`, failed checks, `total_input_tokens`, `total_output_tokens`, and `average_end_to_end_ms`. Token totals can be null when a provider does not report complete usage. Model output can vary, so this exercise does not require a fixed pass rate.",
-                "Select one prompt version using the recorded development results. Write down the version, provider, model, strongest result, important remaining failure, and operational tradeoff. Do not inspect or run the held out cases yet."
+                "Select one prompt version using the recorded development results. Write down the version, provider, model, strongest result, important remaining failure, and operational tradeoff. If quality scores are tied, use token usage and latency as secondary evidence or state that the comparison provides insufficient evidence to choose a quality winner. Do not inspect or run the held out cases yet."
               ],
               expectedResult: [
                 "The terminal prints one four case summary and one report path for each command. The three named report files contain the same provider, model, and sample size together with quality checks, token totals when available, and average end to end latency. Your selected prompt version is supported by those development results."
@@ -1275,15 +1275,15 @@ print("Unsupported citations", unsupported)`,
       "customer-support-response-assistant",
       "Customer Support Response Assistant",
       "1.5 hours",
-      "Build and inspect a two call application using the prompts, context policies, trust boundaries, and evaluation methods introduced in this phase.",
-      ["application workflow", "prompt comparison", "context assembly", "evaluation report"],
+      "Build and inspect a customer support assistant that analyzes a request, assembles approved context, and generates a validated response.",
+      ["application workflow", "request analysis", "context assembly", "response validation"],
       [
         {
           id: "capstone-definition",
           title: "Project Scope",
           content: [
             "The Customer Support Response Assistant is the Phase 2 project. It handles a deliberately narrow set of synthetic requests about order status, damaged items, and refunds. The project exists to make prompt and context decisions visible. It is not a general customer service platform and it does not perform real business actions.",
-            "The application uses a fixed sequence rather than an autonomous agent loop. Follow one request from prompt rendering through context assembly and response evaluation. Later phases add retrieval, tools, agent loops, graph workflows, and durable state."
+            "The application follows a fixed workflow defined in application code rather than an autonomous agent loop. Follow one request from prompt rendering through context assembly and response evaluation. Later phases add retrieval, tools, agent loops, graph workflows, and durable state."
           ],
           example: {
             title: "The default request",
@@ -1314,83 +1314,162 @@ print("Unsupported citations", unsupported)`,
             "Step 01. If Agentic AI Lab is not already available on your computer, clone the public repository from [GitHub](https://github.com/chaitanya-y/agentic-ai-lab). If you already cloned it, open the existing repository. Then enter `labs/02-prompt-context-engineering/customer-support-assistant`. Copy `.env.example` to `.env` and run `uv sync --python 3.12`. Python 3.12 is recommended, while the project supports Python 3.11 or newer.",
             "Choose OpenAI for a hosted model or Ollama with `qwen3:14b` for the optional local route. OpenAI calls remain blocked until a learner supplies a key and sets `ALLOW_PAID_API_CALLS=true`. Ollama does not require that key, but it requires the local service, model download, and enough memory for the selected model.",
             "Run the complete Phase 2 test suite before making a model call. The offline tests use deterministic model doubles and local fixtures. They verify the contracts, source rules, trust boundaries, workflow outcomes, and evaluation logic without a network request. Run the command from the Phase 2 lab folder. A successful run ends with all tests passing."
-          ],
-          example: {
-            title: "Start without a paid call",
-            content: [
-              "A learner can install the dependencies, inspect every module, and run the complete test suite with `ALLOW_PAID_API_CALLS=false`. A hosted request happens only after explicit configuration."
-            ]
-          }
+          ]
         },
         {
-          id: "first-model-call",
-          title: "Request Analysis",
+          id: "assistant-practice",
+          title: "Hands On Practice",
           content: [
-            "Open `workflow.py` and follow the first provider call into `SupportRequest`. Confirm that this request contains the current customer message but no order database or policy documents.",
-            "Run a request with and without an order identifier. Observe the issue type, extracted identifier, requested outcome, missing information, prompt version, provider, model, token usage, latency, and completion status. The missing identifier path should stop before context assembly and the second model call."
+            "Complete the exercises in order from the Phase 2 lab folder. Exercises 1, 2, and 4 run the assistant and ask you to inspect a different application path. Exercise 3 is the coding exercise and adds a workflow regression test. Use Ollama for local model calls or explicitly enable OpenAI in `.env` when you intend to use the hosted provider.",
+            "The model may phrase customer responses differently across runs. Verify structured requests, selected evidence, validation stages, model call counts, and completion reasons instead of comparing prose word for word."
+          ],
+          exercises: [
+            {
+              id: "assistant-exercise-one",
+              title: "Exercise 1: Two Call Request Flow",
+              fileLabel: "Files to inspect",
+              files: [
+                "src/support_assistant/workflow.py",
+                "src/support_assistant/prompts.py",
+                "src/support_assistant/providers.py",
+                "src/support_assistant/models.py",
+                "src/support_assistant/context.py",
+                "src/support_assistant/validation.py"
+              ],
+              content: [
+                "Open `src/support_assistant/workflow.py`. In `run_support_workflow()`, locate the first `model.analyze()` call. This is the first model call in the request flow.",
+                "Open `src/support_assistant/prompts.py` and inspect `render_analysis_messages()`. Confirm that it turns the application instructions and customer message into model input without adding order records or policy documents.",
+                "Open `src/support_assistant/providers.py` and inspect `LangChainSupportModel.analyze()`. It asks the model for structured output that follows the `SupportRequest` schema. Open `src/support_assistant/models.py` and inspect `SupportRequest` to understand the fields the model must return.",
+                "Run the order status command below. Read the structured request before the selected context and trace. The first call should classify the request and extract order 10492. Then follow `build_context()` in `src/support_assistant/context.py` to see how application code authorizes the order, selects the current order status policy, and supplies only that approved evidence to the second call.",
+                "Open `src/support_assistant/validation.py` and inspect `validate_support_response()`. In the trace, locate `analyze_support_request` and `generate_support_response`. Record their different prompt versions, token usage, and latency. Then confirm that the accepted response cites `order_10492` and `policy_order_status` and completes every validation stage."
+              ],
+              expectedResult: [
+                "The structured request contains `order_status` and order 10492. The selected context contains `order_10492` and `policy_order_status`. The trace contains two completed model calls, ends with `answered`, and records completion, schema, evidence, and application rule validation."
+              ],
+              solution: {
+                title: "Complete request checklist",
+                content: [
+                  "The first model call interprets the customer message. Application code authorizes and assembles context. The second model call writes from that context, and application validation decides whether its response is accepted."
+                ],
+                code: `First call -> analyze_support_request
+Structured request -> order_status, order 10492
+Application context -> order_10492, policy_order_status
+Second call -> generate_support_response
+Validation -> completion, schema, evidence, application_rules
+Completion reason -> answered`,
+                file: "Review checklist"
+              }
+            },
+            {
+              id: "assistant-exercise-two",
+              title: "Exercise 2: Early Stop and Authorization",
+              fileLabel: "Files to inspect",
+              files: [
+                "src/support_assistant/workflow.py",
+                "src/support_assistant/context.py"
+              ],
+              content: [
+                "Open `src/support_assistant/workflow.py` and inspect `run_support_workflow()`. Locate the early return that checks `request.missing_information` and a missing `order_id`. This path asks for the required information before context assembly or response generation.",
+                "Open `src/support_assistant/context.py` and inspect `load_order()`. Confirm that it loads an order only when the order belongs to `authenticated_customer_id`. The model can extract an order number, but it cannot decide who is authorized to read that order.",
+                "Run the missing identifier command. Confirm that the structured request records the missing order number, selected context is null, the trace contains one model call, and the completion reason is `needs_information`.",
+                "Run the unauthorized order command as `customer_001`. Order 77777 belongs to another synthetic customer. Confirm that selected context is null, no protected order fields appear, no response generation call occurs, and the completion reason is `order_unavailable`."
+              ],
+              expectedResult: [
+                "Both requests stop after `analyze_support_request`. The missing identifier path asks for an order number. The unauthorized path returns a generic unavailable response. Neither path supplies order or policy context to a second model call."
+              ],
+              solution: {
+                title: "Early stop checklist",
+                content: [
+                  "The two requests stop for different reasons, but both keep unnecessary data and model work out of the request path."
+                ],
+                code: `Missing identifier -> needs_information, one model call, no context
+Unauthorized order -> order_unavailable, one model call, no context`,
+                file: "Review checklist"
+              }
+            },
+            {
+              id: "assistant-exercise-three",
+              title: "Exercise 3: Workflow Validation",
+              fileLabel: "File to edit",
+              files: ["tests/test_workflow.py"],
+              content: [
+                "Open `tests/test_workflow.py`. At the top of the file, locate the imports for `SupportRequest`, `SupportResponse`, and `run_support_workflow()`. Then inspect the existing `FakeModel` class and the workflow tests below it. Add a new test named `test_completed_action_claim_returns_safe_validation_failure` to the end of this file.",
+                "Inside the new test in `tests/test_workflow.py`, create `FakeModel` with a refund request for order 10429 and a response that says the refund has been issued. Cite `order_10429` and `policy_refund_current`, then call `run_support_workflow()` as `customer_001`.",
+                "Assert that the customer receives `cannot_answer`, the trace completion reason is `validation_failed`, two model calls were recorded, and `ProhibitedActionClaim` appears in the validation stages. Run the targeted test first, then run the complete workflow test file."
+              ],
+              expectedResult: [
+                "The targeted command reports 1 passed and 5 deselected. The complete workflow file reports 6 passed. The test proves that a fluent model response cannot turn an unavailable refund action into an accepted customer response."
+              ],
+              solution: {
+                title: "Reject an unsupported completed action",
+                content: [
+                  "The scripted response passes through the normal workflow. Application validation rejects its unsupported action claim and converts the failure into a safe customer outcome."
+                ],
+                code: `def test_completed_action_claim_returns_safe_validation_failure() -> None:
+    model = FakeModel(
+        request=SupportRequest(
+            issue_type="refund",
+            order_id="10429",
+            requested_outcome="refund",
+        ),
+        response=SupportResponse(
+            outcome="answered",
+            message="Your refund has been issued for order 10429.",
+            evidence_ids=["order_10429", "policy_refund_current"],
+        ),
+    )
+
+    result = run_support_workflow(
+        model=model,
+        customer_message="Refund order 10429.",
+        authenticated_customer_id="customer_001",
+    )
+
+    assert result.response.outcome == "cannot_answer"
+    assert result.trace.completion_reason == "validation_failed"
+    assert result.trace.model_call_count == 2
+    assert "ProhibitedActionClaim" in result.trace.validation_stages`,
+                file: "tests/test_workflow.py"
+              }
+            },
+            {
+              id: "assistant-exercise-four",
+              title: "Exercise 4: Context and Conversation Selection",
+              fileLabel: "Files to inspect",
+              files: [
+                "src/support_assistant/context.py",
+                "fixtures/orders.json",
+                "fixtures/policies.json",
+                "fixtures/conversations.json"
+              ],
+              content: [
+                "Open `src/support_assistant/context.py` and inspect `build_context()`. Follow its calls to `load_order()`, `select_policy_sources()`, and `select_conversation_history()`. These functions decide which order, policy, and conversation evidence enters the second model call.",
+                "Open `fixtures/orders.json` and locate order 10429. Then open `fixtures/policies.json` and compare `policy_damaged_current`, `policy_damaged_injected`, `policy_damaged_expired`, and `policy_internal_refund_notes`. Check each policy’s audience, effective dates, and topics before running the assistant.",
+                "Run the damaged item command. Confirm that the selected context contains `order_10429`, `policy_damaged_current`, and `policy_damaged_injected`. Review the excluded sources and connect each exclusion to the audience, effective date, or topic checks in `select_policy_sources()`.",
+                "Open `fixtures/conversations.json` and locate the `corrected_order` conversation. Inspect `turn_correction` and the earlier turns about order 10492. Then run the corrected conversation command and confirm that `turn_correction` is selected while order 10492 does not appear as approved order evidence.",
+                "The synthetic `policy_damaged_injected` source contains misleading instruction text on purpose. Observe that it can enter the model context because its metadata is eligible. Authentication, source restrictions, evidence validation, and action validation still remain controlled by application code. The customer response may vary, but it must not reveal internal policy or claim that a replacement or refund was completed."
+              ],
+              expectedResult: [
+                "The damaged item path selects `order_10429`, `policy_damaged_current`, and `policy_damaged_injected` while excluding expired, internal, and unrelated policies. The corrected history path also selects `turn_correction` without using order 10492 as approved order evidence. Both runs finish with validated responses and no unsupported completed action."
+              ],
+              solution: {
+                title: "Context selection checklist",
+                content: [
+                  "Source selection is visible in the context report. The report distinguishes included evidence from content rejected by audience, date, topic, or conversation relevance rules."
+                ],
+                code: `Damaged item -> order_10429 and current damaged item policy
+Corrected history -> order_10429, turn_correction, damaged item policy
+Internal policy -> excluded by audience
+Expired policy -> excluded by effective date
+Unrelated policies -> excluded by topic`,
+                file: "Review checklist"
+              }
+            }
           ],
           example: {
-            title: "An intentional early stop",
+            title: "Project Outcome",
             content: [
-              "For ‘Where is my order?’ the model returns an order status issue with a null identifier and `order_id` in missing information. The application asks for the order number and avoids context retrieval or another model call."
-            ]
-          }
-        },
-        {
-          id: "context-and-authorization",
-          title: "Context Assembly",
-          content: [
-            "Continue from `workflow.py` into `build_context()` in `context.py`. Follow its calls to `load_order()`, `select_policy_sources()`, and `select_conversation_history()`. Then inspect `_order_evidence()`, `_conversation_evidence()`, and the `estimate_tokens()` budget check in the order they execute.",
-            "Observe `included_source_ids`, `excluded_sources`, selected conversation turn identifiers, estimated input tokens, and the output reserve. Compare this report with the second request before changing a prompt. The report should explain exactly what the response model received."
-          ],
-          example: {
-            title: "An unauthorized order",
-            content: [
-              "Customer 001 asks for order 77777, which belongs to another fixture customer. The application returns a generic unavailable message. The context is not built and no order details appear in the second prompt or trace."
-            ]
-          }
-        },
-        {
-          id: "second-model-call",
-          title: "Response Generation",
-          content: [
-            "Inspect the second request after context assembly. It should contain the validated support request and only the evidence listed in the context report. Compare its purpose and inputs with the first request.",
-            "Observe the returned outcome, customer message, evidence identifiers, and missing information. Follow the result through completion, schema, source, order reference, and unsupported action checks. Only the accepted response should become the customer outcome."
-          ],
-          example: {
-            title: "A verified order answer",
-            content: [
-              "The approved context says order 10492 is in transit with a supplied expected delivery. The model may explain those facts and cite the order and current status policy. It cannot guarantee the date or state that a refund was issued."
-            ]
-          }
-        },
-        {
-          id: "run-and-observe",
-          title: "Run the Assistant",
-          content: [
-            "Run `uv run support-assistant` from the Phase 2 lab directory. The default request asks about order 10492. The program prints four sections. Read the customer response, structured request, selected context, and run metadata in that order.",
-            "Try the damaged item request documented in the lab README. Then remove the order identifier and observe the early stop. Run the corrected conversation fixture and inspect which turns were selected. Finally request order 77777 as customer 001 and verify that no protected context appears.",
-            "Compare OpenAI and Ollama only after the application behavior is understood. The provider and model fields, token reporting, latency, and parsing behavior may differ. The contracts, context rules, authorization, validation, and evaluation cases remain unchanged."
-          ],
-          example: {
-            title: "Four useful runs",
-            content: [
-              "Use one ordinary order status request, one damaged item request, one missing identifier, and one unauthorized order. Together they reveal the success, clarification, and safe failure paths better than repeating a single happy path."
-            ]
-          }
-        },
-        {
-          id: "evaluate-the-assistant",
-          title: "Evaluate the Assistant",
-          content: [
-            "Use `uv run support-eval --split development --limit 4` while comparing prompt versions. The report records the prompt version, provider, model, case count, pass rate, and per case checks. Read the failed checks rather than relying on the aggregate percentage.",
-            "Choose a prompt version from development evidence, then run the held out set. Keep the sample size and limitations visible. Record provider differences without changing the held out expectations to favor one model.",
-            "Finish by explaining one success and one failure from the trace. Identify the first incorrect stage, the relevant context decision, the validation outcome, and the evaluation case that protects the behavior from regression."
-          ],
-          example: {
-            title: "A useful project conclusion",
-            content: [
-              "The final note might say that the revised prompt improved duplicate charge classification on the development set, while the local model still failed two structured response cases. It should name the provider, model, cases, and next engineering action."
+              "After the four exercises, you can trace a complete request, explain both early stop paths, add a workflow regression test, and verify exactly which context entered response generation."
             ]
           }
         },

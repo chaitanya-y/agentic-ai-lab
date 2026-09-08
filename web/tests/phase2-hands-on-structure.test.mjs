@@ -9,7 +9,8 @@ const expectedExercises = new Map([
   ["prompt-engineering", 3],
   ["prompt-injection-and-trust-boundaries", 3],
   ["prompt-evaluation", 4],
-  ["context-engineering", 5]
+  ["context-engineering", 5],
+  ["customer-support-response-assistant", 4]
 ]);
 
 test("hands on exercises stay inside one lesson section", () => {
@@ -92,6 +93,77 @@ test("Prompt Evaluation separates scoring, dataset review, development compariso
     ]
   );
   assert.ok(exercises[3]?.files?.includes(".artifacts/eval-held-out.json"));
+  assert.match(
+    exercises[2]?.content[3] ?? "",
+    /If quality scores are tied.*token usage and latency.*insufficient evidence/s
+  );
+});
+
+test("the Phase 2 assistant ends with four concrete hands on exercises", () => {
+  const lesson = phase2Curriculum.lessons.find(
+    (item) => item.slug === "customer-support-response-assistant"
+  );
+  const sectionIds = new Set(lesson?.sections?.map((section) => section.id));
+  const handsOn = lesson?.sections?.find((section) => section.id === "assistant-practice");
+  const exercises = handsOn?.exercises ?? [];
+
+  assert.equal(
+    lesson?.summary,
+    "Build and inspect a customer support assistant that analyzes a request, assembles approved context, and generates a validated response."
+  );
+  assert.deepEqual(
+    exercises.map((exercise) => exercise.title),
+    [
+      "Exercise 1: Two Call Request Flow",
+      "Exercise 2: Early Stop and Authorization",
+      "Exercise 3: Workflow Validation",
+      "Exercise 4: Context and Conversation Selection"
+    ]
+  );
+
+  for (const removedSection of [
+    "first-model-call",
+    "context-and-authorization",
+    "second-model-call",
+    "run-and-observe",
+    "evaluate-the-assistant"
+  ]) {
+    assert.equal(sectionIds.has(removedSection), false);
+  }
+
+  assert.deepEqual(exercises[2]?.files, ["tests/test_workflow.py"]);
+  assert.match(exercises[2]?.solution?.code ?? "", /ProhibitedActionClaim/);
+  assert.match(exercises[2]?.solution?.code ?? "", /completion_reason == "validation_failed"/);
+});
+
+test("every Phase 2 assistant exercise shows its runnable commands in context", () => {
+  const examples = phase2CodeExamples["customer-support-response-assistant"] ?? {};
+
+  assert.deepEqual(
+    examples["assistant-exercise-one"]?.map((example) => example.code),
+    ['uv run support-assistant "Where is order 10492?"']
+  );
+  assert.deepEqual(
+    examples["assistant-exercise-two"]?.map((example) => example.code),
+    [
+      'uv run support-assistant "Where is my order?"',
+      'uv run support-assistant "Where is order 77777?" --customer customer_001'
+    ]
+  );
+  assert.deepEqual(
+    examples["assistant-exercise-three"]?.map((example) => example.code),
+    [
+      "uv run pytest tests/test_workflow.py -k completed_action_claim_returns_safe_validation_failure",
+      "uv run pytest tests/test_workflow.py"
+    ]
+  );
+  assert.deepEqual(
+    examples["assistant-exercise-four"]?.map((example) => example.code),
+    [
+      'uv run support-assistant "Order 10429 arrived with a cracked screen. What should I do?"',
+      'uv run support-assistant "Order 10429 arrived damaged and I want a replacement." --conversation corrected_order'
+    ]
+  );
 });
 
 test("the prompt template answer completes the named starter variable", () => {

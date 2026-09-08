@@ -1211,8 +1211,8 @@ export const curriculum: CurriculumPhase[] = [
     number: "03",
     title: "Retrieval-Augmented Generation (RAG)",
     shortTitle: "RAG",
-    time: "18 hours",
-    hours: 18,
+    time: "13 hours",
+    hours: 13,
     summary: "Retrieve relevant, current information before an LLM writes an answer.",
     prerequisite: "LLM Fundamentals and practical familiarity with files, APIs, and data structures.",
     outcome: "You can design, inspect, and evaluate a RAG feature that uses the right evidence for a response.",
@@ -1221,7 +1221,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "what-is-retrieval-augmented-generation",
         "What Is Retrieval-Augmented Generation?",
-        "3 hours",
+        "1 hour",
         "Understand the RAG pattern, its two stages, and when it is the right source of information for an AI feature.",
         [
           "Retrieval-augmented generation, usually called RAG, is an application pattern that retrieves relevant information at request time and supplies it to a model before the model generates a response. It is useful when an answer should be based on documents that are too recent, too specific, or too changeable to rely on the model’s training knowledge alone.",
@@ -1234,7 +1234,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "document-ingestion-and-chunking",
         "Document Ingestion and Chunking",
-        "4 hours",
+        "3 hours",
         "Prepare source documents as searchable records that retain the structure and metadata needed for safe retrieval.",
         [
           "Document ingestion turns source files into a consistent internal representation. The system extracts text, preserves meaningful headings and source locations, normalizes formats, and records metadata. Metadata is not an optional decoration: it can identify a document version, the intended audience, an effective date, a product area, or a source URL.",
@@ -1247,7 +1247,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "embeddings-and-vector-databases",
         "Embeddings and Vector Databases",
-        "4 hours",
+        "3 hours",
         "Learn how semantic search represents meaning and why similarity is only one part of evidence selection.",
         [
           "An embedding is a numerical representation of text produced by an embedding model. Texts with related meaning tend to be positioned near one another in the embedding space, which allows a system to retrieve a policy section even when the customer uses different wording. A question about a broken delivery may therefore retrieve a section titled “damaged items.”",
@@ -1273,7 +1273,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "rag-evaluation-and-grounded-answers",
         "RAG Evaluation and Grounded Answers",
-        "4 hours",
+        "3 hours",
         "Evaluate retrieval separately from generation and define how the application behaves when the evidence is missing or unsuitable.",
         [
           "A RAG answer can fail because the search missed the right source, selected an ineligible source, assembled poor context, or generated a claim that the retrieved text did not support. Evaluating only the final wording hides these distinct causes. Retrieval evaluation asks whether the expected evidence was found and ranked highly enough; answer evaluation asks whether the response uses that evidence correctly.",
@@ -1290,8 +1290,8 @@ export const curriculum: CurriculumPhase[] = [
     number: "04",
     title: "Tool Calling and Model Context Protocol (MCP)",
     shortTitle: "Tools & MCP",
-    time: "15 hours",
-    hours: 15,
+    time: "4.5 hours",
+    hours: 4.5,
     summary: "Connect an LLM to tools while application code keeps control of permissions and execution.",
     prerequisite: "LLM Fundamentals and structured-output concepts.",
     outcome: "You can design tool boundaries, approve model-proposed calls, and understand where MCP fits into an AI application.",
@@ -1300,7 +1300,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "function-calling-and-tool-design",
         "Function Calling and Tool Design",
-        "5 hours",
+        "1.5 hours",
         "Understand how models propose typed tool calls and how a well-designed tool limits a task to one clear business capability.",
         [
           "Function calling gives a model a list of tools, their descriptions, and their parameter schemas. Instead of producing a natural-language instruction such as “look up order 123,” the model can propose a structured call with a tool name and arguments. The application receives that proposal, validates it, performs deterministic work, and returns the result as another piece of context.",
@@ -1313,7 +1313,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "tool-safety-and-permissions",
         "Tool Safety and Permissions",
-        "5 hours",
+        "1.5 hours",
         "Design clear boundaries between a model’s proposal, a policy decision, human approval, and a consequential action.",
         [
           "Tools can give an AI application useful access to current information or external systems, but each tool also creates a trust boundary. A model can misunderstand a request, receive an adversarial instruction, or select the wrong operation. The system should therefore apply least privilege: make only the minimum capabilities available for the task and expose read-only access when write access is unnecessary.",
@@ -1326,7 +1326,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "model-context-protocol",
         "Model Context Protocol (MCP)",
-        "5 hours",
+        "1.5 hours",
         "Learn how MCP standardizes the connection between AI clients and external tools, resources, and prompts.",
         [
           "Model Context Protocol, or MCP, is an open protocol for connecting AI applications to external capabilities. An MCP server can publish tools, resources, and prompt templates; an MCP client discovers and uses the approved capabilities. The protocol provides a common interface so the same integration can be used by different AI clients without each client inventing its own connection format.",

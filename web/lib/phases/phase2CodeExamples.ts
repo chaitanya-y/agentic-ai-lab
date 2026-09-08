@@ -737,20 +737,68 @@ uv sync --python 3.12`
         code: `uv run pytest`
       }
     ],
-    "run-and-observe": [
+    "assistant-exercise-one": [
       {
-        title: "Run the default request",
+        title: "Run a complete order request",
         file: "Terminal or PowerShell",
         intent: "practice",
-        description: "Read all four output sections before trying another message.",
-        code: `uv run support-assistant`
+        afterParagraph: 3,
+        description: "Run the request after tracing the workflow code. Inspect the structured request, selected context, and both model calls before reading the final prose as a quality signal.",
+        code: `uv run support-assistant "Where is order 10492?"`
+      }
+    ],
+    "assistant-exercise-two": [
+      {
+        title: "Run a request with a missing order number",
+        file: "Terminal or PowerShell",
+        intent: "practice",
+        afterParagraph: 2,
+        description: "This path should stop after request analysis because the application does not have the identifier required for context assembly.",
+        code: `uv run support-assistant "Where is my order?"`
       },
+      {
+        title: "Run an unauthorized order request",
+        file: "Terminal or PowerShell",
+        intent: "practice",
+        afterParagraph: 3,
+        description: "The supplied customer identity does not own order 77777. Confirm that the workflow returns no selected context and makes no second model call.",
+        code: `uv run support-assistant "Where is order 77777?" --customer customer_001`
+      }
+    ],
+    "assistant-exercise-three": [
+      {
+        title: "Run the new workflow validation test",
+        file: "Terminal or PowerShell",
+        intent: "practice",
+        afterParagraph: 2,
+        description: "Run only the new regression test while you work on it.",
+        code: `uv run pytest tests/test_workflow.py -k completed_action_claim_returns_safe_validation_failure`
+      },
+      {
+        title: "Run every workflow test",
+        file: "Terminal or PowerShell",
+        intent: "practice",
+        afterResult: true,
+        description: "After the new test passes, run the complete workflow file to check the earlier success, early stop, provider failure, and validation paths.",
+        code: `uv run pytest tests/test_workflow.py`
+      }
+    ],
+    "assistant-exercise-four": [
       {
         title: "Run a damaged item request",
         file: "Terminal or PowerShell",
         intent: "practice",
-        description: "The response should use the authenticated order and current damaged item policy.",
+        afterParagraph: 2,
+        description: "Inspect the selected order and policy sources together with every source exclusion.",
         code: `uv run support-assistant "Order 10429 arrived with a cracked screen. What should I do?"`
+      },
+      {
+        title: "Run a corrected conversation",
+        file: "Terminal or PowerShell",
+        intent: "practice",
+        afterParagraph: 3,
+        description: "The current request and conversation fixture should select the correction for order 10429 without restoring stale order evidence.",
+        code: `uv run support-assistant "Order 10429 arrived damaged and I want a replacement." --conversation corrected_order`
       }
     ]
   }
