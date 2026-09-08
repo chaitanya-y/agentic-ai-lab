@@ -91,6 +91,8 @@ function LessonSectionContent({ lessonSlug, section }: { lessonSlug: string; sec
 
 function LessonExerciseContent({ lessonSlug, exercise }: { lessonSlug: string; exercise: LessonExercise }) {
   const codeExamples = getLessonCodeExamples(lessonSlug, exercise.id);
+  const exerciseCodeExamples = codeExamples.filter((example) => !example.afterResult);
+  const completionCodeExamples = codeExamples.filter((example) => example.afterResult);
 
   function renderCodeExample(example: (typeof codeExamples)[number]) {
     return (
@@ -119,13 +121,13 @@ function LessonExerciseContent({ lessonSlug, exercise }: { lessonSlug: string; e
             <p data-note-anchor={`${exercise.id}-${paragraphIndex}`} tabIndex={-1}>
               <GlossaryText text={paragraph} />
             </p>
-            {codeExamples
+            {exerciseCodeExamples
               .filter((example) => example.afterParagraph === paragraphIndex)
               .map(renderCodeExample)}
           </li>
         ))}
       </ol>
-      {codeExamples.filter((example) => example.afterParagraph === undefined).map(renderCodeExample)}
+      {exerciseCodeExamples.filter((example) => example.afterParagraph === undefined).map(renderCodeExample)}
       <div className="lesson-exercise-result">
         <p className="lesson-exercise-label">Expected result</p>
         {exercise.expectedResult.map((result, resultIndex) => (
@@ -154,6 +156,12 @@ function LessonExerciseContent({ lessonSlug, exercise }: { lessonSlug: string; e
             ) : null}
           </div>
         </details>
+      ) : null}
+      {completionCodeExamples.length ? (
+        <div className="lesson-exercise-completion">
+          <p className="lesson-exercise-label">Complete the lab</p>
+          {completionCodeExamples.map(renderCodeExample)}
+        </div>
       ) : null}
     </div>
   );

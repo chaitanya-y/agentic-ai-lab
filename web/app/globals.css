@@ -3599,6 +3599,7 @@ a:not(.button):not(.primary-action):not(.secondary-action):visited {
 }
 
 .lesson-exercise-steps > li {
+  min-width: 0;
   padding-left: 7px;
 }
 
@@ -3621,6 +3622,16 @@ a:not(.button):not(.primary-action):not(.secondary-action):visited {
 
 .lesson-exercise-result > p + p {
   margin-top: 0.8em;
+}
+
+.lesson-exercise-completion {
+  border-top: 1px solid rgba(20, 33, 29, 0.16);
+  margin-top: 32px;
+  padding-top: 26px;
+}
+
+.lesson-exercise-completion > .lesson-exercise-label {
+  margin-bottom: 14px;
 }
 
 .lesson-visual {
@@ -3810,6 +3821,16 @@ a:not(.button):not(.primary-action):not(.secondary-action):visited {
 
 .lesson-reading-content p + p {
   margin-top: 1.35em;
+}
+
+.lesson-inline-link {
+  border-bottom: 1px solid currentColor;
+  color: var(--blue);
+  font-weight: 650;
+}
+
+.lesson-inline-link:hover {
+  border-bottom-width: 2px;
 }
 
 .term-tooltip {

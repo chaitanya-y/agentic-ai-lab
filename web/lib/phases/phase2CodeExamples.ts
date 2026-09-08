@@ -329,8 +329,8 @@ uv sync --python 3.12`
         file: "Terminal or PowerShell",
         intent: "practice",
         afterParagraph: 2,
-        description: "Run this command after saving practice/starter.py. The exercise makes no model call.",
-        code: `uv run python practice/starter.py`
+        description: "Run this command after saving practice/prompt_starter.py. The exercise makes no model call.",
+        code: `uv run python practice/prompt_starter.py`
       }
     ],
     "prompt-exercise-two": [
@@ -340,7 +340,7 @@ uv sync --python 3.12`
         intent: "practice",
         afterParagraph: 2,
         description: "The output should now include the rendered support summary template.",
-        code: `uv run python practice/starter.py`
+        code: `uv run python practice/prompt_starter.py`
       }
     ],
     "prompt-exercise-three": [
@@ -350,23 +350,23 @@ uv sync --python 3.12`
         intent: "practice",
         afterParagraph: 2,
         description: "Confirm that both prompt contract errors are printed and the program completes.",
-        code: `uv run python practice/starter.py`
+        code: `uv run python practice/prompt_starter.py`
       },
       {
         title: "Run the worked exercise answers",
         file: "Terminal or PowerShell",
         intent: "practice",
-        afterParagraph: 2,
-        description: "This local exercise makes no provider calls and requires no API key.",
-        code: `uv run python practice/answers.py`
+        afterResult: true,
+        description: "Run this after completing all three Prompt Engineering exercises and checking your output against each expected result. It executes the completed reference implementation and prints the answer for every exercise. Compare it with your starter before viewing or copying the solution. It makes no model calls.",
+        code: `uv run python practice/prompt_answers.py`
       },
       {
-        title: "Run the prompt practice tests",
+        title: "Run the Prompt Engineering tests",
         file: "Terminal or PowerShell",
         intent: "practice",
-        afterParagraph: 2,
-        description: "These tests verify the prompt template, renderer, and variable contract.",
-        code: `uv run pytest tests/test_prompt_practice.py`
+        afterResult: true,
+        description: "Run these tests from the Phase 2 lab folder after comparing your work with practice/prompt_answers.py. They verify the reusable prompt template, variable validation, prompt examples, and message construction used by the lab. They do not grade practice/prompt_starter.py directly and require no API key or running Ollama model.",
+        code: `uv run pytest tests/test_prompt_practice.py tests/test_prompts.py`
       }
     ]
   },
@@ -458,71 +458,6 @@ response_call = model.respond(
     output_reserve_tokens: int`
       }
     ],
-    "build-context-budget-manager": [
-      {
-        title: "Allocate optional components by priority",
-        file: "src/support_assistant/context_practice.py",
-        description: "Required input is preserved first. Optional input that does not fit is reported as excluded.",
-        code: `required_tokens = sum(item.token_count for item in required)
-if required_tokens > budget.available_input_tokens:
-    raise RequiredContextDoesNotFit(
-        "required context exceeds the available input budget"
-    )
-
-included = list(required)
-used_tokens = required_tokens
-for component in optional:
-    if used_tokens + component.token_count <= budget.available_input_tokens:
-        included.append(component)
-        used_tokens += component.token_count
-    else:
-        excluded.append(component)`
-      }
-    ],
-    "build-source-selector": [
-      {
-        title: "Apply metadata rules in application code",
-        file: "src/support_assistant/context.py",
-        description: "Audience, dates, and topics are checked before any policy content reaches the model.",
-        code: `if source.audience != "customer":
-    reason = "internal audience"
-elif source.effective_from and source.effective_from > as_of:
-    reason = "not yet effective"
-elif source.effective_until and source.effective_until < as_of:
-    reason = "expired"
-elif issue_type not in source.topics:
-    reason = "unrelated topic"`
-      }
-    ],
-    "build-conversation-selector": [
-      {
-        title: "Remove turns tied only to an old order",
-        file: "src/support_assistant/context.py",
-        description: "The current order identifier keeps a stale earlier result out of the next model request.",
-        code: `for turn in list(turns)[-maximum_turns:]:
-    mentioned_ids = set(ORDER_ID_PATTERN.findall(turn.content))
-    if current_order_id and mentioned_ids and current_order_id not in mentioned_ids:
-        continue
-    selected.append(turn)`
-      }
-    ],
-    "test-context-assembly": [
-      {
-        title: "Test the correction without a model call",
-        file: "tests/test_context.py",
-        description: "The test proves which history enters the context and which stale result remains outside it.",
-        code: `history = load_conversation("corrected_order")
-report = build_context(
-    request=damaged_request(order_id="10429"),
-    authenticated_customer_id="customer_001",
-    conversation_history=history,
-    as_of=date(2026, 9, 6),
-)
-
-assert "turn_correction" in report.selected_conversation_turn_ids
-assert "turn_old_result" not in report.selected_conversation_turn_ids`
-      }
-    ],
     "context-engineering-lab": [
       {
         title: "Step 01 Open the Phase 2 lab",
@@ -541,7 +476,7 @@ uv sync --python 3.12`
         title: "Run the context starter",
         file: "Terminal or PowerShell",
         intent: "practice",
-        afterParagraph: 2,
+        afterParagraph: 3,
         description: "Run the file after saving Exercise 1. No model call is made.",
         code: `uv run python practice/context_starter.py`
       }
@@ -561,7 +496,7 @@ uv sync --python 3.12`
         title: "Run the context starter",
         file: "Terminal or PowerShell",
         intent: "practice",
-        afterParagraph: 2,
+        afterParagraph: 4,
         description: "Inspect each included policy and every exclusion reason.",
         code: `uv run python practice/context_starter.py`
       }
@@ -571,7 +506,7 @@ uv sync --python 3.12`
         title: "Run the context starter",
         file: "Terminal or PowerShell",
         intent: "practice",
-        afterParagraph: 2,
+        afterParagraph: 3,
         description: "Inspect the selected conversation turn identifiers.",
         code: `uv run python practice/context_starter.py`
       }
@@ -581,7 +516,7 @@ uv sync --python 3.12`
         title: "Run the completed context exercises",
         file: "Terminal or PowerShell",
         intent: "practice",
-        afterParagraph: 2,
+        afterParagraph: 3,
         description: "The final output should identify the unsupported policy citation.",
         code: `uv run python practice/context_starter.py`
       },
@@ -589,25 +524,17 @@ uv sync --python 3.12`
         title: "Run the worked Context Engineering answers",
         file: "Terminal or PowerShell",
         intent: "practice",
-        afterParagraph: 2,
-        description: "These exercises make no provider calls and require no API key or local model.",
+        afterResult: true,
+        description: "Run this after completing all five exercises. It executes the five completed exercises and prints the reference result for each one. It makes no model calls.",
         code: `uv run python practice/context_answers.py`
       },
       {
-        title: "Run the context tests",
+        title: "Run the Context Engineering tests",
         file: "Terminal or PowerShell",
         intent: "practice",
-        afterParagraph: 2,
-        description: "The tests verify budgets, source policies, record ownership, history selection, and citation checks.",
+        afterResult: true,
+        description: "Run these offline tests from the Phase 2 lab folder after comparing the exercise outputs. They verify budgets, source policies, record ownership, history selection, and citation checks.",
         code: `uv run pytest tests/test_context.py tests/test_context_practice.py`
-      },
-      {
-        title: "Run a request with a correction",
-        file: "Terminal or PowerShell",
-        intent: "practice",
-        afterParagraph: 2,
-        description: "Inspect selected conversation turns, excluded sources, and the final evidence list.",
-        code: `uv run support-assistant "Use the corrected order number 10429." --conversation corrected_order`
       }
     ]
   },
@@ -662,8 +589,8 @@ uv sync --python 3.12`
         file: "Terminal or PowerShell",
         intent: "practice",
         afterParagraph: 0,
-        description: "The tests cover direct input, source filtering, record ownership, and unsupported action claims.",
-        code: `uv run pytest tests/test_trust_boundaries.py tests/test_context.py tests/test_validation.py`
+        description: "Run these offline tests after completing the trust boundary map. They cover direct input, source filtering, record ownership, evidence validation, and unsupported action claims.",
+        code: `uv run pytest tests/test_trust_boundaries.py tests/test_validation.py tests/test_context.py::test_order_lookup_does_not_reveal_another_customers_order`
       }
     ],
     "trust-exercise-three": [
@@ -671,7 +598,7 @@ uv sync --python 3.12`
         title: "Run the new regression test",
         file: "Terminal or PowerShell",
         intent: "practice",
-        afterParagraph: 2,
+        afterParagraph: 3,
         description: "Run the new test by name, then remove the filter to run the complete trust boundary file.",
         code: `uv run pytest tests/test_trust_boundaries.py -k quoted_injection_text
 uv run pytest tests/test_trust_boundaries.py`
@@ -712,46 +639,43 @@ uv sync --python 3.12`
     ],
     "evaluation-exercise-one": [
       {
-        title: "Run the local scoring exercise",
+        title: "Run the deterministic scoring exercise",
         file: "Terminal or PowerShell",
         intent: "practice",
-        afterParagraph: 2,
-        description: "Run the starter after saving the criteria and the two score calls. No model call is made.",
-        code: `uv run python practice/starter.py`
+        afterParagraph: 3,
+        description: "Run your completed scoring exercise first, then compare it with the worked implementation. Neither command makes a model call.",
+        code: `uv run python practice/evaluation_starter.py
+uv run python practice/evaluation_answers.py`
       }
     ],
-    "evaluation-exercise-two": [
-      {
-        title: "Run the local evaluation exercises",
-        file: "Terminal or PowerShell",
-        intent: "practice",
-        afterParagraph: 2,
-        description: "Run your completed starter first, then compare it with the worked implementation. Neither command makes a model call.",
-        code: `uv run python practice/starter.py
-uv run python practice/answers.py`
-      }
-    ],
-    "evaluation-exercise-four": [
+    "evaluation-exercise-three": [
       {
         title: "Evaluate a small development set",
         file: "Terminal or PowerShell",
         intent: "practice",
-        afterParagraph: 2,
+        afterParagraph: 1,
         description: "These commands make live model calls. They keep the provider, model, cases, and limits unchanged while saving each prompt version separately.",
         code: `uv run support-eval --split development --limit 4 --prompt-version support-analysis.baseline.v1 --output .artifacts/eval-baseline.json
 uv run support-eval --split development --limit 4 --prompt-version support-analysis.revised.v1 --output .artifacts/eval-revised.json
 uv run support-eval --split development --limit 4 --prompt-version support-analysis.few-shot.v1 --output .artifacts/eval-few-shot.json`
       }
     ],
-    "evaluation-exercise-five": [
+    "evaluation-exercise-four": [
+      {
+        title: "Run the Prompt Evaluation tests",
+        file: "Terminal or PowerShell",
+        intent: "practice",
+        afterParagraph: 1,
+        description: "Run these offline tests before evaluating the held out cases. They verify scoring, report totals, and dataset separation without making a model call.",
+        code: `uv run pytest tests/test_evaluation.py`
+      },
       {
         title: "Evaluate the held out set",
         file: "Terminal or PowerShell",
         intent: "practice",
         afterParagraph: 2,
-        description: "This example uses the revised prompt. Replace the prompt version when your development results selected another version.",
-        code: `uv run pytest
-uv run support-eval --split held_out --limit 12 --prompt-version support-analysis.revised.v1 --output .artifacts/eval-held-out.json`
+        description: "Run this only after the offline tests pass. This example uses the revised prompt. Replace the prompt version when your development results selected another version.",
+        code: `uv run support-eval --split held_out --limit 12 --prompt-version support-analysis.revised.v1 --output .artifacts/eval-held-out.json`
       }
     ]
   },
@@ -790,8 +714,7 @@ response_call = model.respond(
 cd agentic-ai-lab
 cd labs/02-prompt-context-engineering/customer-support-assistant
 cp .env.example .env
-uv sync --python 3.12
-uv run pytest`
+uv sync --python 3.12`
       },
       {
         title: "Step 01 Prepare the Phase 2 lab",
@@ -803,8 +726,15 @@ uv run pytest`
 cd agentic-ai-lab
 cd labs/02-prompt-context-engineering/customer-support-assistant
 Copy-Item .env.example .env
-uv sync --python 3.12
-uv run pytest`
+uv sync --python 3.12`
+      },
+      {
+        title: "Run the complete Phase 2 test suite",
+        file: "Terminal or PowerShell",
+        intent: "practice",
+        afterParagraph: 2,
+        description: "Run this from labs/02-prompt-context-engineering/customer-support-assistant after installing the dependencies and before making a live model call. It requires no API key or running Ollama model.",
+        code: `uv run pytest`
       }
     ],
     "run-and-observe": [

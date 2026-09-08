@@ -18,7 +18,7 @@ from support_assistant.context_practice import (
 def main() -> None:
     """Run every worked answer without making a model request."""
 
-    print("Exercise 1")
+    print("Context Engineering Exercise 1")
     budget = ContextBudget(
         context_window_tokens=4_000,
         output_reserve_tokens=500,
@@ -32,7 +32,7 @@ def main() -> None:
     except ValueError as error:
         print("Invalid budget", error)
 
-    print("\nExercise 2")
+    print("\nContext Engineering Exercise 2")
     allocation = allocate_context(
         (
             ContextComponent("instructions", 300, 100, required=True),
@@ -47,7 +47,7 @@ def main() -> None:
     print("Excluded", allocation.excluded_component_ids)
     print("Remaining input tokens", allocation.remaining_input_tokens)
 
-    print("\nExercise 3")
+    print("\nContext Engineering Exercise 3")
     included, excluded = select_policy_sources(
         "damaged_item",
         as_of=date(2026, 9, 6),
@@ -58,7 +58,7 @@ def main() -> None:
         [(source.source_id, source.reason) for source in excluded],
     )
 
-    print("\nExercise 4")
+    print("\nContext Engineering Exercise 4")
     history = load_conversation("corrected_order")
     selected_history = select_conversation_history(
         history,
@@ -66,7 +66,7 @@ def main() -> None:
     )
     print("Selected turns", [turn.turn_id for turn in selected_history])
 
-    print("\nExercise 5")
+    print("\nContext Engineering Exercise 5")
     unsupported = find_unsupported_citations(
         citation_ids=("order_10429", "policy_internal_refund_notes"),
         included_source_ids=("order_10429", "policy_damaged_current"),

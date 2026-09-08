@@ -122,8 +122,8 @@ export const curriculum: CurriculumPhase[] = [
     number: "01",
     title: "LLM Fundamentals",
     shortTitle: "LLM fundamentals",
-    time: "12 hours",
-    hours: 12,
+    time: "6.5 hours",
+    hours: 6.5,
     summary: "Understand how large language models generate responses, use context, and fit into an application.",
     prerequisite: "Comfort with a programming language, HTTP APIs, JSON, and basic backend development.",
     outcome: "You can describe the role of an LLM in an application and make informed decisions about models, context, and generated output.",
@@ -132,7 +132,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "what-is-a-large-language-model",
         "What Is a Large Language Model?",
-        "1.5 hours",
+        "1 hour",
         "Learn what generative AI and large language models are, how LLMs represent and generate language, and how they should be used within a software application.",
         [
           "A large language model, or LLM, is a neural network trained to continue a sequence of language. Given the text that came before, it estimates which small piece of text is most likely to come next. It then uses the new piece as part of its input and repeats the process. A response that appears to be a single, coherent thought is therefore produced incrementally, one token after another.",
@@ -349,7 +349,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "transformer-architecture-and-attention",
         "Transformer Architecture and Attention",
-        "1.5 hours",
+        "1 hour",
         "Understand how transformers represent tokens, preserve their order, use attention, and scale model capacity for language generation.",
         [
           "A transformer is a neural network architecture built from a stack of similar layers called transformer blocks. Each transformer block centers on two main operations called self attention and a feed forward network. Self attention is a type of attention that lets each token weigh and combine relevant information from other permitted tokens in the same sequence. The feed forward network then processes each token separately and changes which learned features are emphasized. For example, after self attention connects ‘charge’ with ‘credit card,’ the feed forward network can strengthen features associated with a payment issue rather than charging a device. Repeating these operations across many blocks allows the model to develop a more useful understanding of the sequence. The known input positions can also be processed together during training, which makes transformers more efficient to train than earlier sequence models.",
@@ -443,7 +443,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "how-llms-are-trained-and-improved",
         "How LLMs Are Trained and Improved",
-        "3 hours",
+        "1 hour",
         "Learn how pretraining creates general capability, how post training shapes assistant behavior, and how engineers evaluate or adapt a model for a specific application.",
         [
           "Training a large language model is the process of adjusting its parameters so it becomes better at a defined prediction task. During training, the model processes examples, produces predictions, measures the difference between its predictions and the expected results, and updates its parameters to reduce that error. Repeating this process across very large datasets produces the language and reasoning capabilities that application engineers later access through an API.",
@@ -718,7 +718,7 @@ export const curriculum: CurriculumPhase[] = [
       lesson(
         "using-llm-apis-and-langchain",
         "LLM APIs, Provider SDKs, and LangChain",
-        "3 hours",
+        "1.5 hours",
         "Learn how application code connects to hosted and local models. You will examine how agents differ from deterministic workflows, then build the same Support Request Analyzer with the OpenAI SDK, LangChain, and Ollama running qwen3:14b before building an agent in the next lesson.",
         [
           "An LLM API is a network interface for sending input to a hosted language model and receiving generated output. The request identifies a model and supplies instructions, task input, configuration, and optional output schemas or tool definitions. The provider runs the model and returns content with operational metadata. The application must decide whether that result is complete, valid, and suitable for its workflow.",
@@ -769,7 +769,7 @@ export const curriculum: CurriculumPhase[] = [
           "This lab introduces a small Customer Service Agent now because it connects the fundamentals to a complete application and makes the learning process more engaging. Learners can see how model output, structured data, a tool, permissions, latency, and validation work together instead of waiting until the later agent workflow phase.",
           "The first agent has one goal, one read only order lookup, no long term memory, and strict execution limits. It can ask for a missing order identifier, propose one lookup, and explain verified status. The next lesson implements the complete loop before later phases introduce retrieval, durable state, LangGraph, human review, and specialist agents.",
           "The earlier snippets were provided for observation. This final section is where you set up the project, inspect the complete files, run the model calls, and compare the direct provider SDK with LangChain. Follow the steps in order so each result has a clear purpose.",
-          "Step 01. If Agentic AI Lab is not already available on your computer, clone the public repository from GitHub and enter the repository directory. If you already cloned it, open the existing repository and continue. No GitHub account or access token is required to clone the public repository.",
+          "Step 01. If Agentic AI Lab is not already available on your computer, clone the public repository from [GitHub](https://github.com/chaitanya-y/agentic-ai-lab) and enter the repository directory. If you already cloned it, open the existing repository and continue. No account or access token is required to clone the public repository.",
           "Step 02. Install the required tools for your operating system. Confirm that Git is available first, then use the official standalone uv installer for macOS or Windows. Reopen the terminal if the uv command is not immediately available. After installing uv, use it to install Python 3.12. Python 3.12 is the recommended version for this lab. The project supports Python 3.11 or newer, but all instructions and examples are tested with Python 3.12. Using the recommended version helps avoid dependency and environment differences.",
           "Step 03. Enter the Support Request Analyzer lab directory, create a local .env file from the supplied example, and install the locked dependencies with Python 3.12. The command for copying a file differs between macOS Terminal and Windows PowerShell. uv creates the virtual environment and installs the OpenAI SDK, LangChain, Pydantic, and python dotenv. You do not need to activate the environment because uv run uses it automatically.",
           "Step 04. Choose the hosted or local route in the new .env file. The OpenAI SDK and LangChain examples require an OpenAI API key. The local Ollama example requires no API key and uses qwen3:14b by default. The sample customer message can also be changed in this file. Never commit the .env file or place an API key inside Python source code. OpenAI requests are paid. Local inference uses the learner's computer instead.",
@@ -783,8 +783,8 @@ export const curriculum: CurriculumPhase[] = [
           "Step 12. Run the Ollama analyzer with the same customer message. If the request fails, confirm that the Ollama application is running, the model pull completed, and OLLAMA_HOST points to the local service. Unlike the OpenAI examples, this run does not use an API key or a hosted provider request identifier.",
           "Step 13. Compare the three implementations rather than choosing a preferred framework immediately. Verify that each produces the same SupportRequest contract. Identify which OpenAI details are most visible through the direct SDK, which repeated model operations LangChain standardizes, and which operational tradeoffs change when qwen3:14b runs locally.",
           "Stop after the comparison and write down what changed between the direct SDK, LangChain, and Ollama paths. Do not modify agent.py during this lesson. The next lesson uses that file to add the tool definition, authorization boundary, execution loop, and validated customer response.",
-          "Run the Section 5 tests from the customer-service-agent folder after completing the analyzer exercises. These tests check the shared SupportRequest contract, including valid, missing, and malformed order identifiers. They also check the Ollama analyzer's JSON instructions and its handling of connection, model, and validation failures.",
-          "The Section 5 tests use controlled objects instead of live model calls. They do not require OpenAI credits or a running Ollama model. Passing tests confirm the application contracts and failure handling, while running the three analyzer programs remains necessary to observe real model output, streaming, token usage, and latency."
+          "Step 14. After completing the analyzer exercises, run the analyzer tests from the current `labs/01-llm-fundamentals/customer-service-agent` folder. The command below checks the shared `SupportRequest` contract, including valid, missing, and malformed order identifiers. It also checks the Ollama analyzer instructions and its handling of connection, model, and validation failures.",
+          "The analyzer tests use controlled objects instead of live model calls. They do not require an OpenAI API key or a running Ollama model. A passing result confirms the application contracts and failure handling. Running the three analyzer programs is still necessary to observe real model output, streaming, token usage, and latency."
         ],
         undefined,
         [
@@ -1048,25 +1048,19 @@ export const curriculum: CurriculumPhase[] = [
             id: "build-support-request-analyzer",
             title: "Build a Support Request Analyzer",
             start: 47,
-            end: 62,
             example: {
               title: "Completing the Comparison",
               content: [
                 "After running all three paths with the same customer message, the learner should be able to locate the structured contract, identify each model call, explain the streaming path, read the trace, and describe how the direct SDK, LangChain, and local Ollama approaches differ without describing any implementation as an agent."
               ]
             }
-          },
-          {
-            id: "testing-the-analyzer",
-            title: "Testing the Analyzer",
-            start: 62
           }
         ]
       ),
       lesson(
         "building-a-basic-agent-with-langchain",
         "Building an Agent with LangChain",
-        "2 hours",
+        "1 hour",
         "Build a customer service agent with LangChain and run it with either OpenAI or Ollama. The same agent loop controls tool calls, authorization, validation, execution limits, and tracing for both model providers.",
         [
           "The previous lesson defined an agent and explained when model selected actions are useful. This lesson does not repeat that theory. It implements the small Customer Service Agent introduced there and keeps each model decision visible in ordinary Python code.",
@@ -1084,16 +1078,16 @@ export const curriculum: CurriculumPhase[] = [
           "The run permits no more than two model calls and one tool call. These limits are constants in the code and are checked by the loop. Direct control flow is intentional because learners should be able to follow every branch before LangGraph introduces reusable graph execution later in the course.",
           "The same trace is used for both providers. It records the selected provider, model, prompt version, token usage when available, model latency, tool latency, validation, authorization, step counts, completion reason, and safe error categories. A hosted provider may return a request identifier while a local Ollama run usually does not. Read a trace in execution order. First confirm the model call count and tool call count. Then confirm that authorization and validation passed before checking latency and token usage. This shows whether a response was produced through the intended path before you compare how much the path cost or how long it took.",
           "Failures produce controlled outcomes. Invalid tool arguments stop before execution. Unknown or unauthorized orders expose no order facts. Repeated tool proposals exceed the limit. A model or validation failure returns a safe response and records the reason rather than starting an unrestricted recovery loop.",
-          "Tests use model doubles, which are predictable replacements for a live model. They cover the valid path, missing information, malformed arguments, repeated tool calls, unauthorized access, timeouts, and invalid final responses without requiring an API key or running Ollama.",
-          "Run the Section 6 tests from the customer-service-agent folder before or after using a live provider. The test command runs tests/test_agent.py only. It does not call OpenAI or Ollama, so it is fast, repeatable, and free to run. A passing result confirms the agent's tool boundary, authorization rules, execution limits, fallback behavior, and trace outcomes.",
           "The runnable agent is in labs/01-llm-fundamentals/customer-service-agent. Its main implementation file is src/customer_service_lab/agent.py, and its configuration is stored in the local .env file inside the lab folder.",
-          "Step 01. If Agentic AI Lab is not already available on your computer, clone the public repository from GitHub. If you already cloned it, open the existing repository. From the repository root, enter the customer-service-agent folder and run every remaining command in this section from that folder.",
+          "Step 01. If Agentic AI Lab is not already available on your computer, clone the public repository from [GitHub](https://github.com/chaitanya-y/agentic-ai-lab). If you already cloned it, open the existing repository. From the repository root, enter the customer-service-agent folder and run every remaining command in this section from that folder.",
           "Step 02. Install the locked Python dependencies with uv. Python 3.12 is the recommended version for this lab. The project supports Python 3.11 or newer, but all instructions and examples are tested with Python 3.12. Using the recommended version helps avoid dependency and environment differences. uv installs LangChain, the OpenAI and Ollama integrations, Pydantic, and the test tools inside the lab environment.",
           "Step 03. Read src/customer_service_lab/agent.py before running it. Start with create_agent_model, then read LookupOrder, OrderStore, run_agent, and main in that order. This shows configuration first, followed by the tool contract, trusted data access, the execution loop, and the program entry point.",
           "Step 04. Create .env from .env.example if the file does not already exist. To use OpenAI, set MODEL_PROVIDER to openai, provide OPENAI_API_KEY, and keep the selected OPENAI_MODEL. Never commit the .env file.",
           "Step 05. Run the agent through its Python module from the lab folder. Using the module command ensures Python loads the customer_service_lab package from the environment created by uv.",
           "Step 06. To use the local route, confirm that Ollama is running and qwen3:14b is installed. Change MODEL_PROVIDER to ollama and check OLLAMA_HOST and OLLAMA_MODEL. Run the same module command again. No agent code changes are required.",
-          "Step 07. Compare the two runs. Read the customer response first, then inspect provider, model, model call count, tool call count, authorization result, validation result, latency, token usage when available, and stop reason in the run metadata."
+          "Step 07. Compare the two runs. Read the customer response first, then inspect provider, model, model call count, tool call count, authorization result, validation result, latency, token usage when available, and stop reason in the run metadata.",
+          "Tests use model doubles, which are predictable replacements for a live model. They cover the analyzer and agent paths, including valid and missing inputs, malformed arguments, repeated tool calls, unauthorized access, timeouts, and invalid final responses without requiring an API key or running Ollama.",
+          "Step 08. Run the complete Phase 1 test suite from the current `labs/01-llm-fundamentals/customer-service-agent` folder. The tests make no OpenAI or Ollama requests. A passing result confirms the analyzer contracts, tool boundary, authorization rules, execution limits, fallback behavior, and trace outcomes."
         ],
         undefined,
         [
@@ -1203,15 +1197,9 @@ export const curriculum: CurriculumPhase[] = [
             }
           },
           {
-            id: "testing",
-            title: "Testing",
-            start: 15,
-            end: 17
-          },
-          {
             id: "run-the-agent",
             title: "Run the Agent",
-            start: 17
+            start: 15
           }
         ]
       )

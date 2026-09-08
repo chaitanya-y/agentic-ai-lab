@@ -2,21 +2,21 @@
 
 ## Prompt Engineering
 
-Complete Exercises 1 through 3 in `starter.py` in order. Each exercise builds on the prompt template from the previous exercise.
+Complete Exercises 1 through 3 in `prompt_starter.py` in order. Each exercise builds on the prompt template from the previous exercise.
 
 Run your work from the Phase 2 lab directory.
 
 ```bash
-uv run python practice/starter.py
+uv run python practice/prompt_starter.py
 ```
 
 When you are ready to compare your implementation with the worked answers, run this command.
 
 ```bash
-uv run python practice/answers.py
+uv run python practice/prompt_answers.py
 ```
 
-The local exercises do not call OpenAI or Ollama. They render prompts and check supplied response text with deterministic Python code.
+The local exercises do not call OpenAI or Ollama. They render prompts and validate their named inputs with deterministic Python code.
 
 ## Exercise 1
 
@@ -32,15 +32,21 @@ Render the template with one missing variable and then with one unexpected varia
 
 ## Prompt Evaluation
 
-Complete Exercises 4 and 5 after reading the Prompt Evaluation lesson. These exercises use the response criteria and comparison helpers in the same starter and answer files.
+Complete Exercise 1 in `evaluation_starter.py` after reading the Prompt Evaluation lesson.
 
-### Exercise 4
+```bash
+uv run python practice/evaluation_starter.py
+```
 
-Create response criteria that require `order 10492` and `in transit`, prohibit `guaranteed`, and limit a response to 20 words. Score one passing response and one failing response.
+Compare your implementation with the worked answers.
 
-### Exercise 5
+```bash
+uv run python practice/evaluation_answers.py
+```
 
-Compare supplied baseline and revised responses under the same criteria. Print the result for each prompt version and explain why the comparison must keep the model configuration unchanged.
+### Exercise 1
+
+Create response criteria that require `order 10492` and `in transit`, prohibit `guaranteed`, and limit a response to 20 words. Score one passing response and one failing response. Compare them as `candidate_a` and `candidate_b` under the same criteria.
 
 ## Context Engineering
 

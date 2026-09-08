@@ -8,7 +8,8 @@ from support_assistant.evaluation import (
     run_evaluation,
     score_case,
 )
-from support_assistant.models import RunTrace, SupportRequest, SupportResponse
+from support_assistant.models import ModelCallTrace, RunTrace, SupportRequest, SupportResponse
+from support_assistant.prompts import prompt_examples
 from support_assistant.workflow import WorkflowResult
 
 
@@ -30,6 +31,34 @@ def successful_result() -> WorkflowResult:
             completion_reason="answered",
         ),
     )
+
+
+def traced_successful_result() -> WorkflowResult:
+    result = successful_result()
+    result.trace.model_calls = [
+        ModelCallTrace(
+            name="analyze_support_request",
+            provider="fixture",
+            model="deterministic",
+            prompt_version="support-analysis.revised.v1",
+            latency_ms=40.0,
+            input_tokens=11,
+            output_tokens=3,
+            completion_status="completed",
+        ),
+        ModelCallTrace(
+            name="generate_support_response",
+            provider="fixture",
+            model="deterministic",
+            prompt_version="support-response.context.v1",
+            latency_ms=80.0,
+            input_tokens=17,
+            output_tokens=5,
+            completion_status="completed",
+        ),
+    ]
+    result.trace.end_to_end_ms = 150.0
+    return result
 
 
 def evaluation_case() -> EvaluationCase:
@@ -72,6 +101,14 @@ def test_score_case_reports_missing_required_evidence() -> None:
     assert "required evidence" in result.failure_reasons[0]
 
 
+def test_score_case_preserves_token_usage_and_end_to_end_latency() -> None:
+    result = score_case(evaluation_case(), traced_successful_result())
+
+    assert result.input_tokens == 28
+    assert result.output_tokens == 8
+    assert result.end_to_end_ms == 150.0
+
+
 def test_run_evaluation_reports_counts_and_percentage(tmp_path) -> None:
     failing_case = evaluation_case().model_copy(
         update={"case_id": "test_wrong_order", "expected_order_id": "10429"}
@@ -96,9 +133,27 @@ def test_run_evaluation_reports_counts_and_percentage(tmp_path) -> None:
     assert len(written["results"]) == 2
 
 
+def test_run_evaluation_aggregates_operational_measurements() -> None:
+    report = run_evaluation(
+        cases=[evaluation_case(), evaluation_case().model_copy(update={"case_id": "second"})],
+        runner=lambda case: traced_successful_result(),
+        prompt_version="support-analysis.revised.v1",
+        provider="fixture",
+        model="deterministic",
+        result_kind="offline_fixture",
+    )
+
+    assert report.total_input_tokens == 56
+    assert report.total_output_tokens == 16
+    assert report.average_end_to_end_ms == 150.0
+
+
 def test_evaluation_fixtures_keep_examples_out_of_scored_splits() -> None:
     cases = load_evaluation_cases()
+    example_messages = {example.customer_message for example in prompt_examples()}
+    evaluation_messages = {case.customer_message for case in cases}
 
     assert len(cases) == 24
     assert {case.split for case in cases} == {"development", "held_out"}
     assert all(not case.case_id.startswith("example_") for case in cases)
+    assert example_messages.isdisjoint(evaluation_messages)

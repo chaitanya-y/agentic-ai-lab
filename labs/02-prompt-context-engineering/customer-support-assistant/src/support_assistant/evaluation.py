@@ -44,6 +44,9 @@ class CaseResult(BaseModel):
     observed_order_id: str | None
     observed_outcome: str
     observed_evidence_ids: list[str]
+    input_tokens: int | None
+    output_tokens: int | None
+    end_to_end_ms: float | None
 
 
 class EvaluationReport(BaseModel):
@@ -57,7 +60,18 @@ class EvaluationReport(BaseModel):
     total_cases: int
     passed_cases: int
     pass_rate: float
+    total_input_tokens: int | None
+    total_output_tokens: int | None
+    average_end_to_end_ms: float | None
     results: list[CaseResult]
+
+
+def sum_complete_token_usage(values: list[int | None]) -> int | None:
+    """Sum token counts only when every model call reports its usage."""
+
+    if not values or any(value is None for value in values):
+        return None
+    return sum(value for value in values if value is not None)
 
 
 def load_evaluation_cases(
@@ -91,6 +105,12 @@ def score_case(case: EvaluationCase, result: WorkflowResult) -> CaseResult:
     order_id = result.request.order_id if result.request else None
     evidence_ids = set(result.response.evidence_ids)
     normalized_message = result.response.message.casefold()
+    input_tokens = sum_complete_token_usage(
+        [call.input_tokens for call in result.trace.model_calls]
+    )
+    output_tokens = sum_complete_token_usage(
+        [call.output_tokens for call in result.trace.model_calls]
+    )
 
     checks = {
         "issue_type": issue_type == case.expected_issue_type,
@@ -122,6 +142,9 @@ def score_case(case: EvaluationCase, result: WorkflowResult) -> CaseResult:
         observed_order_id=order_id,
         observed_outcome=result.response.outcome,
         observed_evidence_ids=result.response.evidence_ids,
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        end_to_end_ms=result.trace.end_to_end_ms,
     )
 
 
@@ -140,6 +163,18 @@ def run_evaluation(
     results = [score_case(case, runner(case)) for case in cases]
     passed_cases = sum(result.passed for result in results)
     total_cases = len(results)
+    total_input_tokens = sum_complete_token_usage(
+        [result.input_tokens for result in results]
+    )
+    total_output_tokens = sum_complete_token_usage(
+        [result.output_tokens for result in results]
+    )
+    latency_values = [result.end_to_end_ms for result in results]
+    average_end_to_end_ms = (
+        round(sum(value for value in latency_values if value is not None) / total_cases, 1)
+        if total_cases and all(value is not None for value in latency_values)
+        else None
+    )
     report = EvaluationReport(
         result_kind=result_kind,
         prompt_version=prompt_version,
@@ -149,6 +184,9 @@ def run_evaluation(
         total_cases=total_cases,
         passed_cases=passed_cases,
         pass_rate=round((passed_cases / total_cases * 100) if total_cases else 0.0, 1),
+        total_input_tokens=total_input_tokens,
+        total_output_tokens=total_output_tokens,
+        average_end_to_end_ms=average_end_to_end_ms,
         results=results,
     )
 

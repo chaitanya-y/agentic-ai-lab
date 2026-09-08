@@ -91,7 +91,7 @@ The initial model download is large and local inference requires suitable memory
 
 Start with `src/support_assistant/models.py`. It defines the input, context, response, and trace contracts.
 
-Next read `src/support_assistant/prompt_practice.py`. It defines the small prompt template contract used in Prompt Engineering and the deterministic response checks used in Prompt Evaluation. The starter exercises and worked answers are in `practice/starter.py` and `practice/answers.py`.
+Next read `src/support_assistant/prompt_practice.py`. It defines the small prompt template contract used in Prompt Engineering and the deterministic response checks used in Prompt Evaluation. Prompt exercises use `practice/prompt_starter.py` and `practice/prompt_answers.py`. Evaluation exercises use `practice/evaluation_starter.py` and `practice/evaluation_answers.py`.
 
 Then read `src/support_assistant/prompts.py`. It contains the baseline, revised, and few shot prompt variants. Customer input remains a separate message rather than being joined to system instructions.
 
@@ -101,21 +101,37 @@ Read `src/support_assistant/validation.py` next. These checks reject unknown evi
 
 Finally read `src/support_assistant/workflow.py`. This file connects the two model calls to deterministic application code. Provider setup is isolated in `src/support_assistant/providers.py`. Evaluation code is in `src/support_assistant/evaluation.py`.
 
-## Complete the prompt and evaluation exercises
+## Complete the prompt exercises
 
-Read the exercise instructions and complete `practice/starter.py`.
+Read the Prompt Engineering exercise instructions and complete `practice/prompt_starter.py`.
 
 ```bash
-uv run python practice/starter.py
+uv run python practice/prompt_starter.py
 ```
 
 Compare your implementation with the worked answers after attempting the exercises.
 
 ```bash
-uv run python practice/answers.py
+uv run python practice/prompt_answers.py
 ```
 
-Exercises 1 through 3 cover prompt templates and variable validation. Exercises 4 and 5 belong to Prompt Evaluation and score supplied response text. They run locally without OpenAI or Ollama requests.
+The three exercises cover prompt instructions, templates, and variable validation. They run locally without OpenAI or Ollama requests.
+
+## Complete the prompt evaluation exercises
+
+Read the Prompt Evaluation exercise instructions and complete `practice/evaluation_starter.py`.
+
+```bash
+uv run python practice/evaluation_starter.py
+```
+
+Compare your implementation with the worked answers after attempting the exercises.
+
+```bash
+uv run python practice/evaluation_answers.py
+```
+
+The exercise scores and compares supplied responses with deterministic criteria. It runs locally without OpenAI or Ollama requests.
 
 ## Complete the context exercises
 
@@ -187,6 +203,6 @@ Use held out cases only after the prompt choice is fixed.
 uv run support-eval --split held_out --limit 12
 ```
 
-This command makes live model calls with the selected provider. It writes a report to `.artifacts/evaluation-report.json`. The report records exact checks for issue classification, order extraction, outcome, required evidence, forbidden evidence, and forbidden response phrases.
+This command makes live model calls with the selected provider. It writes a report to `.artifacts/evaluation-report.json`. The report records exact checks for issue classification, order extraction, outcome, required evidence, forbidden evidence, and forbidden response phrases. It also records per case token usage and end to end latency, plus aggregate token totals and average latency when those values are available.
 
 The repository starts with 12 development cases and 12 held out cases. Keep prompt demonstrations in `src/support_assistant/prompts.py` separate from both scored sets. Do not move difficult evaluation cases into the prompt merely to improve the reported score.

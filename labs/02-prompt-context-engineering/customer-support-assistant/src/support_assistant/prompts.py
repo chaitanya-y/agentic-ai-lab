@@ -62,10 +62,10 @@ def prompt_examples() -> tuple[PromptExample, ...]:
     return (
         PromptExample(
             case_id="example_order_status",
-            customer_message="Where is order 10492?",
+            customer_message="Can you check the delivery progress for order 10573?",
             expected=SupportRequest(
                 issue_type="order_status",
-                order_id="10492",
+                order_id="10573",
                 requested_outcome="status",
                 missing_information=[],
             ),
@@ -82,7 +82,9 @@ def prompt_examples() -> tuple[PromptExample, ...]:
         ),
         PromptExample(
             case_id="example_charged_twice",
-            customer_message="The replacement is fine, but I was charged twice.",
+            customer_message=(
+                "My card shows the same purchase twice, but I do not have the order number."
+            ),
             expected=SupportRequest(
                 issue_type="refund",
                 order_id=None,

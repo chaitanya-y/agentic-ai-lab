@@ -1,11 +1,6 @@
 """Worked answers for the Prompt Engineering lesson exercises."""
 
-from support_assistant.prompt_practice import (
-    PromptCriteria,
-    PromptTemplate,
-    compare_responses,
-    score_response,
-)
+from support_assistant.prompt_practice import PromptTemplate
 
 
 ORDER_STATUS_INSTRUCTIONS = """
@@ -53,7 +48,7 @@ def demonstrate_variable_errors() -> tuple[str, str]:
 
 
 def main() -> None:
-    """Run every worked answer without making a model request."""
+    """Run every Prompt Engineering answer without making a model request."""
 
     print("Prompt Engineering Exercise 1")
     print(ORDER_STATUS_INSTRUCTIONS)
@@ -72,29 +67,6 @@ def main() -> None:
     print("\nPrompt Engineering Exercise 3")
     for error in demonstrate_variable_errors():
         print(error)
-
-    criteria = PromptCriteria(
-        max_words=20,
-        required_phrases=("order 10492", "in transit"),
-        forbidden_phrases=("guaranteed",),
-    )
-    passing_response = "Order 10492 is in transit and expected on Friday."
-    failing_response = "Your delivery is guaranteed for Friday."
-
-    print("\nPrompt Evaluation Exercise 1")
-    print(score_response(passing_response, criteria))
-    print(score_response(failing_response, criteria))
-
-    print("\nPrompt Evaluation Exercise 2")
-    comparison = compare_responses(
-        {
-            "baseline.v1": failing_response,
-            "revised.v1": passing_response,
-        },
-        criteria,
-    )
-    for prompt_version, result in comparison.items():
-        print(prompt_version, result)
 
 
 if __name__ == "__main__":
